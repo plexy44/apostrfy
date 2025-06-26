@@ -112,18 +112,38 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
                 <div className="font-code text-sm space-y-6 px-4 py-2 text-foreground">
                   <p className="font-bold uppercase">INT. A FADING MEMORY - DAY</p>
                   
-                  {story.map((part, index) => (
-                    <div key={index} className="grid grid-cols-1 justify-items-center">
-                      <div className="w-full max-w-md">
-                        <p className="text-center font-bold uppercase">
-                          {part.speaker === 'user' ? 'USER' : 'APOSTRFY'}
-                        </p>
-                        <p className="px-10 text-left">
-                          {part.line}
-                        </p>
+                  {story.map((part, index) => {
+                    const characterRegex = /^([A-Z][A-Z0-9\s().-]*):\s*(.*)/s;
+                    const match = part.line.match(characterRegex);
+
+                    if (match) {
+                      const character = match[1].trim();
+                      const dialogue = match[2].trim();
+                      return (
+                        <div key={index} className="grid grid-cols-1 justify-items-center">
+                          <div className="w-full max-w-md">
+                            <p className="text-center font-bold uppercase">
+                              {character}
+                            </p>
+                            <p className="px-10 text-left">
+                              {dialogue}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // No character found, treat as action/description line.
+                    return (
+                      <div key={index} className="grid grid-cols-1 justify-items-center">
+                        <div className="w-full max-w-lg">
+                          <p className="text-left">
+                            {part.line}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   
                   <p className="text-right font-bold uppercase">FADE OUT.</p>
                 </div>
