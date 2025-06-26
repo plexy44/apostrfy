@@ -78,7 +78,7 @@ export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, 
       <Button
         variant="ghost"
         size="icon"
-        className="absolute top-2 -left-5 z-20 rounded-full"
+        className="absolute top-4 -left-16 z-20 rounded-full"
         onClick={onQuitRequest}
         aria-label="Quit game"
       >
