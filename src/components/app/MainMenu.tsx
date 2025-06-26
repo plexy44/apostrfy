@@ -42,43 +42,27 @@ const Orb = () => {
 
     const pupilX = useTransform(mouseX, [-800, 800], [-24, 24]);
     const pupilY = useTransform(mouseY, [-800, 800], [-24, 24]);
-
-    const angle = useMotionValue(0);
-
-    useEffect(() => {
-        const controls = animate(angle, 360, {
-            duration: 10,
-            repeat: Infinity,
-            ease: "linear",
-        });
-        return () => controls.stop();
-    }, [angle]);
-
-    const backgroundImage = useTransform(
-        angle,
-        (latestAngle) => `radial-gradient(circle at 30% 30%, hsl(var(--accent) / 0.5), transparent 40%), radial-gradient(circle at 70% 70%, hsl(var(--primary-foreground) / 0.1), transparent 40%), conic-gradient(from ${latestAngle}deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 50%, hsl(var(--primary)) 100%)`
-    );
     
     return (
         <motion.div
             ref={orbRef}
-            style={{
-                backgroundImage,
-            }}
             animate={{
-                boxShadow: [
-                    "0 0 40px hsl(var(--accent) / 0.3)",
-                    "0 0 60px hsl(var(--accent) / 0.5)",
-                    "0 0 40px hsl(var(--accent) / 0.3)",
+                backgroundColor: [
+                    "hsl(275, 90%, 45%)",
+                    "hsl(320, 85%, 50%)",
+                    "hsl(25, 95%, 55%)",
                 ],
+                boxShadow: [
+                    "0 0 60px hsl(275, 90%, 55%, 0.7)",
+                    "0 0 70px hsl(320, 85%, 60%, 0.8)",
+                    "0 0 65px hsl(25, 95%, 65%, 0.8)",
+                ]
             }}
             transition={{
-                boxShadow: {
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    repeatType: "mirror",
-                }
+                duration: 10,
+                repeat: Infinity,
+                ease: "easeInOut",
+                repeatType: "mirror",
             }}
             className="w-40 h-40 rounded-full flex items-center justify-center relative overflow-hidden"
         >
