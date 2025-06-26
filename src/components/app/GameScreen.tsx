@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Loader, ArrowLeft, Timer } from "lucide-react";
 import Orb from "./Orb";
+import { cn } from "@/lib/utils";
 
 interface GameScreenProps {
   story: StoryPart[];
@@ -25,7 +26,7 @@ interface GameScreenProps {
   onQuitRequest: () => void;
 }
 
-const TimerBar = ({ durationInMinutes, onEndGame }: { durationInMinutes: number; onEndGame: () => void }) => {
+const TimerBar = ({ durationInMinutes, onEndGame, className }: { durationInMinutes: number; onEndGame: () => void, className?: string }) => {
   const durationInSeconds = durationInMinutes * 60;
   const [timeLeft, setTimeLeft] = useState(durationInSeconds);
 
@@ -51,7 +52,7 @@ const TimerBar = ({ durationInMinutes, onEndGame }: { durationInMinutes: number;
   const percentage = (timeLeft / durationInSeconds) * 100;
 
   return (
-    <div className="w-full my-4 space-y-1">
+    <div className={cn("w-full space-y-1", className)}>
       <div className="flex justify-between items-center text-xs font-mono text-muted-foreground">
         <span>Time Remaining: {formatTime(timeLeft)}</span>
         <span>Total: {formatTime(durationInSeconds)}</span>
@@ -89,14 +90,14 @@ export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, 
 
   return (
     <motion.div
-      className="flex flex-row items-center justify-center h-[90vh] w-full max-w-5xl mx-auto gap-12"
+      className="flex flex-col items-center justify-center h-[90vh] w-full max-w-3xl mx-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
     >
       {/* Game Panel */}
-      <div className="flex flex-col h-full flex-grow p-4 glassmorphism rounded-lg relative">
+      <div className="flex flex-col h-full w-full flex-grow p-4 glassmorphism rounded-lg relative">
         <Button
           variant="ghost"
           size="icon"
@@ -107,9 +108,14 @@ export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, 
           <ArrowLeft />
         </Button>
         
-        <TimerBar durationInMinutes={duration} onEndGame={onEndGame} />
+        <div className="flex items-center gap-4 mb-4">
+            <div className="flex-grow">
+                <TimerBar durationInMinutes={duration} onEndGame={onEndGame} />
+            </div>
+            <Orb size="tiny" isInteractive={true} className="flex-shrink-0" />
+        </div>
         
-        <ScrollArea className="flex-grow mb-4 pr-4" ref={scrollAreaRef}>
+        <ScrollArea className="flex-grow pr-4" ref={scrollAreaRef}>
           <div className="space-y-6">
             {story.map((part, index) => (
               <div key={index} className={`flex flex-col animate-fade-in-up ${part.speaker === 'ai' ? 'items-start' : 'items-end'}`}>
@@ -130,7 +136,7 @@ export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, 
           </div>
         </ScrollArea>
 
-        <form onSubmit={handleSubmit} className="flex items-center gap-2">
+        <form onSubmit={handleSubmit} className="flex items-center gap-2 pt-4">
           <Input
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
@@ -157,11 +163,6 @@ export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, 
             Test End Game
           </Button>
         )}
-      </div>
-      
-      {/* Orb Panel */}
-      <div className="flex-none flex items-center justify-center w-40">
-        <Orb size="large" isInteractive={true} />
       </div>
 
     </motion.div>

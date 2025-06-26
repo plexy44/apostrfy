@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 
 interface OrbProps {
   layoutId?: string;
-  size?: "small" | "large";
+  size?: "small" | "large" | "tiny";
   isInteractive?: boolean;
   className?: string;
   onTransitionComplete?: () => void;
@@ -51,8 +51,17 @@ export default function Orb({ layoutId, size = "large", isInteractive = true, cl
         };
     }, [isInteractive, mouseX, mouseY]);
 
-    const pupilX = useTransform(mouseX, [-800, 800], [-24, 24]);
-    const pupilY = useTransform(mouseY, [-800, 800], [-24, 24]);
+    const orbDimensions = {
+        large: { size: 160, maxMove: (160 - (160 * 0.65)) / 2 }, // ~28
+        small: { size: 96, maxMove: (96 - (96 * 0.65)) / 2 },  // ~16.8
+        tiny: { size: 48, maxMove: (48 - (48 * 0.65)) / 2 }      // ~8.4
+    };
+
+    const currentSizeKey = size === "tiny" ? "tiny" : size === "small" ? "small" : "large";
+    const maxMove = orbDimensions[currentSizeKey].maxMove * 0.9; // Use 90% of max move for a better look
+
+    const pupilX = useTransform(mouseX, [-800, 800], [-maxMove, maxMove]);
+    const pupilY = useTransform(mouseY, [-800, 800], [-maxMove, maxMove]);
     
     return (
         <motion.div
@@ -62,7 +71,9 @@ export default function Orb({ layoutId, size = "large", isInteractive = true, cl
             transition={{ type: "spring", stiffness: 40, damping: 15 }}
             className={cn(
                 "rounded-full flex items-center justify-center relative overflow-hidden",
-                size === "large" ? "w-40 h-40" : "w-24 h-24",
+                size === "large" ? "w-40 h-40" : 
+                size === "small" ? "w-24 h-24" :
+                "w-12 h-12",
                 className
             )}
         >
