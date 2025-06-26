@@ -3,6 +3,7 @@
 import { SiliconShape } from "@/components/icons/SiliconShape";
 import { LITERARY_PLACEHOLDERS } from "@/lib/constants";
 import { useEffect, useState } from "react";
+import Orb from "./Orb";
 
 interface LoadingScreenProps {
   text?: string;
@@ -26,9 +27,9 @@ export default function LoadingScreen({ text }: LoadingScreenProps) {
                 <SiliconShape key={i} />
             ))}
         </div>
-        <div className="relative z-10 flex flex-col items-center justify-center text-center">
-            <div className="w-24 h-24 bg-accent rounded-full animate-pulse shadow-[0_0_30px] shadow-accent/50"></div>
-            <p className="mt-8 text-lg font-headline text-foreground/80 max-w-xs">
+        <div className="relative z-10 flex flex-col items-center justify-center text-center gap-8">
+            <Orb size="large" isInteractive={false} />
+            <p className="text-lg font-headline text-foreground/80 max-w-xs">
                 {placeholder}
             </p>
         </div>
