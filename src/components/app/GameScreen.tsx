@@ -13,7 +13,7 @@ import type { StoryPart } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Loader, ArrowLeft, Timer } from "lucide-react";
+import { Send, Loader, ArrowLeft, Timer, Hourglass } from "lucide-react";
 import Orb from "./Orb";
 import { cn } from "@/lib/utils";
 
@@ -50,17 +50,29 @@ const TimerBar = ({ durationInMinutes, onEndGame, className }: { durationInMinut
   };
 
   const percentage = (timeLeft / durationInSeconds) * 100;
+  const isUrgent = timeLeft <= 20;
 
   return (
     <div className={cn("w-full space-y-1", className)}>
-      <div className="flex justify-between items-center text-xs font-mono text-muted-foreground">
-        <span>Time Remaining: {formatTime(timeLeft)}</span>
-        <span>Total: {formatTime(durationInSeconds)}</span>
+      <div className={cn("flex justify-between items-center text-xs font-mono text-muted-foreground", isUrgent && "text-destructive animate-pulse font-semibold")}>
+        <div className="flex items-center gap-1.5">
+          <Hourglass className="h-3 w-3" />
+          <span>{formatTime(timeLeft)}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Timer className="h-3 w-3" />
+          <span>{formatTime(durationInSeconds)}</span>
+        </div>
       </div>
       <div className="w-full h-3 bg-secondary rounded-full overflow-hidden">
         <div
-          className="h-full bg-accent rounded-full transition-all duration-1000 ease-linear"
-          style={{ width: `${percentage}%`, background: `linear-gradient(90deg, hsl(var(--accent)), hsl(var(--primary)))` }}
+          className="h-full rounded-full transition-all duration-1000 ease-linear"
+          style={{
+            width: `${percentage}%`,
+            background: isUrgent
+              ? 'hsl(var(--destructive))'
+              : `linear-gradient(90deg, hsl(var(--accent)), hsl(var(--primary)))`,
+          }}
         />
       </div>
     </div>
