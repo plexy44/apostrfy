@@ -40,14 +40,26 @@ const TimerBar = ({ durationInMinutes, onEndGame }: { durationInMinutes: number;
     return () => clearInterval(timer);
   }, [timeLeft, onEndGame]);
 
+  const formatTime = (totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  };
+
   const percentage = (timeLeft / durationInSeconds) * 100;
 
   return (
-    <div className="w-full h-3 bg-secondary rounded-full overflow-hidden my-4">
-      <div
-        className="h-full bg-accent rounded-full transition-all duration-1000 ease-linear"
-        style={{ width: `${percentage}%`, background: `linear-gradient(90deg, hsl(var(--accent)), hsl(var(--primary)))` }}
-      />
+    <div className="w-full my-4 space-y-1">
+      <div className="flex justify-between items-center text-xs font-mono text-muted-foreground">
+        <span>Time Remaining</span>
+        <span>{formatTime(timeLeft)} / {formatTime(durationInSeconds)}</span>
+      </div>
+      <div className="w-full h-3 bg-secondary rounded-full overflow-hidden">
+        <div
+          className="h-full bg-accent rounded-full transition-all duration-1000 ease-linear"
+          style={{ width: `${percentage}%`, background: `linear-gradient(90deg, hsl(var(--accent)), hsl(var(--primary)))` }}
+        />
+      </div>
     </div>
   );
 };
