@@ -139,11 +139,21 @@ export default function ApostrfyClient() {
   const handleEndGame = async () => {
     setGameState({ status: "generating_summary" });
     try {
-      const transcript = story.map(s => `${s.speaker}: ${s.line}`).join("\n");
-      const result = await generateSentimentSnapshot({ transcript });
+      const userContent = story
+        .filter((part) => part.speaker === "user")
+        .map((part) => part.line)
+        .join("\n");
+
+      // Ensure there's content to analyze
+      if (userContent.trim() === "") {
+         setSentiment({ snapshot: "The story concluded, its words echoing in the quiet.", emotions: ['Reflection', 'Silence', 'Stillness', 'Pause', 'Calm', 'Contemplation'] });
+         setGameState({ status: "gameover" });
+         return;
+      }
+        
+      const result = await generateSentimentSnapshot({ userContent });
       
-      const emotions = ['Mystery', 'Suspense', 'Hope', 'Melancholy', 'Wonder', 'Resolve'];
-      setSentiment({ snapshot: result.sentimentSnapshot, emotions: emotions.sort(() => 0.5 - Math.random()).slice(0, 6) });
+      setSentiment({ snapshot: result.sentimentSnapshot, emotions: result.emotionalKeywords });
       setGameState({ status: "gameover" });
     } catch (error) {
       console.error("Failed to generate sentiment snapshot:", error);
