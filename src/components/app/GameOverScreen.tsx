@@ -65,11 +65,11 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full mb-6">
         {/* Left Column */}
         <div className="lg:col-span-1 flex flex-col gap-6">
-          <AnalysisCard title="Mood Analysis">
+          <AnalysisCard title="Mood">
             <MoodWheel mood={analysis.mood.primaryEmotion} score={analysis.mood.confidenceScore} />
           </AnalysisCard>
 
-          <AnalysisCard title="Story Keywords">
+          <AnalysisCard title="Sentiment">
             <div className="flex flex-wrap items-center justify-center gap-2">
               {analysis.keywords.map((keyword) => (
                 <Badge key={keyword} variant="secondary" className="text-sm px-3 py-1 cursor-default">
@@ -82,7 +82,7 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
 
         {/* Middle Column */}
         <div className="lg:col-span-1 flex flex-col gap-6">
-          <AnalysisCard title="Style Match">
+          <AnalysisCard title="Style">
             <div className="text-center">
               <p className="text-muted-foreground text-sm mb-1">Primary Match</p>
               <p className="text-2xl font-bold font-headline text-foreground">{analysis.style.primaryMatch}</p>
