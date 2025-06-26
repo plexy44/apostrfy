@@ -1,3 +1,7 @@
+import ApostrfyClient from '@/components/ApostrfyClient';
+
 export default function Home() {
-  return <></>;
+  return (
+    <ApostrfyClient />
+  );
 }
