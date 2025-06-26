@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, RefreshCw, Send, Quote, Smile, Tags, Feather, FileText } from "lucide-react";
+import { Mail, RefreshCw, Send } from "lucide-react";
 import { motion } from "framer-motion";
 import MoodWheel from "./MoodWheel";
 import { Separator } from "../ui/separator";
@@ -42,10 +42,9 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
     setIsModalOpen(false);
   };
 
-  const AnalysisCard = ({ icon, title, children }: { icon: React.ReactNode, title: string, children: React.ReactNode }) => (
+  const AnalysisCard = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <Card className="bg-background/30 border-border/10 flex-1 min-w-[280px]">
-      <CardHeader className="flex-row items-center gap-3 space-y-0">
-        {icon}
+      <CardHeader>
         <CardTitle className="font-headline text-xl text-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent>{children}</CardContent>
@@ -66,11 +65,11 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full mb-6">
         {/* Left Column */}
         <div className="lg:col-span-1 flex flex-col gap-6">
-          <AnalysisCard icon={<Smile className="text-accent" />} title="Mood Analysis">
+          <AnalysisCard title="Mood Analysis">
             <MoodWheel mood={analysis.mood.primaryEmotion} score={analysis.mood.confidenceScore} />
           </AnalysisCard>
 
-          <AnalysisCard icon={<Tags className="text-accent" />} title="Story Keywords">
+          <AnalysisCard title="Story Keywords">
             <div className="flex flex-wrap items-center justify-center gap-2">
               {analysis.keywords.map((keyword) => (
                 <Badge key={keyword} variant="secondary" className="text-sm px-3 py-1 cursor-default">
@@ -83,7 +82,7 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
 
         {/* Middle Column */}
         <div className="lg:col-span-1 flex flex-col gap-6">
-          <AnalysisCard icon={<Feather className="text-accent" />} title="Style Match">
+          <AnalysisCard title="Style Match">
             <div className="text-center">
               <p className="text-muted-foreground text-sm mb-1">Primary Match</p>
               <p className="text-2xl font-bold font-headline text-foreground">{analysis.style.primaryMatch}</p>
@@ -93,7 +92,7 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
           </AnalysisCard>
           
           {analysis.famousQuote && (
-            <AnalysisCard icon={<Quote className="text-accent" />} title="A Word From...">
+            <AnalysisCard title="A Word From...">
               <blockquote className="text-lg italic border-l-4 border-accent pl-4 text-left">
                 {analysis.famousQuote.quote}
                 <cite className="block text-right not-italic text-sm mt-2 text-muted-foreground">&ndash; {analysis.famousQuote.author}</cite>
@@ -105,8 +104,7 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
         {/* Right Column */}
         <div className="lg:col-span-1">
            <Card className="bg-background/30 border-border/10 flex flex-col h-full">
-            <CardHeader className="flex-row items-center gap-3">
-              <FileText className="text-accent" />
+            <CardHeader>
               <CardTitle className="font-headline text-xl text-foreground">Final Transcript</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow">
