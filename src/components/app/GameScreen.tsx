@@ -12,7 +12,7 @@ import type { StoryPart } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Loader, ArrowLeft } from "lucide-react";
+import { Send, Loader, ArrowLeft, Timer } from "lucide-react";
 
 interface GameScreenProps {
   story: StoryPart[];
@@ -121,7 +121,10 @@ export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, 
           {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
         </Button>
       </form>
-       <p className="text-xs text-muted-foreground mt-2 text-center">A 30-second response timer will be implemented here.</p>
+       <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mt-2">
+        <Timer className="h-4 w-4" />
+        <span>A 30-second response timer will be implemented here.</span>
+      </div>
     </div>
   );
 }
