@@ -9,6 +9,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import type { Trope } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,7 +73,13 @@ export default function MainMenu({ onStartGame, comingFromOnboarding }: MainMenu
   const isTyping = startTyping && displayedMessage.length < orbMessage.length;
 
   return (
-    <div className="flex flex-col items-center justify-center w-full animate-fade-in">
+    <motion.div
+      className="flex flex-col items-center justify-center w-full"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <div className="flex flex-col items-center text-center mb-8">
         <ApostrfyLogo className="w-48 h-auto mb-2 text-foreground" />
         <p className="font-headline text-muted-foreground tracking-widest">connect || co-create</p>
@@ -95,7 +102,7 @@ export default function MainMenu({ onStartGame, comingFromOnboarding }: MainMenu
       
       <Card className="w-full max-w-lg glassmorphism">
         <CardHeader>
-          <CardTitle className="font-headline text-2xl text-center">Co-create a story</CardTitle>
+          <CardTitle className="font-headline text-2xl text-center text-foreground">Co-create a story</CardTitle>
           <CardDescription className="text-center">First, choose a style for your AI companion.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -116,7 +123,7 @@ export default function MainMenu({ onStartGame, comingFromOnboarding }: MainMenu
           </div>
 
           <div className="space-y-2">
-            <h4 className="text-center font-headline">Select Duration</h4>
+            <h4 className="text-center font-headline text-foreground">Select Duration</h4>
             <div className="flex justify-center gap-2">
               {DURATIONS.map((duration) => (
                 <Button
@@ -141,6 +148,6 @@ export default function MainMenu({ onStartGame, comingFromOnboarding }: MainMenu
       >
         Start Writing
       </Button>
-    </div>
+    </motion.div>
   );
 }

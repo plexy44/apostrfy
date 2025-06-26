@@ -8,6 +8,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { motion } from "framer-motion";
 import type { StoryPart } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,8 +52,8 @@ const TimerBar = ({ durationInMinutes, onEndGame }: { durationInMinutes: number;
   return (
     <div className="w-full my-4 space-y-1">
       <div className="flex justify-between items-center text-xs font-mono text-muted-foreground">
-        <span>Time Remaining</span>
-        <span>{formatTime(timeLeft)} / {formatTime(durationInSeconds)}</span>
+        <span>Time Remaining: {formatTime(timeLeft)}</span>
+        <span>Total: {formatTime(durationInSeconds)}</span>
       </div>
       <div className="w-full h-3 bg-secondary rounded-full overflow-hidden">
         <div
@@ -86,7 +87,13 @@ export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, 
   };
 
   return (
-    <div className="flex flex-col h-[90vh] w-full max-w-3xl mx-auto p-4 glassmorphism rounded-lg animate-fade-in relative">
+    <motion.div
+      className="flex flex-col h-[90vh] w-full max-w-3xl mx-auto p-4 glassmorphism rounded-lg relative"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <Button
         variant="ghost"
         size="icon"
@@ -137,6 +144,6 @@ export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, 
         <Timer className="h-4 w-4" />
         <span>A 30-second response timer will be implemented here.</span>
       </div>
-    </div>
+    </motion.div>
   );
 }
