@@ -46,7 +46,7 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
     <Card className="bg-background/30 border-border/10 flex-1 min-w-[280px]">
       <CardHeader className="flex-row items-center gap-3 space-y-0">
         {icon}
-        <CardTitle className="font-headline text-xl text-foreground/90">{title}</CardTitle>
+        <CardTitle className="font-headline text-xl text-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent>{children}</CardContent>
     </Card>
@@ -107,7 +107,7 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
            <Card className="bg-background/30 border-border/10 flex flex-col h-full">
             <CardHeader className="flex-row items-center gap-3">
               <BookOpen className="text-accent" />
-              <CardTitle className="font-headline text-xl text-foreground/90">Final Transcript</CardTitle>
+              <CardTitle className="font-headline text-xl text-foreground">Final Transcript</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow">
               <ScrollArea className="h-96 w-full rounded-md border p-4 text-left">

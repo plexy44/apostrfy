@@ -1,3 +1,9 @@
+/**
+ * @fileoverview This is the entry point for the Genkit development server.
+ * It imports all the defined flows so they can be inspected and tested
+ * through the Genkit developer UI.
+ */
+
 import { config } from 'dotenv';
 config();
 
