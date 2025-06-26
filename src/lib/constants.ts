@@ -49,7 +49,7 @@ export const DURATIONS: { label: string; value: number }[] = [
 
 export const ONBOARDING_CONTENT = [
     {
-        title: "Apostrfy",
+        title: "",
         text: "A space to write, not for an audience, but for yourself. Let's create a story together.",
         special: 'logo',
     },

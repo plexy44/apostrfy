@@ -47,32 +47,36 @@ export default function Orb({ layoutId, size = "large", isInteractive = true, cl
         <motion.div
             layoutId={layoutId}
             ref={orbRef}
-            animate={{
-                backgroundColor: [
-                    "hsl(38, 95%, 55%)",  // Warm orange
-                    "hsl(5, 85%, 60%)",   // Warm red
-                    "hsl(340, 90%, 65%)", // Warm pink
-                    "hsl(25, 95%, 55%)",  // Amber
-                ],
-                boxShadow: [
-                    "0 0 60px hsl(38, 95%, 55%, 0.7)",
-                    "0 0 70px hsl(5, 85%, 60%, 0.8)",
-                    "0 0 65px hsl(340, 90%, 65%, 0.8)",
-                    "0 0 60px hsl(25, 95%, 55%, 0.7)",
-                ]
-            }}
-            transition={{
-                duration: 10,
-                repeat: Infinity,
-                ease: "easeInOut",
-                repeatType: "mirror",
-            }}
+            transition={{ type: "spring", stiffness: 40, damping: 15 }}
             className={cn(
                 "rounded-full flex items-center justify-center relative overflow-hidden",
                 size === "large" ? "w-40 h-40" : "w-24 h-24",
                 className
             )}
         >
+            <motion.div
+                className="w-full h-full absolute inset-0"
+                animate={{
+                    backgroundColor: [
+                        "hsl(38, 95%, 55%)",  // Warm orange
+                        "hsl(5, 85%, 60%)",   // Warm red
+                        "hsl(340, 90%, 65%)", // Warm pink
+                        "hsl(25, 95%, 55%)",  // Amber
+                    ],
+                    boxShadow: [
+                        "0 0 60px hsl(38, 95%, 55%, 0.7)",
+                        "0 0 70px hsl(5, 85%, 60%, 0.8)",
+                        "0 0 65px hsl(340, 90%, 65%, 0.8)",
+                        "0 0 60px hsl(25, 95%, 55%, 0.7)",
+                    ]
+                }}
+                transition={{
+                    duration: 10,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    repeatType: "mirror",
+                }}
+            />
              <motion.div 
                 style={{
                     ...({
@@ -89,7 +93,7 @@ export default function Orb({ layoutId, size = "large", isInteractive = true, cl
                 className="w-full h-full absolute inset-0" 
             />
             <motion.div 
-                className="w-[65%] h-[65%] rounded-full bg-black/80 backdrop-blur-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.5),0_0_35px_5px_hsl(var(--primary-foreground)/0.8)]"
+                className="w-[65%] h-[65%] rounded-full bg-black/80 backdrop-blur-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.5),0_0_35px_5px_hsl(var(--primary-foreground)/0.8)] z-10"
                 style={{
                     x: isInteractive ? pupilX : 0,
                     y: isInteractive ? pupilY : 0,
