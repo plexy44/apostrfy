@@ -110,15 +110,24 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
               <CardTitle className="font-headline text-xl text-foreground">Final Transcript</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow">
-              <ScrollArea className="h-96 w-full rounded-md border p-4 text-left">
-                <div className="space-y-4">
+              <ScrollArea className="h-96 w-full rounded-md border bg-secondary/20 p-4">
+                <div className="font-code text-sm space-y-6 px-4 py-2 text-foreground">
+                  <p className="font-bold uppercase">INT. A FADING MEMORY - DAY</p>
+                  
                   {story.map((part, index) => (
-                    <div key={index} className={`flex ${part.speaker === "ai" ? "justify-start" : "justify-end"}`}>
-                      <p className={`max-w-[80%] p-3 rounded-lg ${part.speaker === "ai" ? "bg-secondary" : "bg-primary/80 text-primary-foreground"}`}>
-                        {part.line}
-                      </p>
+                    <div key={index} className="grid grid-cols-1 justify-items-center">
+                      <div className="w-full max-w-md">
+                        <p className="text-center font-bold uppercase">
+                          {part.speaker === 'user' ? 'USER' : 'APOSTRFY'}
+                        </p>
+                        <p className="px-10 text-left">
+                          {part.line}
+                        </p>
+                      </div>
                     </div>
                   ))}
+                  
+                  <p className="text-right font-bold uppercase">FADE OUT.</p>
                 </div>
               </ScrollArea>
             </CardContent>

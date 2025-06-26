@@ -20,7 +20,7 @@ export default {
         body: ['Inter', 'sans-serif'],
         headline: ['Space Grotesk', 'sans-serif'],
         script: ['Dancing Script', 'cursive'],
-        code: ['monospace'],
+        code: ['Courier Prime', 'monospace'],
       },
       colors: {
         background: 'hsl(var(--background))',
