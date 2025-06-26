@@ -144,6 +144,16 @@ export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, 
         <Timer className="h-4 w-4" />
         <span>A 30-second response timer will be implemented here.</span>
       </div>
+
+      {process.env.NODE_ENV === 'development' && (
+        <Button
+          variant="outline"
+          onClick={onEndGame}
+          className="absolute bottom-4 right-4 z-20"
+        >
+          Test End Game
+        </Button>
+      )}
     </motion.div>
   );
 }
