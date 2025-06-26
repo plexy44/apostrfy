@@ -9,9 +9,10 @@ interface OrbProps {
   size?: "small" | "large";
   isInteractive?: boolean;
   className?: string;
+  onTransitionComplete?: () => void;
 }
 
-export default function Orb({ layoutId, size = "large", isInteractive = true, className }: OrbProps) {
+export default function Orb({ layoutId, size = "large", isInteractive = true, className, onTransitionComplete }: OrbProps) {
     const orbRef = useRef<HTMLDivElement>(null);
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
@@ -47,6 +48,7 @@ export default function Orb({ layoutId, size = "large", isInteractive = true, cl
         <motion.div
             layoutId={layoutId}
             ref={orbRef}
+            onLayoutAnimationComplete={onTransitionComplete}
             transition={{ type: "spring", stiffness: 40, damping: 15 }}
             className={cn(
                 "rounded-full flex items-center justify-center relative overflow-hidden",

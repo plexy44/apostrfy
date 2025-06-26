@@ -21,6 +21,7 @@ export default function ApostrfyClient() {
   const [story, setStory] = useState<StoryPart[]>([]);
   const [sentiment, setSentiment] = useState<{ snapshot: string; emotions: string[] }>({ snapshot: "", emotions: [] });
   const [isAiTyping, setIsAiTyping] = useState(false);
+  const [comingFromOnboarding, setComingFromOnboarding] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -34,6 +35,7 @@ export default function ApostrfyClient() {
 
   const handleOnboardingComplete = () => {
     setHasVisited();
+    setComingFromOnboarding(true);
     setGameState({ status: "menu" });
   };
 
@@ -42,6 +44,7 @@ export default function ApostrfyClient() {
     setStory([]);
     setGameState({ status: "playing" });
     setIsAiTyping(true);
+    setComingFromOnboarding(false);
 
     try {
       const input: GenerateStoryContentInput = {
@@ -104,6 +107,7 @@ export default function ApostrfyClient() {
   const handlePlayAgain = () => {
     setGameState({ status: "menu" });
     setSettings({ trope: null, duration: 5 });
+    setComingFromOnboarding(false);
   };
   
   return (
@@ -112,7 +116,7 @@ export default function ApostrfyClient() {
         <AnimatePresence>
             {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}
             {gameState.status === "onboarding" && <OnboardingModal key="onboarding" onComplete={handleOnboardingComplete} />}
-            {gameState.status === "menu" && <MainMenu key="menu" onStartGame={handleStartGame} />}
+            {gameState.status === "menu" && <MainMenu key="menu" onStartGame={handleStartGame} comingFromOnboarding={comingFromOnboarding} />}
             {gameState.status === "playing" && (
               <GameScreen
                 key="playing"

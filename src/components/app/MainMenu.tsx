@@ -11,22 +11,57 @@ import Orb from "./Orb";
 
 interface MainMenuProps {
   onStartGame: (trope: Trope, duration: number) => void;
+  comingFromOnboarding: boolean;
 }
 
-export default function MainMenu({ onStartGame }: MainMenuProps) {
+export default function MainMenu({ onStartGame, comingFromOnboarding }: MainMenuProps) {
   const [selectedTrope, setSelectedTrope] = useState<Trope | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<number>(5);
   const [orbMessage, setOrbMessage] = useState("");
+  const [displayedMessage, setDisplayedMessage] = useState("");
+  const [startTyping, setStartTyping] = useState(false);
 
   useEffect(() => {
-    setOrbMessage(ORB_MESSAGES[Math.floor(Math.random() * ORB_MESSAGES.length)]);
-  }, []);
+    const message = ORB_MESSAGES[Math.floor(Math.random() * ORB_MESSAGES.length)];
+    setOrbMessage(message);
+
+    if (!comingFromOnboarding) {
+        const timer = setTimeout(() => {
+            setStartTyping(true);
+        }, 300); // Small delay for fade-in animation
+        return () => clearTimeout(timer);
+    }
+  }, [comingFromOnboarding]);
+
+  useEffect(() => {
+    if (startTyping && orbMessage) {
+      setDisplayedMessage("");
+      let i = 0;
+      const intervalId = setInterval(() => {
+        if (i < orbMessage.length) {
+          setDisplayedMessage(orbMessage.substring(0, i + 1));
+          i++;
+        } else {
+          clearInterval(intervalId);
+        }
+      }, 50); // Typing speed
+
+      return () => clearInterval(intervalId);
+    }
+  }, [startTyping, orbMessage]);
+
+
+  const handleTransitionComplete = () => {
+    setStartTyping(true);
+  };
 
   const handleStart = () => {
     if (selectedTrope) {
       onStartGame(selectedTrope, selectedDuration);
     }
   };
+
+  const isTyping = startTyping && displayedMessage.length < orbMessage.length;
 
   return (
     <div className="flex flex-col items-center justify-center w-full animate-fade-in">
@@ -36,10 +71,16 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
       </div>
 
       <div className="flex flex-col items-center gap-4 mb-8">
-        <Orb layoutId="main-orb" size="large" isInteractive />
+        <Orb 
+          layoutId="main-orb" 
+          size="large" 
+          isInteractive 
+          onTransitionComplete={handleTransitionComplete} 
+        />
         <div className="w-full max-w-xs p-4 text-center rounded-lg glassmorphism">
             <p className="text-sm text-foreground/90 font-sans min-h-[3em] flex items-center justify-center">
-              {orbMessage}
+              {displayedMessage}
+              {isTyping && <span className="animate-pulse ml-1">|</span>}
             </p>
         </div>
       </div>
