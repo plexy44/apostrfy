@@ -7,7 +7,6 @@ import { ONBOARDING_CONTENT } from '@/lib/constants';
 import ApostrfyLogo from '../icons/ApostrfyLogo';
 
 interface OnboardingModalProps {
-  step: number;
   onComplete: () => void;
 }
 
@@ -68,7 +67,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
           className="w-full max-w-md glassmorphism rounded-2xl p-8 text-center flex flex-col items-center"
         >
           {renderSpecialContent()}
-          <h2 className="font-headline text-3xl mb-4 text-accent">{title}</h2>
+          {special !== 'logo' && <h2 className="font-headline text-3xl mb-4 text-accent">{title}</h2>}
           <p className="text-foreground/80 mb-8 h-20">{text}</p>
 
           <div className="flex items-center justify-center space-x-2 my-4">
