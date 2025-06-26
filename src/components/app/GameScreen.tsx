@@ -12,7 +12,7 @@ import type { StoryPart } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Loader } from "lucide-react";
+import { Send, Loader, ArrowLeft } from "lucide-react";
 
 interface GameScreenProps {
   story: StoryPart[];
@@ -20,6 +20,7 @@ interface GameScreenProps {
   isAiTyping: boolean;
   onUserSubmit: (input: string) => void;
   onEndGame: () => void;
+  onQuitRequest: () => void;
 }
 
 const TimerBar = ({ durationInMinutes, onEndGame }: { durationInMinutes: number; onEndGame: () => void }) => {
@@ -51,7 +52,7 @@ const TimerBar = ({ durationInMinutes, onEndGame }: { durationInMinutes: number;
   );
 };
 
-export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, onEndGame }: GameScreenProps) {
+export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest }: GameScreenProps) {
   const [userInput, setUserInput] = useState("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -73,7 +74,17 @@ export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, 
   };
 
   return (
-    <div className="flex flex-col h-[90vh] w-full max-w-3xl mx-auto p-4 glassmorphism rounded-lg animate-fade-in">
+    <div className="flex flex-col h-[90vh] w-full max-w-3xl mx-auto p-4 glassmorphism rounded-lg animate-fade-in relative">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-4 left-4 z-20"
+        onClick={onQuitRequest}
+        aria-label="Quit game"
+      >
+        <ArrowLeft />
+      </Button>
+      
       <TimerBar durationInMinutes={duration} onEndGame={onEndGame} />
       
       <ScrollArea className="flex-grow mb-4 pr-4" ref={scrollAreaRef}>

@@ -14,3 +14,12 @@ export type GameState =
   | { status: 'playing' }
   | { status: 'generating_summary' }
   | { status: 'gameover' };
+
+export interface PastStory {
+  id: string;
+  timestamp: number;
+  trope: Trope;
+  duration: number;
+  story: StoryPart[];
+  sentimentSnapshot?: string;
+}

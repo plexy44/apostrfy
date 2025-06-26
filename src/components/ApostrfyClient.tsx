@@ -18,8 +18,20 @@ import MainMenu from "@/components/app/MainMenu";
 import GameScreen from "@/components/app/GameScreen";
 import GameOverScreen from "@/components/app/GameOverScreen";
 import AppFooter from "@/components/app/AppFooter";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useIsFirstVisit } from "@/hooks/useIsFirstVisit";
+import { usePastStories } from "@/hooks/usePastStories";
 
 export default function ApostrfyClient() {
   const { isFirstVisit, setHasVisited } = useIsFirstVisit();
@@ -29,7 +41,10 @@ export default function ApostrfyClient() {
   const [sentiment, setSentiment] = useState<{ snapshot: string; emotions: string[] }>({ snapshot: "", emotions: [] });
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [comingFromOnboarding, setComingFromOnboarding] = useState(false);
+  const [quitDialogState, setQuitDialogState] = useState<'closed' | 'confirm_quit' | 'confirm_save'>('closed');
   const { toast } = useToast();
+  const { saveStory } = usePastStories();
+
 
   useEffect(() => {
     if (isFirstVisit === undefined) return;
@@ -113,8 +128,44 @@ export default function ApostrfyClient() {
 
   const handlePlayAgain = () => {
     setGameState({ status: "menu" });
+    setStory([]);
     setSettings({ trope: null, duration: 5 });
     setComingFromOnboarding(false);
+  };
+
+  const handleQuitRequest = () => {
+    setQuitDialogState('confirm_quit');
+  };
+
+  const handleConfirmQuit = () => {
+    if (story.length < 2) {
+      handlePlayAgain();
+      setQuitDialogState('closed');
+    } else {
+      setQuitDialogState('confirm_save');
+    }
+  };
+
+  const handleSaveAndQuit = () => {
+    if (settings.trope) {
+      saveStory({
+        trope: settings.trope,
+        duration: settings.duration,
+        story: story,
+      });
+      toast({ title: "Story Saved", description: "Your story has been saved." });
+    }
+    handlePlayAgain();
+    setQuitDialogState('closed');
+  };
+
+  const handleQuitWithoutSaving = () => {
+    handlePlayAgain();
+    setQuitDialogState('closed');
+  };
+  
+  const handleCancelQuit = () => {
+    setQuitDialogState('closed');
   };
   
   return (
@@ -132,6 +183,7 @@ export default function ApostrfyClient() {
                 isAiTyping={isAiTyping}
                 onUserSubmit={handleUserSubmit}
                 onEndGame={handleEndGame}
+                onQuitRequest={handleQuitRequest}
               />
             )}
             {gameState.status === "generating_summary" && <LoadingScreen key="generating" text="The words are settling..." />}
@@ -139,6 +191,37 @@ export default function ApostrfyClient() {
         </AnimatePresence>
       </div>
       {gameState.status !== "playing" && gameState.status !== 'generating_summary' && <AppFooter />}
+
+      <AlertDialog open={quitDialogState === 'confirm_quit'} onOpenChange={(open) => !open && handleCancelQuit()}>
+        <AlertDialogContent className="glassmorphism">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to quit?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your progress in the current story will not be saved automatically.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelQuit}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmQuit}>Quit Game</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={quitDialogState === 'confirm_save'} onOpenChange={(open) => !open && handleCancelQuit()}>
+        <AlertDialogContent className="glassmorphism">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Save this story?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You can store up to 5 stories to view later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+             <Button variant="ghost" onClick={handleCancelQuit}>Cancel</Button>
+            <Button variant="outline" onClick={handleQuitWithoutSaving}>Quit Without Saving</Button>
+            <Button onClick={handleSaveAndQuit}>Save and Quit</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
