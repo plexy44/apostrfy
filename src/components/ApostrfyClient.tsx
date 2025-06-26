@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { GameState, StoryPart, Trope } from "@/lib/types";
 import { generateStoryContent, GenerateStoryContentInput } from "@/ai/flows/generate-story-content";
 import { generateSentimentSnapshot } from "@/ai/flows/generate-sentiment-snapshot";
@@ -11,28 +11,16 @@ import GameScreen from "@/components/app/GameScreen";
 import GameOverScreen from "@/components/app/GameOverScreen";
 import AppFooter from "@/components/app/AppFooter";
 import { useToast } from "@/hooks/use-toast";
-import { useIsFirstVisit } from "@/hooks/useIsFirstVisit";
 
 export default function ApostrfyClient() {
-  const [gameState, setGameState] = useState<GameState>({ status: "loading" });
+  const [gameState, setGameState] = useState<GameState>({ status: "onboarding", step: 1 });
   const [settings, setSettings] = useState<{ trope: Trope | null; duration: number }>({ trope: null, duration: 5 });
   const [story, setStory] = useState<StoryPart[]>([]);
   const [sentiment, setSentiment] = useState<{ snapshot: string; emotions: string[] }>({ snapshot: "", emotions: [] });
   const [isAiTyping, setIsAiTyping] = useState(false);
-  const { isFirstVisit, setHasVisited } = useIsFirstVisit();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (isFirstVisit === undefined) return; // Wait for the hook to determine visit status
-    if (isFirstVisit) {
-      setGameState({ status: "onboarding", step: 1 });
-    } else {
-      setGameState({ status: "menu" });
-    }
-  }, [isFirstVisit]);
-
   const handleOnboardingComplete = () => {
-    setHasVisited();
     setGameState({ status: "menu" });
   };
 
@@ -107,8 +95,6 @@ export default function ApostrfyClient() {
   
   const renderContent = () => {
     switch (gameState.status) {
-      case "loading":
-        return <LoadingScreen />;
       case "onboarding":
         return <OnboardingModal step={gameState.step} onComplete={handleOnboardingComplete} />;
       case "menu":
@@ -137,7 +123,7 @@ export default function ApostrfyClient() {
       <div className="flex-grow flex items-center justify-center p-4 relative">
         {renderContent()}
       </div>
-      {gameState.status !== "playing" && gameState.status !== 'loading' && <AppFooter />}
+      {gameState.status !== "playing" && gameState.status !== 'generating_summary' && <AppFooter />}
     </div>
   );
 }

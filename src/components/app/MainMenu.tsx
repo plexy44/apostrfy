@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Trope } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,19 +8,41 @@ import { TROPES, DURATIONS, ORB_MESSAGES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import ApostrfyLogo from "../icons/ApostrfyLogo";
-import { useEffect } from "react";
 
 interface MainMenuProps {
   onStartGame: (trope: Trope, duration: number) => void;
 }
 
 const Orb = () => (
-  <motion.div 
-    animate={{ scale: [1, 1.05, 1], transition: { duration: 4, repeat: Infinity, ease: "easeInOut" }}}
-    className="w-40 h-40 rounded-full bg-gradient-to-br from-primary to-accent/70 flex items-center justify-center shadow-[0_0_40px] shadow-accent/30"
-  >
-    <div className="w-36 h-36 rounded-full bg-background/50 backdrop-blur-sm"></div>
-  </motion.div>
+  <motion.div
+    animate={{
+      backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+      boxShadow: [
+        "0 0 40px hsl(var(--accent) / 0.3)",
+        "0 0 60px hsl(var(--accent) / 0.5)",
+        "0 0 40px hsl(var(--accent) / 0.3)",
+      ],
+    }}
+    transition={{
+      backgroundPosition: {
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut",
+          repeatType: "mirror",
+      },
+      boxShadow: {
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut",
+          repeatType: "mirror",
+      }
+    }}
+    style={{
+      backgroundSize: "200% 200%",
+      backgroundImage: "radial-gradient(circle at 30% 30%, hsl(var(--accent) / 0.8), transparent 40%), radial-gradient(circle at 70% 70%, hsl(var(--primary-foreground) / 0.1), transparent 40%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)",
+    }}
+    className="w-40 h-40 rounded-full"
+  />
 );
 
 export default function MainMenu({ onStartGame }: MainMenuProps) {
@@ -45,11 +67,13 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
         <p className="font-headline text-muted-foreground tracking-widest">connect || co-create</p>
       </div>
 
-      <div className="relative mb-8">
+      <div className="flex flex-col items-center gap-4 mb-8">
         <Orb />
-        <p className="absolute inset-0 flex items-center justify-center text-center text-sm text-foreground/90 font-sans p-8">
-          {orbMessage}
-        </p>
+        <div className="w-full max-w-xs p-4 text-center rounded-lg glassmorphism">
+            <p className="text-sm text-foreground/90 font-sans min-h-[3em] flex items-center justify-center">
+              {orbMessage}
+            </p>
+        </div>
       </div>
       
       <Card className="w-full max-w-lg glassmorphism">

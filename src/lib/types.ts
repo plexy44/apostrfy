@@ -8,7 +8,6 @@ export type StoryPart = {
 };
 
 export type GameState = 
-  | { status: 'loading' }
   | { status: 'onboarding', step: number }
   | { status: 'menu' }
   | { status: 'playing' }
