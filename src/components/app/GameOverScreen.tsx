@@ -46,7 +46,7 @@ export default function GameOverScreen({ story, sentiment, onPlayAgain }: GameOv
     <div className="w-full max-w-2xl mx-auto flex flex-col items-center text-center animate-fade-in">
       <Card className="w-full glassmorphism">
         <CardHeader>
-          <CardTitle className="font-headline text-3xl text-accent">Sentiment Snapshot</CardTitle>
+          <CardTitle className="font-headline text-3xl text-foreground">Sentiment Snapshot</CardTitle>
           <CardDescription className="text-lg pt-2">
             &ldquo;{sentiment.snapshot}&rdquo;
           </CardDescription>
