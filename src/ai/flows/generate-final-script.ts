@@ -11,7 +11,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateFinalScriptInputSchema = z.object({
-  fullStory: z.string().describe("The full raw story transcript, including both user and AI lines, separated by newlines."),
+  fullStory: z.string().describe("The full raw story transcript, with each line prefixed by its speaker (e.g., 'USER:' or 'APOSTRFY:')."),
 });
 export type GenerateFinalScriptInput = z.infer<typeof GenerateFinalScriptInputSchema>;
 
@@ -28,19 +28,25 @@ const prompt = ai.definePrompt({
   name: 'generateFinalScriptPrompt',
   input: {schema: GenerateFinalScriptInputSchema},
   output: {schema: GenerateFinalScriptOutputSchema},
-  prompt: `You are a professional copy editor. Your task is to take the following raw story transcript and transform it into a polished, final script.
+  prompt: `You are a professional screenplay editor. Your task is to take the following raw story transcript, which includes speaker tags like 'USER:' and 'APOSTRFY:', and transform it into a polished, final script.
 
 Your responsibilities are:
-1.  **Correct Spelling and Grammar**: Fix any typos or grammatical errors throughout the text.
-2.  **Improve Formatting**: Ensure proper punctuation, including full stops at the end of sentences. Combine related lines into coherent paragraphs where appropriate, especially for action/description lines.
-3.  **Preserve Script Structure**: It is crucial that you maintain the distinction between action lines and dialogue. Dialogue is always prefixed with a character name in all caps followed by a colon (e.g., 'CHARACTER:'). Do not remove these character prefixes.
-4.  **Do Not Add Content**: Do not add new story elements, characters, or dialogue. Your role is to edit and format, not to create.
-
-Return the complete, edited script as a single block of text, ready for display.
+1.  **Correct Spelling and Grammar**: Fix typos and grammatical errors.
+2.  **Enhance Formatting**:
+    *   Ensure proper punctuation.
+    *   Combine short, choppy action lines into fluid, descriptive paragraphs. Use line breaks to create natural spacing and rhythm.
+    *   Action/description lines should NOT have a speaker prefix. If a line tagged with a speaker is clearly an action (e.g., 'USER: I walk to the door.'), remove the tag and treat it as an action line.
+3.  **Handle Dialogue**:
+    *   For lines prefixed with a character name (e.g., 'USER:', 'APOSTRFY:', or others provided in the text), format them as dialogue.
+    *   You can keep 'USER' and 'APOSTRFY' or, if the context suggests a more fitting character name, you may replace them (e.g., 'DETECTIVE' for 'USER').
+    *   The format must be the character name in all caps, followed by a colon.
+4.  **Preserve Intent**: Do not add new story elements. Your role is to edit and format the existing content into a readable screenplay format.
+5.  **Output**: Return the complete, edited script as a single block of text. Use newlines to separate paragraphs and dialogue blocks appropriately.
 
 Raw Story Transcript:
 {{{fullStory}}}`,
 });
+
 
 const generateFinalScriptFlow = ai.defineFlow(
   {

@@ -147,7 +147,8 @@ export default function ApostrfyClient() {
     setGameState({ status: "generating_summary" });
     try {
       const userContent = story.filter(part => part.speaker === "user").map(part => part.line).join("\n");
-      const fullStory = story.map(part => part.line).join("\n");
+      const rawFullStory = story.map(part => part.line).join("\n");
+      const prefixedFullStory = story.map(part => `${part.speaker === 'user' ? 'USER' : 'APOSTRFY'}: ${part.line}`).join("\n");
 
       if (userContent.trim() === "") {
         // Handle case with no user input
@@ -164,11 +165,11 @@ export default function ApostrfyClient() {
       }
 
       const [quoteResult, moodResult, styleResult, keywordsResult, scriptResult] = await Promise.all([
-        generateQuoteBanner({ fullStory }),
+        generateQuoteBanner({ fullStory: rawFullStory }),
         generateMoodAnalysis({ userContent }),
         generateStyleMatch({ userContent, personas: JSON.stringify(inspirationalPersonas) }),
         generateStoryKeywords({ userContent }),
-        generateFinalScript({ fullStory }),
+        generateFinalScript({ fullStory: prefixedFullStory }),
       ]);
 
       const winner = styleResult.styleMatches[0];

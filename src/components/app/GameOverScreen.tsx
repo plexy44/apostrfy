@@ -107,11 +107,11 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
             </CardHeader>
             <CardContent className="flex-grow">
               <ScrollArea className="h-96 w-full rounded-md border bg-secondary/20 p-4">
-                <div className="font-code text-sm space-y-6 px-4 py-2 text-foreground">
-                  <p className="font-bold uppercase">INT. A FADING MEMORY - DAY</p>
+                <div className="font-code text-sm whitespace-pre-wrap px-2 py-2 text-foreground">
+                  <p className="font-bold uppercase text-center mb-6">INT. A FADING MEMORY - DAY</p>
                   
                   {analysis.finalScript.split('\n').map((line, index) => {
-                    if (line.trim() === '') return null; // Don't render empty lines from paragraph breaks
+                    if (line.trim() === '') return <div key={index} className="h-4" />;
                     
                     const characterRegex = /^([A-Z][A-Z0-9\s().-]*):\s*(.*)/s;
                     const match = line.match(characterRegex);
@@ -120,12 +120,12 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
                       const character = match[1].trim();
                       const dialogue = match[2].trim();
                       return (
-                        <div key={index} className="grid grid-cols-1 justify-items-center">
-                          <div className="w-full max-w-md">
+                        <div key={index} className="grid grid-cols-1 justify-items-center mb-4">
+                          <div className="w-full max-w-sm">
                             <p className="text-center font-bold uppercase">
                               {character}
                             </p>
-                            <p className="px-10 text-left">
+                            <p className="text-left">
                               {dialogue}
                             </p>
                           </div>
@@ -133,9 +133,8 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
                       );
                     }
 
-                    // No character found, treat as action/description line.
                     return (
-                      <div key={index} className="grid grid-cols-1 justify-items-center">
+                      <div key={index} className="grid grid-cols-1 justify-items-center mb-4">
                         <div className="w-full max-w-lg">
                           <p className="text-left">
                             {line}
@@ -145,7 +144,7 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
                     );
                   })}
                   
-                  <p className="text-right font-bold uppercase">FADE OUT.</p>
+                  <p className="text-center font-bold uppercase mt-6">FADE OUT.</p>
                 </div>
               </ScrollArea>
             </CardContent>
