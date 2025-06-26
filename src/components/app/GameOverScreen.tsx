@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, RefreshCw, Send, Users, BookOpen, Quote, BrainCircuit, Sparkles } from "lucide-react";
+import { Mail, RefreshCw, Send, Quote, Smile, Tags, Feather, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import MoodWheel from "./MoodWheel";
 import { Separator } from "../ui/separator";
@@ -66,11 +66,11 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full mb-6">
         {/* Left Column */}
         <div className="lg:col-span-1 flex flex-col gap-6">
-          <AnalysisCard icon={<BrainCircuit className="text-accent" />} title="Mood Analysis">
+          <AnalysisCard icon={<Smile className="text-accent" />} title="Mood Analysis">
             <MoodWheel mood={analysis.mood.primaryEmotion} score={analysis.mood.confidenceScore} />
           </AnalysisCard>
 
-          <AnalysisCard icon={<Sparkles className="text-accent" />} title="Story Keywords">
+          <AnalysisCard icon={<Tags className="text-accent" />} title="Story Keywords">
             <div className="flex flex-wrap items-center justify-center gap-2">
               {analysis.keywords.map((keyword) => (
                 <Badge key={keyword} variant="secondary" className="text-sm px-3 py-1 cursor-default">
@@ -83,7 +83,7 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
 
         {/* Middle Column */}
         <div className="lg:col-span-1 flex flex-col gap-6">
-          <AnalysisCard icon={<Users className="text-accent" />} title="Style Match">
+          <AnalysisCard icon={<Feather className="text-accent" />} title="Style Match">
             <div className="text-center">
               <p className="text-muted-foreground text-sm mb-1">Primary Match</p>
               <p className="text-2xl font-bold font-headline text-foreground">{analysis.style.primaryMatch}</p>
@@ -106,7 +106,7 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
         <div className="lg:col-span-1">
            <Card className="bg-background/30 border-border/10 flex flex-col h-full">
             <CardHeader className="flex-row items-center gap-3">
-              <BookOpen className="text-accent" />
+              <FileText className="text-accent" />
               <CardTitle className="font-headline text-xl text-foreground">Final Transcript</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow">
