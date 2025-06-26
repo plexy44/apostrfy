@@ -5,23 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ONBOARDING_CONTENT } from '@/lib/constants';
 import ApostrfyLogo from '../icons/ApostrfyLogo';
+import Orb from './Orb';
 
 interface OnboardingModalProps {
   onComplete: () => void;
 }
-
-const OrbAnimation = () => (
-  <div className="w-24 h-24 my-4">
-    <motion.div
-      className="w-full h-full rounded-full bg-gradient-to-br from-primary to-accent/70"
-      animate={{
-        scale: [1, 1.1, 1, 1.1, 1],
-        boxShadow: ["0 0 20px rgba(143, 0, 255, 0.2)", "0 0 30px rgba(143, 0, 255, 0.4)", "0 0 20px rgba(143, 0, 255, 0.2)", "0 0 30px rgba(143, 0, 255, 0.4)", "0 0 20px rgba(143, 0, 255, 0.2)"],
-      }}
-      transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-    />
-  </div>
-);
 
 const DialogueAnimation = () => (
     <div className="space-y-2 my-4 w-48">
@@ -50,13 +38,19 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
     switch(special) {
         case 'logo': return <ApostrfyLogo className="w-48 h-auto my-4 text-foreground"/>
         case 'dialogue': return <DialogueAnimation />;
-        case 'orb': return <OrbAnimation />;
+        case 'orb': return <Orb layoutId="main-orb" size="small" isInteractive={false} className="my-4" />;
         default: return null;
     }
   }
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <motion.div
+        className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+    >
       <AnimatePresence mode="wait">
         <motion.div
           key={currentStep}
@@ -84,6 +78,6 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
           </Button>
         </motion.div>
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }

@@ -1,83 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import type { Trope } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TROPES, DURATIONS, ORB_MESSAGES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import ApostrfyLogo from "../icons/ApostrfyLogo";
+import Orb from "./Orb";
 
 interface MainMenuProps {
   onStartGame: (trope: Trope, duration: number) => void;
 }
-
-const Orb = () => {
-    const orbRef = useRef<HTMLDivElement>(null);
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
-
-    useEffect(() => {
-        const handleMouseMove = (e: globalThis.MouseEvent) => {
-            if (orbRef.current) {
-                const rect = orbRef.current.getBoundingClientRect();
-                const orbCenterX = rect.left + rect.width / 2;
-                const orbCenterY = rect.top + rect.height / 2;
-                
-                const deltaX = e.clientX - orbCenterX;
-                const deltaY = e.clientY - orbCenterY;
-
-                mouseX.set(deltaX);
-                mouseY.set(deltaY);
-            }
-        };
-        
-        window.addEventListener('mousemove', handleMouseMove);
-
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-        };
-    }, [mouseX, mouseY]);
-
-    const pupilX = useTransform(mouseX, [-800, 800], [-24, 24]);
-    const pupilY = useTransform(mouseY, [-800, 800], [-24, 24]);
-    
-    return (
-        <motion.div
-            ref={orbRef}
-            animate={{
-                backgroundColor: [
-                    "hsl(275, 90%, 45%)",
-                    "hsl(320, 85%, 50%)",
-                    "hsl(25, 95%, 55%)",
-                ],
-                boxShadow: [
-                    "0 0 60px hsl(275, 90%, 55%, 0.7)",
-                    "0 0 70px hsl(320, 85%, 60%, 0.8)",
-                    "0 0 65px hsl(25, 95%, 65%, 0.8)",
-                ]
-            }}
-            transition={{
-                duration: 10,
-                repeat: Infinity,
-                ease: "easeInOut",
-                repeatType: "mirror",
-            }}
-            className="w-40 h-40 rounded-full flex items-center justify-center relative overflow-hidden"
-        >
-            <motion.div 
-                className="w-[65%] h-[65%] rounded-full bg-black/80 backdrop-blur-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.5),0_0_35px_5px_hsl(var(--primary-foreground)/0.8)]"
-                style={{
-                    x: pupilX,
-                    y: pupilY,
-                }}
-                transition={{ type: "spring", stiffness: 100, damping: 20 }}
-            />
-        </motion.div>
-    );
-};
-
 
 export default function MainMenu({ onStartGame }: MainMenuProps) {
   const [selectedTrope, setSelectedTrope] = useState<Trope | null>(null);
@@ -102,7 +36,7 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
       </div>
 
       <div className="flex flex-col items-center gap-4 mb-8">
-        <Orb />
+        <Orb layoutId="main-orb" size="large" isInteractive />
         <div className="w-full max-w-xs p-4 text-center rounded-lg glassmorphism">
             <p className="text-sm text-foreground/90 font-sans min-h-[3em] flex items-center justify-center">
               {orbMessage}

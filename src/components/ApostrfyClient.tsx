@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
 import type { GameState, StoryPart, Trope } from "@/lib/types";
 import { generateStoryContent, GenerateStoryContentInput } from "@/ai/flows/generate-story-content";
 import { generateSentimentSnapshot } from "@/ai/flows/generate-sentiment-snapshot";
@@ -105,37 +106,26 @@ export default function ApostrfyClient() {
     setSettings({ trope: null, duration: 5 });
   };
   
-  const renderContent = () => {
-    switch (gameState.status) {
-      case "loading_screen":
-        return <LoadingScreen />;
-      case "onboarding":
-        return <OnboardingModal onComplete={handleOnboardingComplete} />;
-      case "menu":
-        return <MainMenu onStartGame={handleStartGame} />;
-      case "playing":
-        return (
-          <GameScreen
-            story={story}
-            duration={settings.duration}
-            isAiTyping={isAiTyping}
-            onUserSubmit={handleUserSubmit}
-            onEndGame={handleEndGame}
-          />
-        );
-      case "generating_summary":
-        return <LoadingScreen text="The words are settling..." />;
-      case "gameover":
-        return <GameOverScreen story={story} sentiment={sentiment} onPlayAgain={handlePlayAgain} />;
-      default:
-        return <MainMenu onStartGame={handleStartGame} />;
-    }
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <div className="flex-grow flex items-center justify-center p-4 relative">
-        {renderContent()}
+        <AnimatePresence>
+            {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}
+            {gameState.status === "onboarding" && <OnboardingModal key="onboarding" onComplete={handleOnboardingComplete} />}
+            {gameState.status === "menu" && <MainMenu key="menu" onStartGame={handleStartGame} />}
+            {gameState.status === "playing" && (
+              <GameScreen
+                key="playing"
+                story={story}
+                duration={settings.duration}
+                isAiTyping={isAiTyping}
+                onUserSubmit={handleUserSubmit}
+                onEndGame={handleEndGame}
+              />
+            )}
+            {gameState.status === "generating_summary" && <LoadingScreen key="generating" text="The words are settling..." />}
+            {gameState.status === "gameover" && <GameOverScreen key="gameover" story={story} sentiment={sentiment} onPlayAgain={handlePlayAgain} />}
+        </AnimatePresence>
       </div>
       {gameState.status !== "playing" && gameState.status !== 'generating_summary' && <AppFooter />}
     </div>
