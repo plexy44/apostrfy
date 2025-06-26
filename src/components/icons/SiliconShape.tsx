@@ -1,17 +1,19 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 export function SiliconShape() {
-  const animationProps = useMemo(() => {
+  const [animationProps, setAnimationProps] = useState<any>(null);
+
+  useEffect(() => {
     const duration = Math.random() * 20 + 20; // 20-40s
     const delay = Math.random() * 10; // 0-10s
     const xRange = [-10, 110];
     const yRange = [-10, 110];
     const rotateRange = [0, 360];
 
-    return {
+    setAnimationProps({
       initial: {
         x: `${Math.random() * 100}vw`,
         y: `${Math.random() * 100}vh`,
@@ -30,8 +32,12 @@ export function SiliconShape() {
         repeatType: "mirror" as const,
         ease: "easeInOut" as const,
       },
-    };
+    });
   }, []);
+
+  if (!animationProps) {
+    return null;
+  }
 
   return (
     <motion.div
