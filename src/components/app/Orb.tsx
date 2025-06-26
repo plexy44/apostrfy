@@ -1,9 +1,9 @@
 /**
  * @fileoverview This component defines the animated AI companion Orb.
  * It uses Framer Motion for complex visual effects, including:
- * - A smooth, continuous color-shifting background.
+ * - A smooth, continuous color-shifting background using warm tones.
  * - An interactive "pupil" that follows the user's cursor across the screen.
- * - A glowing "accretion disk" effect with an iridescent shimmer.
+ * - A glowing "accretion disk" effect.
  * - A shared layout animation (`layoutId`) to smoothly transition between
  *   different states (e.g., from the onboarding modal to the main menu).
  */
@@ -88,21 +88,6 @@ export default function Orb({ layoutId, size = "large", isInteractive = true, cl
                     ease: "easeInOut",
                     repeatType: "mirror",
                 }}
-            />
-             <motion.div 
-                style={{
-                    ...({
-                        '--conic-angle': '0deg',
-                        background: 'radial-gradient(farthest-corner, transparent, transparent 65%, hsl(0 0% 100% / 0.5)), conic-gradient(from var(--conic-angle), hsl(0 0% 100% / 0.7), hsl(240 70% 70% / 0.8), hsl(180 80% 60% / 0.9), hsl(0 0% 100% / 0.7))'
-                    } as any)
-                }}
-                animate={{ '--conic-angle': '360deg' } as any}
-                transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: 'linear'
-                }}
-                className="w-full h-full absolute inset-0" 
             />
             <motion.div 
                 className="w-[65%] h-[65%] rounded-full bg-black/80 backdrop-blur-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.5),0_0_35px_5px_hsl(var(--primary-foreground)/0.8)] z-10"
