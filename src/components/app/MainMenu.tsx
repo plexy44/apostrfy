@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, MouseEvent } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Trope } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,31 +18,36 @@ const Orb = () => {
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
 
-    const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-        if (orbRef.current) {
-            const rect = orbRef.current.getBoundingClientRect();
-            const x = e.clientX - rect.left - rect.width / 2;
-            const y = e.clientY - rect.top - rect.height / 2;
-            mouseX.set(x);
-            mouseY.set(y);
-        }
-    };
+    useEffect(() => {
+        const handleMouseMove = (e: globalThis.MouseEvent) => {
+            if (orbRef.current) {
+                const rect = orbRef.current.getBoundingClientRect();
+                const orbCenterX = rect.left + rect.width / 2;
+                const orbCenterY = rect.top + rect.height / 2;
+                
+                const deltaX = e.clientX - orbCenterX;
+                const deltaY = e.clientY - orbCenterY;
 
-    const handleMouseLeave = () => {
-        mouseX.set(0);
-        mouseY.set(0);
-    };
+                mouseX.set(deltaX);
+                mouseY.set(deltaY);
+            }
+        };
+        
+        window.addEventListener('mousemove', handleMouseMove);
 
-    const pupilX = useTransform(mouseX, [-80, 80], [-24, 24]);
-    const pupilY = useTransform(mouseY, [-80, 80], [-24, 24]);
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+        };
+    }, [mouseX, mouseY]);
+
+    const pupilX = useTransform(mouseX, [-800, 800], [-24, 24]);
+    const pupilY = useTransform(mouseY, [-800, 800], [-24, 24]);
 
     const baseBackgroundImage = "radial-gradient(circle at 30% 30%, hsl(var(--accent) / 0.8), transparent 40%), radial-gradient(circle at 70% 70%, hsl(var(--primary-foreground) / 0.1), transparent 40%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)";
     
     return (
         <motion.div
             ref={orbRef}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
             animate={{
                 backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
                 boxShadow: [
@@ -72,12 +77,12 @@ const Orb = () => {
             className="w-40 h-40 rounded-full flex items-center justify-center relative overflow-hidden"
         >
             <motion.div 
-                className="w-[65%] h-[65%] rounded-full bg-black/80 backdrop-blur-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]"
+                className="w-[65%] h-[65%] rounded-full bg-black/80 backdrop-blur-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.5),0_0_25px_3px_hsl(var(--primary-foreground)/0.4)]"
                 style={{
                     x: pupilX,
                     y: pupilY,
                 }}
-                transition={{ type: "spring", stiffness: 150, damping: 20, mass: 0.5 }}
+                transition={{ type: "spring", stiffness: 100, damping: 20 }}
             />
         </motion.div>
     );
