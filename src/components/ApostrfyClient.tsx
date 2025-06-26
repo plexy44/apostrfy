@@ -148,8 +148,7 @@ export default function ApostrfyClient() {
     try {
       const userContent = story.filter(part => part.speaker === "user").map(part => part.line).join("\n");
       const rawFullStory = story.map(part => part.line).join("\n");
-      const prefixedFullStory = story.map(part => `${part.speaker === 'user' ? 'USER' : 'APOSTRFY'}: ${part.line}`).join("\n");
-
+      
       if (userContent.trim() === "") {
         // Handle case with no user input
         setAnalysis({
@@ -169,7 +168,7 @@ export default function ApostrfyClient() {
         generateMoodAnalysis({ userContent }),
         generateStyleMatch({ userContent, personas: JSON.stringify(inspirationalPersonas) }),
         generateStoryKeywords({ userContent }),
-        generateFinalScript({ fullStory: prefixedFullStory }),
+        generateFinalScript({ fullStory: rawFullStory }),
       ]);
 
       const winner = styleResult.styleMatches[0];
