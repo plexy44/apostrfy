@@ -57,4 +57,5 @@ export interface GameAnalysis {
     quote: string;
   } | null;
   keywords: string[];
+  finalScript: string;
 }

@@ -7,9 +7,9 @@
 "use client";
 
 import { useState } from "react";
-import type { StoryPart, GameAnalysis } from "@/lib/types";
+import type { GameAnalysis } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -19,15 +19,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Mail, RefreshCw, Send } from "lucide-react";
 import { motion } from "framer-motion";
 import MoodWheel from "./MoodWheel";
-import { Separator } from "../ui/separator";
 
 interface GameOverScreenProps {
-  story: StoryPart[];
   analysis: GameAnalysis;
   onPlayAgain: () => void;
 }
 
-export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOverScreenProps) {
+export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreenProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
 
@@ -112,9 +110,11 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
                 <div className="font-code text-sm space-y-6 px-4 py-2 text-foreground">
                   <p className="font-bold uppercase">INT. A FADING MEMORY - DAY</p>
                   
-                  {story.map((part, index) => {
+                  {analysis.finalScript.split('\n').map((line, index) => {
+                    if (line.trim() === '') return null; // Don't render empty lines from paragraph breaks
+                    
                     const characterRegex = /^([A-Z][A-Z0-9\s().-]*):\s*(.*)/s;
-                    const match = part.line.match(characterRegex);
+                    const match = line.match(characterRegex);
 
                     if (match) {
                       const character = match[1].trim();
@@ -138,7 +138,7 @@ export default function GameOverScreen({ story, analysis, onPlayAgain }: GameOve
                       <div key={index} className="grid grid-cols-1 justify-items-center">
                         <div className="w-full max-w-lg">
                           <p className="text-left">
-                            {part.line}
+                            {line}
                           </p>
                         </div>
                       </div>

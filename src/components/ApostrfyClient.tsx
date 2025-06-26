@@ -15,6 +15,7 @@ import { generateQuoteBanner } from "@/ai/flows/generate-quote-banner";
 import { generateMoodAnalysis } from "@/ai/flows/generate-mood-analysis";
 import { generateStyleMatch } from "@/ai/flows/generate-style-match";
 import { generateStoryKeywords } from "@/ai/flows/generate-story-keywords";
+import { generateFinalScript } from "@/ai/flows/generate-final-script";
 
 import LoadingScreen from "@/components/app/LoadingScreen";
 import OnboardingModal from "@/components/app/OnboardingModal";
@@ -146,7 +147,7 @@ export default function ApostrfyClient() {
     setGameState({ status: "generating_summary" });
     try {
       const userContent = story.filter(part => part.speaker === "user").map(part => part.line).join("\n");
-      const fullStory = story.map(part => `${part.speaker}: ${part.line}`).join("\n");
+      const fullStory = story.map(part => part.line).join("\n");
 
       if (userContent.trim() === "") {
         // Handle case with no user input
@@ -155,17 +156,19 @@ export default function ApostrfyClient() {
           mood: { primaryEmotion: "Serenity", confidenceScore: 0.8 },
           style: { primaryMatch: "The Silent Observer", secondaryMatch: "The Patient Chronicler" },
           famousQuote: null,
-          keywords: ['Reflection', 'Silence', 'Stillness', 'Pause', 'Contemplation', 'End']
+          keywords: ['Reflection', 'Silence', 'Stillness', 'Pause', 'Contemplation', 'End'],
+          finalScript: "The page is blank. The story was not written."
         });
         setGameState({ status: "gameover" });
         return;
       }
 
-      const [quoteResult, moodResult, styleResult, keywordsResult] = await Promise.all([
+      const [quoteResult, moodResult, styleResult, keywordsResult, scriptResult] = await Promise.all([
         generateQuoteBanner({ fullStory }),
         generateMoodAnalysis({ userContent }),
         generateStyleMatch({ userContent, personas: JSON.stringify(inspirationalPersonas) }),
         generateStoryKeywords({ userContent }),
+        generateFinalScript({ fullStory }),
       ]);
 
       const winner = styleResult.styleMatches[0];
@@ -183,6 +186,7 @@ export default function ApostrfyClient() {
         },
         famousQuote,
         keywords: keywordsResult.keywords,
+        finalScript: scriptResult.finalScript,
       });
 
       setGameState({ status: "gameover" });
@@ -195,7 +199,8 @@ export default function ApostrfyClient() {
         mood: { primaryEmotion: "Melancholy", confidenceScore: 0.7 },
         style: { primaryMatch: "The Storyteller", secondaryMatch: "The Dreamer" },
         famousQuote: null,
-        keywords: ['Mystery', 'Suspense', 'Hope', 'Wonder', 'Resolve']
+        keywords: ['Mystery', 'Suspense', 'Hope', 'Wonder', 'Resolve'],
+        finalScript: story.map(part => part.line).join('\n\n'),
       });
       setGameState({ status: "gameover" });
     }
@@ -265,7 +270,7 @@ export default function ApostrfyClient() {
               />
             )}
             {gameState.status === "generating_summary" && <LoadingScreen key="generating" text="The words are settling..." />}
-            {gameState.status === "gameover" && analysis && <GameOverScreen key="gameover" story={story} analysis={analysis} onPlayAgain={handlePlayAgain} />}
+            {gameState.status === "gameover" && analysis && <GameOverScreen key="gameover" analysis={analysis} onPlayAgain={handlePlayAgain} />}
         </AnimatePresence>
       </div>
       {gameState.status !== "playing" && gameState.status !== 'generating_summary' && gameState.status !== 'generating_initial_story' && <AppFooter />}
