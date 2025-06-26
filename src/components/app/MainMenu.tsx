@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TROPES, DURATIONS, ORB_MESSAGES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 import ApostrfyLogo from "../icons/ApostrfyLogo";
 
 interface MainMenuProps {
@@ -15,25 +15,29 @@ interface MainMenuProps {
 
 const Orb = () => {
     const orbRef = useRef<HTMLDivElement>(null);
-    const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+    const mouseX = useMotionValue(0);
+    const mouseY = useMotionValue(0);
 
     const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
         if (orbRef.current) {
             const rect = orbRef.current.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-            setMousePos({ x, y });
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            mouseX.set(x);
+            mouseY.set(y);
         }
     };
 
     const handleMouseLeave = () => {
-        setMousePos({ x: 50, y: 50 });
+        mouseX.set(0);
+        mouseY.set(0);
     };
+
+    const pupilX = useTransform(mouseX, [-80, 80], [-24, 24]);
+    const pupilY = useTransform(mouseY, [-80, 80], [-24, 24]);
 
     const baseBackgroundImage = "radial-gradient(circle at 30% 30%, hsl(var(--accent) / 0.8), transparent 40%), radial-gradient(circle at 70% 70%, hsl(var(--primary-foreground) / 0.1), transparent 40%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)";
     
-    const dynamicBackgroundImage = `radial-gradient(circle 40px at ${mousePos.x}% ${mousePos.y}%, rgba(10, 10, 15, 0.7) 0%, transparent 70%), ${baseBackgroundImage}`;
-
     return (
         <motion.div
             ref={orbRef}
@@ -63,10 +67,19 @@ const Orb = () => {
             }}
             style={{
                 backgroundSize: "200% 200%",
-                backgroundImage: dynamicBackgroundImage,
+                backgroundImage: baseBackgroundImage,
             }}
-            className="w-40 h-40 rounded-full"
-        />
+            className="w-40 h-40 rounded-full flex items-center justify-center relative overflow-hidden"
+        >
+            <motion.div 
+                className="w-[65%] h-[65%] rounded-full bg-black/80 backdrop-blur-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]"
+                style={{
+                    x: pupilX,
+                    y: pupilY,
+                }}
+                transition={{ type: "spring", stiffness: 150, damping: 20, mass: 0.5 }}
+            />
+        </motion.div>
     );
 };
 
