@@ -9,7 +9,7 @@
 
 import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
-import type { GameState, StoryPart, Trope } from "@/lib/types";
+import type { GameState, StoryPart, Trope, Persona, TropePersonaKey, InspirationalPersonas } from "@/lib/types";
 import { generateStoryContent, GenerateStoryContentInput } from "@/ai/flows/generate-story-content";
 import { generateSentimentSnapshot } from "@/ai/flows/generate-sentiment-snapshot";
 import LoadingScreen from "@/components/app/LoadingScreen";
@@ -32,6 +32,19 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useIsFirstVisit } from "@/hooks/useIsFirstVisit";
 import { usePastStories } from "@/hooks/usePastStories";
+import personasData from "@/lib/personas.json";
+const { inspirationalPersonas } = personasData as { inspirationalPersonas: InspirationalPersonas };
+
+
+const getPersonaKey = (trope: Trope): TropePersonaKey => {
+  const map: Record<Trope, TropePersonaKey> = {
+    'Noir Detective': 'noirDetective',
+    'Cosmic Wanderer': 'cosmicWanderer',
+    'Gothic Romance': 'gothicRomance',
+    'Freeflow': 'freeflow',
+  };
+  return map[trope];
+};
 
 export default function ApostrfyClient() {
   const { isFirstVisit, setHasVisited } = useIsFirstVisit();
@@ -42,6 +55,8 @@ export default function ApostrfyClient() {
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [comingFromOnboarding, setComingFromOnboarding] = useState(false);
   const [quitDialogState, setQuitDialogState] = useState<'closed' | 'confirm_quit' | 'confirm_save'>('closed');
+  const [sessionPersonas, setSessionPersonas] = useState<[Persona, Persona] | null>(null);
+  const [loadingPersonaText, setLoadingPersonaText] = useState<string | null>(null);
   const { toast } = useToast();
   const { saveStory } = usePastStories();
 
@@ -64,9 +79,18 @@ export default function ApostrfyClient() {
   const handleStartGame = async (trope: Trope, duration: number) => {
     setSettings({ trope, duration });
     setStory([]);
-    setGameState({ status: "playing" });
-    setIsAiTyping(true);
     setComingFromOnboarding(false);
+
+    const personaKey = getPersonaKey(trope);
+    const personaList = inspirationalPersonas[personaKey];
+    
+    const loadingPersona = personaList[Math.floor(Math.random() * personaList.length)];
+    setLoadingPersonaText(`Conjuring the spirit of ${loadingPersona.name}...`);
+
+    const uniquePersonas = [...personaList].sort(() => 0.5 - Math.random()).slice(0, 2) as [Persona, Persona];
+    setSessionPersonas(uniquePersonas);
+
+    setGameState({ status: "generating_initial_story" });
 
     try {
       const input: GenerateStoryContentInput = {
@@ -74,20 +98,21 @@ export default function ApostrfyClient() {
         duration,
         userInput: "Start the story.",
         history: [],
+        persona1: uniquePersonas[0],
+        persona2: uniquePersonas[1],
       };
       const result = await generateStoryContent(input);
       setStory([{ speaker: "ai", line: result.aiResponse }]);
+      setGameState({ status: "playing" });
     } catch (error) {
       console.error("Failed to start story:", error);
       toast({ variant: "destructive", title: "Error", description: "Could not start the story. Please try again." });
       setGameState({ status: "menu" });
-    } finally {
-      setIsAiTyping(false);
     }
   };
 
   const handleUserSubmit = async (userInput: string) => {
-    if (!settings.trope) return;
+    if (!settings.trope || !sessionPersonas) return;
     const newStory = [...story, { speaker: "user", line: userInput }] as StoryPart[];
     setStory(newStory);
     setIsAiTyping(true);
@@ -98,6 +123,8 @@ export default function ApostrfyClient() {
         duration: settings.duration,
         userInput,
         history: newStory.map(s => ({ speaker: s.speaker, line: s.line })),
+        persona1: sessionPersonas[0],
+        persona2: sessionPersonas[1],
       };
       const result = await generateStoryContent(input);
       setStory(prev => [...prev, { speaker: "ai", line: result.aiResponse }]);
@@ -175,6 +202,7 @@ export default function ApostrfyClient() {
             {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}
             {gameState.status === "onboarding" && <OnboardingModal key="onboarding" onComplete={handleOnboardingComplete} />}
             {gameState.status === "menu" && <MainMenu key="menu" onStartGame={handleStartGame} comingFromOnboarding={comingFromOnboarding} />}
+            {gameState.status === "generating_initial_story" && <LoadingScreen key="generating_initial" text={loadingPersonaText || "..."} />}
             {gameState.status === "playing" && (
               <GameScreen
                 key="playing"
@@ -190,7 +218,7 @@ export default function ApostrfyClient() {
             {gameState.status === "gameover" && <GameOverScreen key="gameover" story={story} sentiment={sentiment} onPlayAgain={handlePlayAgain} />}
         </AnimatePresence>
       </div>
-      {gameState.status !== "playing" && gameState.status !== 'generating_summary' && <AppFooter />}
+      {gameState.status !== "playing" && gameState.status !== 'generating_summary' && gameState.status !== 'generating_initial_story' && <AppFooter />}
 
       <AlertDialog open={quitDialogState === 'confirm_quit'} onOpenChange={(open) => !open && handleCancelQuit()}>
         <AlertDialogContent className="glassmorphism">

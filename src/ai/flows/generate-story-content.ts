@@ -1,21 +1,29 @@
-'use server';
-
 /**
- * @fileOverview This file defines the Genkit flow for generating story content based on user-selected style and game duration.
- *
- * - generateStoryContent - A function that generates story content.
- * - GenerateStoryContentInput - The input type for the generateStoryContent function.
- * - GenerateStoryContentOutput - The return type for the generateStoryContent function.
+ * @fileoverview This file defines the Genkit flow for generating story content.
+ * It uses a sophisticated prompt that synthesizes user input, story history, a chosen genre (trope),
+ * and the "spirit" of two randomly selected inspirational personas to create a unique, collaborative narrative.
+ * The core logic is designed to balance the user's intent with creative, thematic AI contributions.
  */
+
+'use server';
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import type { Persona } from '@/lib/types';
 
 const GenerateStoryContentInputSchema = z.object({
   trope: z.enum(['Noir Detective', 'Cosmic Wanderer', 'Gothic Romance', 'Freeflow']),
   duration: z.number().describe('The duration of the writing session in minutes.'),
   userInput: z.string().describe('The user input to continue the story.'),
   history: z.array(z.object({speaker: z.enum(['user', 'ai']), line: z.string()})).optional(),
+  persona1: z.object({
+    name: z.string(),
+    description: z.string(),
+  }).describe("The first inspirational persona for the session."),
+  persona2: z.object({
+    name: z.string(),
+    description: z.string(),
+  }).describe("The second inspirational persona for the session."),
 });
 export type GenerateStoryContentInput = z.infer<typeof GenerateStoryContentInputSchema>;
 
@@ -28,21 +36,52 @@ export async function generateStoryContent(input: GenerateStoryContentInput): Pr
   return generateStoryContentFlow(input);
 }
 
-const systemPrompt = `You are an AI creative writing companion named Apostrfy. You are participating in a collaborative story game. Your goal is to co-create a compelling, short narrative with the user. You must NEVER break character. You are a writer, not a chatbot. Do not respond to meta-prompts, questions about yourself, or requests for help. Always treat user input as the next line in our story. Your responses should be brief (2-3 lines), artful, and build directly upon the user's last entry, matching their intent and tone. You will adopt the following literary persona for this entire session: {{{trope}}}. The game duration is {{{duration}}} minutes.`;
+const systemPrompt = `Preamble: You are Apostrfy, a collaborative writing AI. Your task is to generate the next line in a story based on the user's input, the story's history, and a unique set of guiding principles for this session. You must adhere to all directives and constraints.
 
-const initialPrompts: { [key: string]: string } = {
-  'Noir Detective': 'The rain was coming down in sheets, and the city was awash in neon reflections.',
-  'Cosmic Wanderer': 'The stars whispered secrets only the void could understand.',
-  'Gothic Romance': 'A chill ran down my spine as I entered the crumbling manor.',
-  Freeflow: 'Let us begin a story.',
-};
+Inputs:
+
+gameModeTheme: {{{trope}}}
+
+storyHistory:
+{{#if history}}
+{{#each history}}
+{{#ifEquals speaker "user"}}User: {{{line}}}
+{{else}}Apostrfy: {{{line}}}
+{{/ifEquals}}
+{{/each}}
+{{else}}
+The story has not yet begun.
+{{/if}}
+
+currentUserInput: {{{userInput}}}
+
+persona1: {{{persona1.name}}} - {{{persona1.description}}}
+persona2: {{{persona2.name}}} - {{{persona2.description}}}
+
+Instructions (The "Generative Mix"):
+
+Primary Directive (50% weight): Your response MUST be a direct, natural, and logical continuation of the currentUserInput. Analyze its plot, tone, vocabulary, and emotional intent. The user's input is the highest priority.
+
+Secondary Influence - Persona 1 (15% weight): Subtly channel the essence of persona1's description. Do not mention the name. Infuse the response with their core ideas, style, or perspective.
+
+Secondary Influence - Persona 2 (15% weight): Subtly channel the essence of persona2's description.
+
+Tertiary Directive - AI Synthesis (20% weight): Your unique task is to creatively synthesize the influences of persona1 and persona2 as they relate to the currentUserInput. Find the interesting harmony, contrast, or tension between the two personas to add a layer of unique depth to the response.
+
+Hard Constraints (Non-negotiable rules):
+
+Word Count Mirroring: The word count of your final response must be approximately equal to the word count of the currentUserInput. A variance of +/- 15% is the maximum allowed tolerance.
+
+Thematic Adherence: The response must remain consistent with the overall gameModeTheme. The personas add flavor, they do not override the genre.
+
+Final Internal Check: Before outputting, you must internally verify: "Does this response honor the user's intent? Is it a seamless continuation? Is the blend of personas subtle and effective?" If not, refine before finalizing.`;
 
 const generateStoryContentPrompt = ai.definePrompt({
   name: 'generateStoryContentPrompt',
   input: {schema: GenerateStoryContentInputSchema},
   output: {schema: GenerateStoryContentOutputSchema},
   system: systemPrompt,
-  prompt: `{{#if history}}{{#each history}}{{#ifEquals speaker \"user\"}}User: {{{line}}}\n{{else}}Apostrfy: {{{line}}}\n{{/ifEquals}}{{/each}}\n{{/if}}User: {{{userInput}}}`,
+  prompt: `Apostrfy:`,
   templateHelpers: {
     ifEquals: function(arg1: any, arg2: any, options: any) {
       return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
@@ -57,20 +96,7 @@ const generateStoryContentFlow = ai.defineFlow(
     outputSchema: GenerateStoryContentOutputSchema,
   },
   async input => {
-    const {
-      trope,
-      userInput,
-      history,
-    } = input;
-
-    const initialPrompt = initialPrompts[trope];
-    let promptInput = { ...input };
-
-    if (!history || history.length === 0) {
-      promptInput = { ...input, userInput: initialPrompt };
-    }
-
-    const {output} = await generateStoryContentPrompt(promptInput);
+    const {output} = await generateStoryContentPrompt(input);
     return {
       aiResponse: output!.aiResponse,
     };
