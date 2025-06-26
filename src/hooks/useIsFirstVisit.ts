@@ -2,19 +2,23 @@
 
 import { useState, useEffect } from "react";
 
-const VISIT_KEY = "apostrfy_has_visited_v2";
+const VISIT_KEY = "apostrfy_has_visited_v3";
 
 export const useIsFirstVisit = () => {
   const [isFirstVisit, setIsFirstVisit] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
-    const hasVisited = localStorage.getItem(VISIT_KEY);
-    setIsFirstVisit(hasVisited !== "true");
+    if (typeof window !== 'undefined') {
+      const hasVisited = localStorage.getItem(VISIT_KEY);
+      setIsFirstVisit(hasVisited !== "true");
+    }
   }, []);
 
   const setHasVisited = () => {
-    localStorage.setItem(VISIT_KEY, "true");
-    setIsFirstVisit(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(VISIT_KEY, "true");
+      setIsFirstVisit(false);
+    }
   };
 
   return { isFirstVisit, setHasVisited };

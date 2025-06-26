@@ -110,7 +110,7 @@ export default function ApostrfyClient() {
       case "loading_screen":
         return <LoadingScreen />;
       case "onboarding":
-        return <OnboardingModal step={gameState.step} onComplete={handleOnboardingComplete} />;
+        return <OnboardingModal onComplete={handleOnboardingComplete} />;
       case "menu":
         return <MainMenu onStartGame={handleStartGame} />;
       case "playing":
