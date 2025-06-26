@@ -23,7 +23,7 @@ interface MainMenuProps {
 }
 
 export default function MainMenu({ onStartGame, comingFromOnboarding }: MainMenuProps) {
-  const [selectedTrope, setSelectedTrope] = useState<Trope | null>(null);
+  const [selectedTrope, setSelectedTrope] = useState<Trope>("Cosmic Wanderer");
   const [selectedDuration, setSelectedDuration] = useState<number>(5);
   const [orbMessage, setOrbMessage] = useState("");
   const [displayedMessage, setDisplayedMessage] = useState("");
@@ -106,7 +106,7 @@ export default function MainMenu({ onStartGame, comingFromOnboarding }: MainMenu
                 onClick={() => setSelectedTrope(trope.name)}
                 className={cn(
                   "p-4 rounded-lg border-2 text-left transition-all hover:border-accent",
-                  selectedTrope === trope.name ? "border-accent bg-accent/20" : "border-border"
+                  selectedTrope === trope.name ? "border-accent bg-accent/20 shadow-lg shadow-accent/50" : "border-border"
                 )}
               >
                 <h3 className="font-headline text-lg text-foreground">{trope.name}</h3>
