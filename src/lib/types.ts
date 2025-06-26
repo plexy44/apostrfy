@@ -29,7 +29,6 @@ export interface PastStory {
   trope: Trope;
   duration: number;
   story: StoryPart[];
-  sentimentSnapshot?: string;
 }
 
 export interface Persona {
@@ -40,3 +39,22 @@ export interface Persona {
 export type InspirationalPersonas = {
   [key in TropePersonaKey]: Persona[];
 };
+
+export type Emotion = 'Joy' | 'Hope' | 'Awe' | 'Serenity' | 'Melancholy' | 'Tension' | 'Fear' | 'Sadness' | 'Morose';
+
+export interface GameAnalysis {
+  quoteBanner: string;
+  mood: {
+    primaryEmotion: Emotion;
+    confidenceScore: number;
+  };
+  style: {
+    primaryMatch: string;
+    secondaryMatch: string;
+  };
+  famousQuote: {
+    author: string;
+    quote: string;
+  } | null;
+  keywords: string[];
+}

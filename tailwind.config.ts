@@ -19,6 +19,7 @@ export default {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
         headline: ['Space Grotesk', 'sans-serif'],
+        script: ['Dancing Script', 'cursive'],
         code: ['monospace'],
       },
       colors: {
@@ -72,6 +73,17 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+        mood: {
+          joy: 'hsl(var(--mood-joy))',
+          hope: 'hsl(var(--mood-hope))',
+          awe: 'hsl(var(--mood-awe))',
+          serenity: 'hsl(var(--mood-serenity))',
+          melancholy: 'hsl(var(--mood-melancholy))',
+          tension: 'hsl(var(--mood-tension))',
+          fear: 'hsl(var(--mood-fear))',
+          sadness: 'hsl(var(--mood-sadness))',
+          morose: 'hsl(var(--mood-morose))',
+        }
       },
       borderRadius: {
         lg: 'var(--radius)',

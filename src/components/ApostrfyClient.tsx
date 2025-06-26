@@ -9,9 +9,13 @@
 
 import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
-import type { GameState, StoryPart, Trope, Persona, TropePersonaKey, InspirationalPersonas } from "@/lib/types";
+import type { GameState, StoryPart, Trope, Persona, TropePersonaKey, InspirationalPersonas, GameAnalysis } from "@/lib/types";
 import { generateStoryContent, GenerateStoryContentInput } from "@/ai/flows/generate-story-content";
-import { generateSentimentSnapshot } from "@/ai/flows/generate-sentiment-snapshot";
+import { generateQuoteBanner } from "@/ai/flows/generate-quote-banner";
+import { generateMoodAnalysis } from "@/ai/flows/generate-mood-analysis";
+import { generateStyleMatch } from "@/ai/flows/generate-style-match";
+import { generateStoryKeywords } from "@/ai/flows/generate-story-keywords";
+
 import LoadingScreen from "@/components/app/LoadingScreen";
 import OnboardingModal from "@/components/app/OnboardingModal";
 import MainMenu from "@/components/app/MainMenu";
@@ -33,8 +37,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsFirstVisit } from "@/hooks/useIsFirstVisit";
 import { usePastStories } from "@/hooks/usePastStories";
 import personasData from "@/lib/personas.json";
-const { inspirationalPersonas } = personasData as { inspirationalPersonas: InspirationalPersonas };
+import famousQuotesData from "@/lib/famousQuotes.json";
 
+const { inspirationalPersonas } = personasData as { inspirationalPersonas: InspirationalPersonas };
+const quotes = famousQuotesData as Record<string, string>;
 
 const getPersonaKey = (trope: Trope): TropePersonaKey => {
   const map: Record<Trope, TropePersonaKey> = {
@@ -51,7 +57,7 @@ export default function ApostrfyClient() {
   const [gameState, setGameState] = useState<GameState>({ status: "loading_screen" });
   const [settings, setSettings] = useState<{ trope: Trope | null; duration: number }>({ trope: null, duration: 5 });
   const [story, setStory] = useState<StoryPart[]>([]);
-  const [sentiment, setSentiment] = useState<{ snapshot: string; emotions: string[] }>({ snapshot: "", emotions: [] });
+  const [analysis, setAnalysis] = useState<GameAnalysis | null>(null);
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [comingFromOnboarding, setComingFromOnboarding] = useState(false);
   const [quitDialogState, setQuitDialogState] = useState<'closed' | 'confirm_quit' | 'confirm_save'>('closed');
@@ -139,35 +145,69 @@ export default function ApostrfyClient() {
   const handleEndGame = async () => {
     setGameState({ status: "generating_summary" });
     try {
-      const userContent = story
-        .filter((part) => part.speaker === "user")
-        .map((part) => part.line)
-        .join("\n");
+      const userContent = story.filter(part => part.speaker === "user").map(part => part.line).join("\n");
+      const fullStory = story.map(part => `${part.speaker}: ${part.line}`).join("\n");
 
-      // Ensure there's content to analyze
       if (userContent.trim() === "") {
-         setSentiment({ snapshot: "The story concluded, its words echoing in the quiet.", emotions: ['Reflection', 'Silence', 'Stillness', 'Pause', 'Calm', 'Contemplation'] });
-         setGameState({ status: "gameover" });
-         return;
+        // Handle case with no user input
+        setAnalysis({
+          quoteBanner: "The story concluded, its words echoing in the quiet.",
+          mood: { primaryEmotion: "Serenity", confidenceScore: 0.8 },
+          style: { primaryMatch: "The Silent Observer", secondaryMatch: "The Patient Chronicler" },
+          famousQuote: null,
+          keywords: ['Reflection', 'Silence', 'Stillness', 'Pause', 'Contemplation', 'End']
+        });
+        setGameState({ status: "gameover" });
+        return;
       }
-        
-      const result = await generateSentimentSnapshot({ userContent });
-      
-      setSentiment({ snapshot: result.sentimentSnapshot, emotions: result.emotionalKeywords });
+
+      const [quoteResult, moodResult, styleResult, keywordsResult] = await Promise.all([
+        generateQuoteBanner({ fullStory }),
+        generateMoodAnalysis({ userContent }),
+        generateStyleMatch({ userContent, personas: JSON.stringify(inspirationalPersonas) }),
+        generateStoryKeywords({ userContent }),
+      ]);
+
+      const winner = styleResult.styleMatches[0];
+      const famousQuote = quotes[winner] ? { author: winner, quote: quotes[winner] } : null;
+
+      setAnalysis({
+        quoteBanner: quoteResult.quote,
+        mood: {
+          primaryEmotion: moodResult.primaryEmotion,
+          confidenceScore: moodResult.confidenceScore,
+        },
+        style: {
+          primaryMatch: styleResult.styleMatches[0],
+          secondaryMatch: styleResult.styleMatches[1],
+        },
+        famousQuote,
+        keywords: keywordsResult.keywords,
+      });
+
       setGameState({ status: "gameover" });
     } catch (error) {
       console.error("Failed to generate sentiment snapshot:", error);
-      toast({ variant: "destructive", title: "Error", description: "Could not generate story summary. Please try again." });
-      setSentiment({ snapshot: "The story ended, a universe of feeling left in its wake.", emotions: ['Mystery', 'Suspense', 'Hope', 'Melancholy', 'Wonder', 'Resolve'] });
+      toast({ variant: "destructive", title: "Analysis Error", description: "Could not generate the full story analysis. Please try again." });
+      // Fallback analysis
+      setAnalysis({
+        quoteBanner: "The story ended, a universe of feeling left in its wake.",
+        mood: { primaryEmotion: "Melancholy", confidenceScore: 0.7 },
+        style: { primaryMatch: "The Storyteller", secondaryMatch: "The Dreamer" },
+        famousQuote: null,
+        keywords: ['Mystery', 'Suspense', 'Hope', 'Wonder', 'Resolve']
+      });
       setGameState({ status: "gameover" });
     }
   };
+
 
   const handlePlayAgain = () => {
     setGameState({ status: "menu" });
     setStory([]);
     setSettings({ trope: null, duration: 5 });
     setComingFromOnboarding(false);
+    setAnalysis(null);
   };
 
   const handleQuitRequest = () => {
@@ -225,7 +265,7 @@ export default function ApostrfyClient() {
               />
             )}
             {gameState.status === "generating_summary" && <LoadingScreen key="generating" text="The words are settling..." />}
-            {gameState.status === "gameover" && <GameOverScreen key="gameover" story={story} sentiment={sentiment} onPlayAgain={handlePlayAgain} />}
+            {gameState.status === "gameover" && analysis && <GameOverScreen key="gameover" story={story} analysis={analysis} onPlayAgain={handlePlayAgain} />}
         </AnimatePresence>
       </div>
       {gameState.status !== "playing" && gameState.status !== 'generating_summary' && gameState.status !== 'generating_initial_story' && <AppFooter />}

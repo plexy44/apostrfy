@@ -33,6 +33,17 @@
     --ring: 275 100% 25%;
 
     --radius: 0.5rem;
+
+    /* Mood Colors */
+    --mood-joy: 48 96% 57%;
+    --mood-hope: 45 86% 63%;
+    --mood-awe: 28 95% 63%;
+    --mood-serenity: 145 58% 51%;
+    --mood-melancholy: 215 39% 51%;
+    --mood-tension: 262 52% 47%;
+    --mood-fear: 315 41% 43%;
+    --mood-sadness: 210 20% 55%;
+    --mood-morose: 247 34% 25%;
   }
 
   .dark {
@@ -63,6 +74,17 @@
     --border: 236 16% 25%;
     --input: 236 16% 25%;
     --ring: 274 100% 60%;
+
+    /* Mood Colors - Dark Theme Adjustments (optional, can be same) */
+    --mood-joy: 48 96% 57%;
+    --mood-hope: 45 86% 63%;
+    --mood-awe: 28 95% 63%;
+    --mood-serenity: 145 58% 51%;
+    --mood-melancholy: 215 39% 51%;
+    --mood-tension: 262 52% 47%;
+    --mood-fear: 315 41% 43%;
+    --mood-sadness: 210 20% 55%;
+    --mood-morose: 247 34% 35%; /* Slightly lighter for dark bg */
   }
 }
 
