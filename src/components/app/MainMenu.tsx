@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TROPES, DURATIONS, ORB_MESSAGES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import ApostrfyLogo from "../icons/ApostrfyLogo";
 
 interface MainMenuProps {
@@ -43,13 +43,29 @@ const Orb = () => {
     const pupilX = useTransform(mouseX, [-800, 800], [-24, 24]);
     const pupilY = useTransform(mouseY, [-800, 800], [-24, 24]);
 
-    const baseBackgroundImage = "radial-gradient(circle at 30% 30%, hsl(var(--accent) / 0.8), transparent 40%), radial-gradient(circle at 70% 70%, hsl(var(--primary-foreground) / 0.1), transparent 40%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)";
+    const angle = useMotionValue(0);
+
+    useEffect(() => {
+        const controls = animate(angle, 360, {
+            duration: 10,
+            repeat: Infinity,
+            ease: "linear",
+        });
+        return () => controls.stop();
+    }, [angle]);
+
+    const backgroundImage = useTransform(
+        angle,
+        (latestAngle) => `radial-gradient(circle at 30% 30%, hsl(var(--accent) / 0.5), transparent 40%), radial-gradient(circle at 70% 70%, hsl(var(--primary-foreground) / 0.1), transparent 40%), conic-gradient(from ${latestAngle}deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 50%, hsl(var(--primary)) 100%)`
+    );
     
     return (
         <motion.div
             ref={orbRef}
+            style={{
+                backgroundImage,
+            }}
             animate={{
-                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
                 boxShadow: [
                     "0 0 40px hsl(var(--accent) / 0.3)",
                     "0 0 60px hsl(var(--accent) / 0.5)",
@@ -57,12 +73,6 @@ const Orb = () => {
                 ],
             }}
             transition={{
-                backgroundPosition: {
-                    duration: 6,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    repeatType: "mirror",
-                },
                 boxShadow: {
                     duration: 4,
                     repeat: Infinity,
@@ -70,14 +80,10 @@ const Orb = () => {
                     repeatType: "mirror",
                 }
             }}
-            style={{
-                backgroundSize: "200% 200%",
-                backgroundImage: baseBackgroundImage,
-            }}
             className="w-40 h-40 rounded-full flex items-center justify-center relative overflow-hidden"
         >
             <motion.div 
-                className="w-[65%] h-[65%] rounded-full bg-black/80 backdrop-blur-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.5),0_0_25px_3px_hsl(var(--primary-foreground)/0.4)]"
+                className="w-[65%] h-[65%] rounded-full bg-black/80 backdrop-blur-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.5),0_0_35px_5px_hsl(var(--primary-foreground)/0.8)]"
                 style={{
                     x: pupilX,
                     y: pupilY,
