@@ -7,8 +7,10 @@ const ApostrfyLogo = ({ className }: { className?: string }) => (
     xmlns="http://www.w3.org/2000/svg"
   >
     <text
-      x="0"
-      y="30"
+      x="50%"
+      y="50%"
+      dominantBaseline="middle"
+      textAnchor="middle"
       fontFamily="Space Grotesk, sans-serif"
       fontSize="36"
       fontWeight="bold"

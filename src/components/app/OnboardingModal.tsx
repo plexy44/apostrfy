@@ -8,6 +8,7 @@ import ApostrfyLogo from '../icons/ApostrfyLogo';
 
 interface OnboardingModalProps {
   onComplete: () => void;
+  step: number;
 }
 
 const OrbAnimation = () => (
@@ -32,8 +33,8 @@ const DialogueAnimation = () => (
 );
 
 
-export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
-  const [currentStep, setCurrentStep] = useState(1);
+export default function OnboardingModal({ onComplete, step }: OnboardingModalProps) {
+  const [currentStep, setCurrentStep] = useState(step);
   const totalSteps = ONBOARDING_CONTENT.length;
   const { title, text, special } = ONBOARDING_CONTENT[currentStep - 1];
 
