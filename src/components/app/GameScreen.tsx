@@ -1,3 +1,10 @@
+/**
+ * @fileoverview This component provides the main interface for the story co-creation game.
+ * It features a timer bar to track the session duration, a scrollable area to display
+ * the evolving story in a chat-like format, and a user input form to submit the next
+ * part of the narrative.
+ */
+
 "use client";
 
 import { useEffect, useState, useRef } from "react";

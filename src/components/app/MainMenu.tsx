@@ -1,3 +1,11 @@
+/**
+ * @fileoverview This component serves as the main menu for the application.
+ * It allows users to select a story style (trope) and a session duration.
+ * It features the central interactive AI orb and a "Start Writing" button to
+ * begin the co-creation experience. It also handles the typewriter effect
+ * for the orb's message upon transitioning from the onboarding flow.
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";

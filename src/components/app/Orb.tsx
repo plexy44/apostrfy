@@ -1,3 +1,13 @@
+/**
+ * @fileoverview This component defines the animated AI companion Orb.
+ * It uses Framer Motion for complex visual effects, including:
+ * - A smooth, continuous color-shifting background.
+ * - An interactive "pupil" that follows the user's cursor across the screen.
+ * - A glowing "accretion disk" effect with an iridescent shimmer.
+ * - A shared layout animation (`layoutId`) to smoothly transition between
+ *   different states (e.g., from the onboarding modal to the main menu).
+ */
+
 "use client";
 
 import { useEffect, useRef } from "react";

@@ -1,3 +1,10 @@
+/**
+ * @fileoverview This is the main client-side component for Apostrfy.
+ * It acts as the central state machine for the entire application, managing the
+ * overall game state (loading, onboarding, menu, playing, gameover), user settings,
+ * story progression, and interactions with the Genkit AI flows for content generation.
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";

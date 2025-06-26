@@ -1,3 +1,9 @@
+/**
+ * @fileoverview This component renders the screen displayed after a story session ends.
+ * It shows the final story transcript, an AI-generated "Sentiment Snapshot",
+ * and provides options for the user to play again or to email the story transcript.
+ */
+
 "use client";
 
 import { useState } from "react";

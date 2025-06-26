@@ -1,3 +1,10 @@
+/**
+ * @fileoverview This component manages the multi-step onboarding experience for new users.
+ * It presents a series of modals that explain the app's concept and functionality.
+ * The component uses Framer Motion for smooth transitions between steps and includes
+ * special content elements like the app logo and a shared layout animation for the Orb.
+ */
+
 "use client";
 
 import { useState } from 'react';
@@ -61,7 +68,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
           className="w-full max-w-md glassmorphism rounded-2xl p-8 text-center flex flex-col items-center"
         >
           {renderSpecialContent()}
-          <h2 className="font-headline text-3xl mb-4 text-accent">{title}</h2>
+          <h2 className="font-headline text-3xl mb-4 text-accent">{ONBOARDING_CONTENT[currentStep - 1].title}</h2>
           <p className="text-foreground/80 mb-8 h-20">{text}</p>
 
           <div className="flex items-center justify-center space-x-2 my-4">
