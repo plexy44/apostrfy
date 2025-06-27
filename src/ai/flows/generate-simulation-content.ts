@@ -71,8 +71,7 @@ const generateSimulationContentPrompt = ai.definePrompt({
   name: 'generateSimulationContentPrompt',
   input: {schema: GenerateSimulationContentInputSchema},
   output: {schema: GenerateSimulationContentOutputSchema},
-  system: systemPrompt,
-  prompt: ``,
+  prompt: systemPrompt,
 });
 
 const generateSimulationContentFlow = ai.defineFlow(
