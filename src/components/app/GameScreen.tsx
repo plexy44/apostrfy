@@ -1,8 +1,10 @@
 /**
- * @fileoverview This component provides the main interface for the story co-creation game.
- * It features a timer bar to track the session duration, a scrollable area to display
- * the evolving story in a chat-like format, and a user input form to submit the next
- * part of the narrative.
+ * @fileoverview This component renders the main interface for story creation.
+ * It is structured into three distinct, non-overlapping sections: a fixed header
+ * displaying the timer and game context, a central scrollable area for the story
+ * transcript, and a fixed footer containing the user input form. The component
+ * adapts for both 'interactive' mode, where the user can submit text, and
+ * 'simulation' mode, where input is disabled.
  */
 
 "use client";

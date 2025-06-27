@@ -1,5 +1,7 @@
 /**
- * @fileoverview Generates story content for a simulated collaborative story between two AI personas.
+ * @fileoverview Generates a story segment for a simulated writing session between two AI personas.
+ * This flow is responsible for one turn in the automated narrative, ensuring the generated
+ * text continues the story in the voice of the specified persona without engaging in direct conversation.
  *
  * - generateSimulationContent - A function that handles the story generation for one turn.
  * - GenerateSimulationContentInput - The input type for the generateSimulationContent function.

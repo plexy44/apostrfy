@@ -1,8 +1,9 @@
 /**
- * @fileoverview This component renders the "Sentiment Analysis" screen after a session.
- * It displays a comprehensive breakdown of the user's writing, including a mood wheel,
- * style matches, and evocative keywords. It also features a toggle to switch between
- * the final, AI-polished script and the original raw chat transcript.
+ * @fileoverview Renders the 'Sentiment Analysis' screen displayed after a session concludes.
+ * It provides a comprehensive breakdown of the user's writing, including a mood
+ * wheel, style matches, and evocative keywords, all in a responsive layout.
+ * A key feature is the toggle allowing users to switch between the final,
+ * AI-polished script and the original raw chat transcript.
  */
 
 "use client";

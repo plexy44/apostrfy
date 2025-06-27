@@ -1,8 +1,9 @@
 /**
  * @fileoverview This is the main client-side component for Apostrfy.
  * It acts as the central state machine for the entire application, managing the
- * overall game state (loading, onboarding, menu, playing, gameover), user settings,
- * story progression, and interactions with the Genkit AI flows for content generation.
+ * overall game state (loading, onboarding, menu, playing, gameover) for both
+ * 'interactive' and 'simulation' modes. It handles user settings, story
+ * progression, and interactions with all Genkit AI flows.
  */
 
 "use client";

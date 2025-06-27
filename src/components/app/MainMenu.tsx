@@ -1,9 +1,9 @@
 /**
  * @fileoverview This component serves as the main menu for the application.
- * It allows users to select a story style (trope) and a session duration.
- * It features the central interactive AI orb and a "Start Writing" button to
- * begin the co-creation experience. It also handles the typewriter effect
- * for the orb's message upon transitioning from the onboarding flow.
+ * It allows users to select a story style (trope) and session duration.
+ * It features the central interactive AI orb and provides options to start an
+ * interactive co-creation session or begin an automated 'simulation' between
+ * two AI personas.
  */
 
 "use client";

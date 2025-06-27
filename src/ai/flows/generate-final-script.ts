@@ -1,5 +1,7 @@
 /**
- * @fileOverview Polishes a raw story transcript into a final, well-formatted script.
+ * @fileOverview Cleans and formats a raw story transcript. This flow focuses
+ * strictly on correcting spelling and grammar and combining the dialogue into
+ * a cohesive narrative with paragraphs. It does not interpret or add content.
  *
  * - generateFinalScript - A function that handles the script polishing process.
  * - GenerateFinalScriptInput - The input type for the generateFinalScript function.
