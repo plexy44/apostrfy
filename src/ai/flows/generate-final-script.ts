@@ -28,16 +28,14 @@ const prompt = ai.definePrompt({
   name: 'generateFinalScriptPrompt',
   input: {schema: GenerateFinalScriptInputSchema},
   output: {schema: GenerateFinalScriptOutputSchema},
-  prompt: `You are an expert screenplay editor. Your task is to take the following raw story transcript and transform it into a professionally formatted screenplay excerpt.
+  prompt: `You are a proofreader and text formatter. Your task is to take the following raw story transcript, which consists of alternating lines from two authors, and perform the following actions:
 
-Follow these rules meticulously:
-1.  **Analyze the Content**: Read the entire transcript to understand the flow, setting, and actions.
-2.  **Format as Action Lines**: Convert the entire narrative into action lines (standard paragraphs). Do NOT invent scene headings (like INT. DINER - NIGHT) unless the location is explicitly and clearly stated. Do NOT invent character names or format any text as dialogue. The entire output should be descriptive action.
-3.  **Merge and Refine**: Weave the alternating lines from the two authors into a single, cohesive narrative. Create fluid, well-structured paragraphs.
-4.  **Correct and Polish**: Correct all spelling and grammar errors. Ensure professional, clean prose.
-5.  **Output**: The final output should be a single block of text representing the action lines of a script. Use standard paragraph breaks.
+1.  **Correct Spelling and Grammar**: Fix any spelling mistakes and grammatical errors in the text.
+2.  **Combine into Paragraphs**: Merge the alternating lines into a single, cohesive narrative. Form logical paragraphs where appropriate. Do not add any new content, ideas, or descriptions. Your role is only to format and correct.
+3.  **Preserve Original Intent**: The original voice and style of the authors should be preserved. Do not rephrase sentences unless it's for grammatical correctness.
+4.  **Output**: The final output should be a single block of text with standard paragraph breaks.
 
-This is NOT a chat log. It is a creative story. Your job is to make it read like a piece of a movie script.
+Do not interpret the story, add scene headings, or change the meaning. Simply combine, correct, and format.
 
 Raw Story Transcript:
 {{{fullStory}}}`,
