@@ -1,7 +1,8 @@
 /**
- * @fileoverview This component renders a consistent, themed loading screen for the application.
- * It features the animated AI Orb, drifting background shapes, and displays a random
- * literary quote to maintain immersion during loading periods.
+ * @fileoverview This component renders a consistent, themed loading screen.
+ * It features an animated AI Orb and can display either a random literary quote
+ * for general loading, or contextual game information (like style and duration)
+ * when transitioning into a new session.
  */
 "use client";
 
