@@ -147,7 +147,7 @@ export default function ApostrfyClient() {
     setGameState({ status: "generating_summary" });
     try {
       const userContent = story.filter(part => part.speaker === "user").map(part => part.line).join("\n");
-      const rawFullStory = story.map(part => part.line).join("\n");
+      const fullStory = story.map(part => `${part.speaker.toUpperCase()}: ${part.line}`).join('\n');
       
       if (userContent.trim() === "") {
         // Handle case with no user input
@@ -164,11 +164,11 @@ export default function ApostrfyClient() {
       }
 
       const [quoteResult, moodResult, styleResult, keywordsResult, scriptResult] = await Promise.all([
-        generateQuoteBanner({ fullStory: rawFullStory }),
+        generateQuoteBanner({ fullStory: story.map(p => p.line).join('\n') }),
         generateMoodAnalysis({ userContent }),
         generateStyleMatch({ userContent, personas: JSON.stringify(inspirationalPersonas) }),
         generateStoryKeywords({ userContent }),
-        generateFinalScript({ fullStory: rawFullStory }),
+        generateFinalScript({ fullStory }),
       ]);
 
       const winner = styleResult.styleMatches[0];
@@ -257,10 +257,11 @@ export default function ApostrfyClient() {
             {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}
             {gameState.status === "onboarding" && <OnboardingModal key="onboarding" onComplete={handleOnboardingComplete} />}
             {gameState.status === "menu" && <MainMenu key="menu" onStartGame={handleStartGame} comingFromOnboarding={comingFromOnboarding} />}
-            {gameState.status === "generating_initial_story" && <LoadingScreen key="generating_initial" text={loadingPersonaText || "..."} />}
-            {gameState.status === "playing" && (
+            {gameState.status === "generating_initial_story" && <LoadingScreen key="generating_initial" />}
+            {gameState.status === "playing" && settings.trope && (
               <GameScreen
                 key="playing"
+                trope={settings.trope}
                 story={story}
                 duration={settings.duration}
                 isAiTyping={isAiTyping}
@@ -269,7 +270,7 @@ export default function ApostrfyClient() {
                 onQuitRequest={handleQuitRequest}
               />
             )}
-            {gameState.status === "generating_summary" && <LoadingScreen key="generating" text="The words are settling..." />}
+            {gameState.status === "generating_summary" && <LoadingScreen key="generating" />}
             {gameState.status === "gameover" && analysis && <GameOverScreen key="gameover" analysis={analysis} onPlayAgain={handlePlayAgain} />}
         </AnimatePresence>
       </div>

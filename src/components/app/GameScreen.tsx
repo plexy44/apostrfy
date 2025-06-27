@@ -9,7 +9,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import type { StoryPart } from "@/lib/types";
+import type { StoryPart, Trope } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -18,6 +18,7 @@ import Orb from "./Orb";
 import { cn } from "@/lib/utils";
 
 interface GameScreenProps {
+  trope: Trope;
   story: StoryPart[];
   duration: number;
   isAiTyping: boolean;
@@ -79,17 +80,12 @@ const TimerBar = ({ durationInMinutes, onEndGame, className }: { durationInMinut
   );
 };
 
-export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest }: GameScreenProps) {
+export default function GameScreen({ trope, story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest }: GameScreenProps) {
   const [userInput, setUserInput] = useState("");
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({
-        top: scrollAreaRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [story]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -120,14 +116,15 @@ export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, 
           <ArrowLeft />
         </Button>
         
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-start gap-4 mb-4">
             <div className="flex-grow">
+                <h3 className="font-headline text-lg text-foreground mb-1">{trope}</h3>
                 <TimerBar durationInMinutes={duration} onEndGame={onEndGame} />
             </div>
             <Orb size="tiny" isInteractive={true} className="flex-shrink-0" />
         </div>
         
-        <ScrollArea className="flex-grow pr-4" ref={scrollAreaRef}>
+        <ScrollArea className="flex-grow pr-4">
           <div className="space-y-6">
             {story.map((part, index) => (
               <div key={index} className={`flex flex-col animate-fade-in-up ${part.speaker === 'ai' ? 'items-start' : 'items-end'}`}>
@@ -145,6 +142,7 @@ export default function GameScreen({ story, duration, isAiTyping, onUserSubmit, 
                  </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
 
