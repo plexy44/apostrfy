@@ -77,7 +77,7 @@ export default function MoodWheel({ mood, score }: MoodWheelProps) {
             y="50%"
             textAnchor="middle"
             dominantBaseline="middle"
-            className="fill-foreground text-2xl font-bold font-headline"
+            className="fill-foreground text-xl font-bold font-headline"
             style={{ fill: MOOD_COLORS_HSL[mood] }}
         >
             {mood}
