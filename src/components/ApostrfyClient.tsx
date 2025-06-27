@@ -267,7 +267,13 @@ export default function ApostrfyClient() {
             {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}
             {gameState.status === "onboarding" && <OnboardingModal key="onboarding" onComplete={handleOnboardingComplete} />}
             {gameState.status === "menu" && <MainMenu key="menu" onStartGame={handleStartGame} comingFromOnboarding={comingFromOnboarding} />}
-            {gameState.status === "generating_initial_story" && <LoadingScreen key="generating_initial" />}
+            {gameState.status === "generating_initial_story" && settings.trope && (
+              <LoadingScreen
+                key="generating_initial"
+                trope={settings.trope}
+                duration={settings.duration}
+              />
+            )}
             {gameState.status === "playing" && settings.trope && (
               <GameScreen
                 key="playing"
