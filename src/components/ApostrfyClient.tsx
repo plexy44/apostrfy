@@ -69,7 +69,9 @@ export default function ApostrfyClient() {
 
 
   useEffect(() => {
-    if (isFirstVisit === undefined) return;
+    if (isFirstVisit === undefined) {
+      return; // Wait until the hook determines the visit status
+    }
     if (isFirstVisit) {
       setGameState({ status: 'onboarding', step: 1 });
     } else {
