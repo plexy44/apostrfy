@@ -7,7 +7,7 @@
 "use client";
 
 import { useState } from "react";
-import type { GameAnalysis } from "@/lib/types";
+import type { GameAnalysis, StoryPart } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Mail, RefreshCw, Send } from "lucide-react";
 import { motion } from "framer-motion";
 import MoodWheel from "./MoodWheel";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface GameOverScreenProps {
   analysis: GameAnalysis;
@@ -106,12 +107,33 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
               <CardTitle className="font-headline text-2xl text-foreground">{analysis.title}</CardTitle>
               <p className="text-sm text-muted-foreground font-sans">{analysis.trope}</p>
             </CardHeader>
-            <CardContent className="flex-grow">
-              <ScrollArea className="h-96 w-full rounded-md border bg-secondary/20">
-                <div className="font-code text-base whitespace-pre-wrap p-6 md:p-8 lg:py-12 lg:pl-16 lg:pr-12 text-foreground text-left leading-relaxed">
-                  {analysis.finalScript}
-                </div>
-              </ScrollArea>
+            <CardContent className="flex-grow flex flex-col p-6 pt-2">
+              <Tabs defaultValue="script" className="flex-grow flex flex-col">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="script">Final Script</TabsTrigger>
+                  <TabsTrigger value="transcript">Transcript</TabsTrigger>
+                </TabsList>
+                <TabsContent value="script" className="flex-grow mt-4">
+                  <ScrollArea className="h-96 w-full rounded-md border bg-secondary/20">
+                    <div className="font-code text-base whitespace-pre-wrap p-6 md:p-8 lg:py-12 lg:pl-16 lg:pr-12 text-foreground text-left leading-relaxed">
+                      {analysis.finalScript}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+                <TabsContent value="transcript" className="flex-grow mt-4">
+                   <ScrollArea className="h-96 w-full rounded-md border bg-secondary/20 p-4">
+                    <div className="space-y-6">
+                      {analysis.story.map((part, index) => (
+                        <div key={index} className={`flex flex-col ${part.speaker === 'ai' ? 'items-start' : 'items-end'}`}>
+                          <div className={`p-4 rounded-xl max-w-[85%] ${part.speaker === 'ai' ? 'bg-secondary rounded-bl-none' : 'bg-primary/90 text-primary-foreground rounded-br-none'}`}>
+                            <p>{part.line}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>

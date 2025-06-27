@@ -159,7 +159,8 @@ export default function ApostrfyClient() {
           style: { primaryMatch: "The Silent Observer", secondaryMatch: "The Patient Chronicler" },
           famousQuote: null,
           keywords: ['Reflection', 'Silence', 'Stillness', 'Pause', 'Contemplation', 'End'],
-          finalScript: "The page is blank. The story was not written."
+          finalScript: "The page is blank. The story was not written.",
+          story: story,
         });
         setGameState({ status: "gameover" });
         return;
@@ -192,6 +193,7 @@ export default function ApostrfyClient() {
         famousQuote,
         keywords: keywordsResult.keywords,
         finalScript: scriptResult.finalScript,
+        story: story,
       });
 
       setGameState({ status: "gameover" });
@@ -208,6 +210,7 @@ export default function ApostrfyClient() {
         famousQuote: null,
         keywords: ['Mystery', 'Suspense', 'Hope', 'Wonder', 'Resolve'],
         finalScript: story.map(part => part.line).join('\n\n'),
+        story: story,
       });
       setGameState({ status: "gameover" });
     }

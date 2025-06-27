@@ -60,4 +60,5 @@ export interface GameAnalysis {
   } | null;
   keywords: string[];
   finalScript: string;
+  story: StoryPart[];
 }
