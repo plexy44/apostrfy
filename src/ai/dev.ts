@@ -13,3 +13,4 @@ import '@/ai/flows/generate-mood-analysis.ts';
 import '@/ai/flows/generate-style-match.ts';
 import '@/ai/flows/generate-story-keywords.ts';
 import '@/ai/flows/generate-final-script.ts';
+import '@/ai/flows/generate-story-title.ts';

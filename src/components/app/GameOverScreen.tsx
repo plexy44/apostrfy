@@ -102,12 +102,13 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
         {/* Right Column */}
         <div className="lg:col-span-1">
            <Card className="bg-background/30 border-border/10 flex flex-col h-full">
-            <CardHeader>
-              <CardTitle className="font-headline text-xl text-foreground">Final Transcript</CardTitle>
+            <CardHeader className="text-center">
+              <CardTitle className="font-headline text-2xl text-foreground">{analysis.title}</CardTitle>
+              <p className="text-sm text-muted-foreground font-sans">{analysis.trope}</p>
             </CardHeader>
             <CardContent className="flex-grow">
               <ScrollArea className="h-96 w-full rounded-md border bg-secondary/20 p-4">
-                <div className="font-code text-sm whitespace-pre-wrap px-2 py-2 text-foreground text-left">
+                <div className="font-body text-sm whitespace-pre-wrap px-2 py-2 text-foreground text-left leading-relaxed">
                   {analysis.finalScript}
                 </div>
               </ScrollArea>

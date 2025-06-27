@@ -16,6 +16,7 @@ import { generateMoodAnalysis } from "@/ai/flows/generate-mood-analysis";
 import { generateStyleMatch } from "@/ai/flows/generate-style-match";
 import { generateStoryKeywords } from "@/ai/flows/generate-story-keywords";
 import { generateFinalScript } from "@/ai/flows/generate-final-script";
+import { generateStoryTitle } from "@/ai/flows/generate-story-title";
 
 import LoadingScreen from "@/components/app/LoadingScreen";
 import OnboardingModal from "@/components/app/OnboardingModal";
@@ -148,10 +149,13 @@ export default function ApostrfyClient() {
     try {
       const userContent = story.filter(part => part.speaker === "user").map(part => part.line).join("\n");
       const fullStory = story.map(part => `${part.speaker.toUpperCase()}: ${part.line}`).join('\n');
+      const fullStoryRaw = story.map(p => p.line).join('\n');
       
       if (userContent.trim() === "") {
         // Handle case with no user input
         setAnalysis({
+          title: "An Unwritten Tale",
+          trope: settings.trope!,
           quoteBanner: "The story concluded, its words echoing in the quiet.",
           mood: { primaryEmotion: "Serenity", confidenceScore: 0.8 },
           style: { primaryMatch: "The Silent Observer", secondaryMatch: "The Patient Chronicler" },
@@ -163,18 +167,21 @@ export default function ApostrfyClient() {
         return;
       }
 
-      const [quoteResult, moodResult, styleResult, keywordsResult, scriptResult] = await Promise.all([
-        generateQuoteBanner({ fullStory: story.map(p => p.line).join('\n') }),
+      const [quoteResult, moodResult, styleResult, keywordsResult, scriptResult, titleResult] = await Promise.all([
+        generateQuoteBanner({ fullStory: fullStoryRaw }),
         generateMoodAnalysis({ userContent }),
         generateStyleMatch({ userContent, personas: JSON.stringify(inspirationalPersonas) }),
         generateStoryKeywords({ userContent }),
         generateFinalScript({ fullStory }),
+        generateStoryTitle({ fullStory: fullStoryRaw }),
       ]);
 
       const winner = styleResult.styleMatches[0];
       const famousQuote = quotes[winner] ? { author: winner, quote: quotes[winner] } : null;
 
       setAnalysis({
+        title: titleResult.title,
+        trope: settings.trope!,
         quoteBanner: quoteResult.quote,
         mood: {
           primaryEmotion: moodResult.primaryEmotion,
@@ -195,6 +202,8 @@ export default function ApostrfyClient() {
       toast({ variant: "destructive", title: "Analysis Error", description: "Could not generate the full story analysis. Please try again." });
       // Fallback analysis
       setAnalysis({
+        title: "A Story Untold",
+        trope: settings.trope || "Freeflow",
         quoteBanner: "The story ended, a universe of feeling left in its wake.",
         mood: { primaryEmotion: "Melancholy", confidenceScore: 0.7 },
         style: { primaryMatch: "The Storyteller", secondaryMatch: "The Dreamer" },

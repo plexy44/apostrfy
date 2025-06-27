@@ -43,6 +43,8 @@ export type InspirationalPersonas = {
 export type Emotion = 'Joy' | 'Hope' | 'Awe' | 'Serenity' | 'Melancholy' | 'Tension' | 'Fear' | 'Sadness' | 'Morose';
 
 export interface GameAnalysis {
+  title: string;
+  trope: Trope;
   quoteBanner: string;
   mood: {
     primaryEmotion: Emotion;
