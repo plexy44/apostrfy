@@ -62,13 +62,12 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
         &ldquo;{analysis.quoteBanner}&rdquo;
       </h2>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full mb-6">
-        {/* Left Column */}
-        <div className="lg:col-span-1 flex flex-col gap-6">
+      {/* Top Analysis Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full mb-6">
+        <div className="flex flex-col gap-6">
           <AnalysisCard title="Mood">
             <MoodWheel mood={analysis.mood.primaryEmotion} score={analysis.mood.confidenceScore} />
           </AnalysisCard>
-
           <AnalysisCard title="Sentiment">
             <div className="flex flex-wrap items-center justify-center gap-2">
               {analysis.keywords.map((keyword) => (
@@ -79,9 +78,7 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
             </div>
           </AnalysisCard>
         </div>
-
-        {/* Middle Column */}
-        <div className="lg:col-span-1 flex flex-col gap-6">
+        <div className="flex flex-col gap-6">
           <AnalysisCard title="Style">
             <div className="text-center">
               <p className="text-muted-foreground text-sm mb-1">Primary Match</p>
@@ -90,7 +87,6 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
               <p className="text-lg text-foreground/80">{analysis.style.secondaryMatch}</p>
             </div>
           </AnalysisCard>
-          
           {analysis.famousQuote && (
             <AnalysisCard title="A Word From...">
               <blockquote className="text-lg italic border-l-4 border-accent pl-4 text-left">
@@ -100,46 +96,46 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
             </AnalysisCard>
           )}
         </div>
-
-        {/* Right Column */}
-        <div className="lg:col-span-1">
-           <Card className="bg-background/30 border-border/10 flex flex-col h-full">
-            <CardHeader className="text-center">
-              <CardTitle className="font-headline text-2xl text-foreground">{analysis.title}</CardTitle>
-              <p className="text-sm text-muted-foreground font-sans">{analysis.trope}</p>
-            </CardHeader>
-            <CardContent className="flex-grow flex flex-col p-6 pt-2">
-              <Tabs defaultValue="script" className="flex-grow flex flex-col">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="script">Final Script</TabsTrigger>
-                  <TabsTrigger value="transcript">Transcript</TabsTrigger>
-                </TabsList>
-                <TabsContent value="script" className="flex-grow mt-4">
-                  <ScrollArea className="h-96 w-full rounded-md border bg-secondary/20">
-                    <div className="font-code text-base whitespace-pre-wrap p-6 md:p-8 lg:py-12 lg:pl-16 lg:pr-12 text-foreground text-left leading-relaxed">
-                      {analysis.finalScript}
-                    </div>
-                  </ScrollArea>
-                </TabsContent>
-                <TabsContent value="transcript" className="flex-grow mt-4">
-                   <ScrollArea className="h-96 w-full rounded-md border bg-secondary/20 p-4">
-                    <div className="space-y-6">
-                      {analysis.story.map((part, index) => (
-                        <div key={index} className={`flex flex-col ${part.speaker === 'ai' ? 'items-start' : 'items-end'}`}>
-                          <div className={`p-4 rounded-xl max-w-[85%] ${part.speaker === 'ai' ? 'bg-secondary rounded-bl-none' : 'bg-primary/90 text-primary-foreground rounded-br-none'}`}>
-                            <p>{part.line}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
       </div>
       
+      {/* Script/Transcript Section */}
+      <div className="w-full mb-6">
+        <Card className="bg-background/30 border-border/10 flex flex-col h-full">
+          <CardHeader className="text-center">
+            <CardTitle className="font-headline text-2xl text-foreground">{analysis.title}</CardTitle>
+            <p className="text-sm text-muted-foreground font-sans">{analysis.trope}</p>
+          </CardHeader>
+          <CardContent className="flex-grow flex flex-col p-6 pt-2">
+            <Tabs defaultValue="script" className="flex-grow flex flex-col">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="script">Final Script</TabsTrigger>
+                <TabsTrigger value="transcript">Transcript</TabsTrigger>
+              </TabsList>
+              <TabsContent value="script" className="flex-grow mt-4">
+                <ScrollArea className="h-96 w-full rounded-md border bg-secondary/20">
+                  <div className="font-code text-base whitespace-pre-wrap p-6 md:p-8 lg:py-12 lg:pl-16 lg:pr-12 text-foreground text-left leading-relaxed">
+                    {analysis.finalScript}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+              <TabsContent value="transcript" className="flex-grow mt-4">
+                 <ScrollArea className="h-96 w-full rounded-md border bg-secondary/20 p-4">
+                  <div className="space-y-6">
+                    {analysis.story.map((part, index) => (
+                      <div key={index} className={`flex flex-col ${part.speaker === 'ai' ? 'items-start' : 'items-end'}`}>
+                        <div className={`p-4 rounded-xl max-w-[85%] ${part.speaker === 'ai' ? 'bg-secondary rounded-bl-none' : 'bg-primary/90 text-primary-foreground rounded-br-none'}`}>
+                          <p>{part.line}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
         <Button onClick={onPlayAgain} size="lg">
           <RefreshCw />
