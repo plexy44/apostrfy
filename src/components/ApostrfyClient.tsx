@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import type { GameState, StoryPart, Trope, Persona, TropePersonaKey, InspirationalPersonas, GameAnalysis } from "@/lib/types";
 import { generateStoryContent, GenerateStoryContentInput } from "@/ai/flows/generate-story-content";
+import { generateSimulationContent, GenerateSimulationContentInput } from "@/ai/flows/generate-simulation-content";
 import { generateQuoteBanner } from "@/ai/flows/generate-quote-banner";
 import { generateMoodAnalysis } from "@/ai/flows/generate-mood-analysis";
 import { generateStyleMatch } from "@/ai/flows/generate-style-match";
@@ -57,6 +58,7 @@ const getPersonaKey = (trope: Trope): TropePersonaKey => {
 export default function ApostrfyClient() {
   const { isFirstVisit, setHasVisited } = useIsFirstVisit();
   const [gameState, setGameState] = useState<GameState>({ status: "loading_screen" });
+  const [gameMode, setGameMode] = useState<'interactive' | 'simulation'>('interactive');
   const [settings, setSettings] = useState<{ trope: Trope | null; duration: number }>({ trope: null, duration: 5 });
   const [story, setStory] = useState<StoryPart[]>([]);
   const [analysis, setAnalysis] = useState<GameAnalysis | null>(null);
@@ -86,6 +88,7 @@ export default function ApostrfyClient() {
   };
 
   const handleStartGame = async (trope: Trope, duration: number) => {
+    setGameMode('interactive');
     setSettings({ trope, duration });
     setStory([]);
     setComingFromOnboarding(false);
@@ -117,8 +120,76 @@ export default function ApostrfyClient() {
     }
   };
 
+  const handleStartSimulation = async (trope: Trope) => {
+    setSettings({ trope, duration: 1 });
+    setStory([]);
+    setComingFromOnboarding(false);
+    setGameMode('simulation');
+
+    const personaKey = getPersonaKey(trope);
+    const personaList = inspirationalPersonas[personaKey];
+    
+    const uniquePersonas = [...personaList].sort(() => 0.5 - Math.random()).slice(0, 2) as [Persona, Persona];
+    setSessionPersonas(uniquePersonas);
+
+    setGameState({ status: "generating_initial_story" });
+
+    try {
+      const input: GenerateSimulationContentInput = {
+        trope,
+        history: [],
+        personaToEmbody: uniquePersonas[0],
+        otherPersona: uniquePersonas[1],
+      };
+      const result = await generateSimulationContent(input);
+      setStory([{ speaker: "user", line: result.aiResponse, personaName: uniquePersonas[0].name }]);
+      setGameState({ status: "playing" });
+    } catch (error) {
+      console.error("Failed to start simulation:", error);
+      toast({ variant: "destructive", title: "Error", description: "Could not start the simulation. Please try again." });
+      setGameState({ status: "menu" });
+    }
+  };
+
+  useEffect(() => {
+    if (gameMode !== 'simulation' || gameState.status !== 'playing' || !sessionPersonas || isAiTyping) {
+      return;
+    }
+    
+    const runSimulationTurn = async () => {
+      // Determine whose turn it is
+      const lastSpeaker = story[story.length - 1]?.speaker;
+      const nextSpeakerIsPersona2 = lastSpeaker === 'user';
+      const personaToEmbody = nextSpeakerIsPersona2 ? sessionPersonas[1] : sessionPersonas[0];
+      const otherPersona = nextSpeakerIsPersona2 ? sessionPersonas[0] : sessionPersonas[1];
+      const nextSpeakerLabel = nextSpeakerIsPersona2 ? 'ai' : 'user';
+
+      setIsAiTyping(true);
+      try {
+        const input: GenerateSimulationContentInput = {
+          trope: settings.trope!,
+          history: story,
+          personaToEmbody,
+          otherPersona,
+        };
+        const result = await generateSimulationContent(input);
+        setStory(prev => [...prev, { speaker: nextSpeakerLabel, line: result.aiResponse, personaName: personaToEmbody.name }]);
+      } catch (error) {
+        console.error("Failed to get AI simulation response:", error);
+        toast({ variant: "destructive", title: "Error", description: "Simulation paused due to an error." });
+      } finally {
+        setIsAiTyping(false);
+      }
+    };
+    
+    const timeoutId = setTimeout(runSimulationTurn, 1500); // Delay between turns
+    return () => clearTimeout(timeoutId);
+
+  }, [story, gameMode, gameState.status, sessionPersonas, settings.trope, isAiTyping]);
+
+
   const handleUserSubmit = async (userInput: string) => {
-    if (!settings.trope || !sessionPersonas) return;
+    if (!settings.trope || !sessionPersonas || gameMode === 'simulation') return;
     const newStory = [...story, { speaker: "user", line: userInput }] as StoryPart[];
     setStory(newStory);
     setIsAiTyping(true);
@@ -145,11 +216,15 @@ export default function ApostrfyClient() {
   const handleEndGame = async () => {
     setGameState({ status: "generating_summary" });
     try {
-      const userContent = story.filter(part => part.speaker === "user").map(part => part.line).join("\n");
-      const fullStory = story.map(part => `${part.speaker.toUpperCase()}: ${part.line}`).join('\n');
+      const fullStory = story.map(part => `${part.personaName || part.speaker.toUpperCase()}: ${part.line}`).join('\n');
       const fullStoryRaw = story.map(p => p.line).join('\n');
       
-      if (userContent.trim() === "") {
+      const analysisContent = (gameMode === 'simulation' 
+          ? story.filter(part => part.speaker === "user")
+          : story.filter(part => part.speaker === "user")
+      ).map(part => part.line).join("\n");
+
+      if (gameMode === 'interactive' && analysisContent.trim() === "") {
         // Handle case with no user input
         setAnalysis({
           title: "An Unwritten Tale",
@@ -165,12 +240,16 @@ export default function ApostrfyClient() {
         setGameState({ status: "gameover" });
         return;
       }
+      
+      const stylePromise = gameMode === 'simulation' && sessionPersonas
+        ? Promise.resolve({ styleMatches: [sessionPersonas[0].name, sessionPersonas[1].name] })
+        : generateStyleMatch({ userContent: analysisContent, personas: JSON.stringify(inspirationalPersonas) });
 
       const [quoteResult, moodResult, styleResult, keywordsResult, scriptResult, titleResult] = await Promise.all([
         generateQuoteBanner({ fullStory: fullStoryRaw }),
-        generateMoodAnalysis({ userContent }),
-        generateStyleMatch({ userContent, personas: JSON.stringify(inspirationalPersonas) }),
-        generateStoryKeywords({ userContent }),
+        generateMoodAnalysis({ userContent: analysisContent }),
+        stylePromise,
+        generateStoryKeywords({ userContent: analysisContent }),
         generateFinalScript({ fullStory }),
         generateStoryTitle({ fullStory: fullStoryRaw }),
       ]);
@@ -223,6 +302,7 @@ export default function ApostrfyClient() {
     setSettings({ trope: null, duration: 5 });
     setComingFromOnboarding(false);
     setAnalysis(null);
+    setGameMode('interactive');
   };
 
   const handleQuitRequest = () => {
@@ -239,7 +319,7 @@ export default function ApostrfyClient() {
   };
 
   const handleSaveAndQuit = () => {
-    if (settings.trope) {
+    if (settings.trope && gameMode === 'interactive') { // Only save interactive stories
       saveStory({
         trope: settings.trope,
         duration: settings.duration,
@@ -266,7 +346,7 @@ export default function ApostrfyClient() {
         <AnimatePresence>
             {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}
             {gameState.status === "onboarding" && <OnboardingModal key="onboarding" onComplete={handleOnboardingComplete} />}
-            {gameState.status === "menu" && <MainMenu key="menu" onStartGame={handleStartGame} comingFromOnboarding={comingFromOnboarding} />}
+            {gameState.status === "menu" && <MainMenu key="menu" onStartGame={handleStartGame} onStartSimulation={handleStartSimulation} comingFromOnboarding={comingFromOnboarding} />}
             {gameState.status === "generating_initial_story" && settings.trope && (
               <LoadingScreen
                 key="generating_initial"
@@ -284,6 +364,7 @@ export default function ApostrfyClient() {
                 onUserSubmit={handleUserSubmit}
                 onEndGame={handleEndGame}
                 onQuitRequest={handleQuitRequest}
+                gameMode={gameMode}
               />
             )}
             {gameState.status === "generating_summary" && <LoadingScreen key="generating" />}
@@ -297,12 +378,12 @@ export default function ApostrfyClient() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure you want to quit?</AlertDialogTitle>
             <AlertDialogDescription>
-              Your progress in the current story will not be saved automatically.
+              {gameMode === 'interactive' ? 'Your progress in the current story will not be saved automatically.' : 'This simulation will be cancelled.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={handleCancelQuit}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmQuit}>Quit Game</AlertDialogAction>
+            <AlertDialogAction onClick={handleConfirmQuit}>Quit</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -312,13 +393,13 @@ export default function ApostrfyClient() {
           <AlertDialogHeader>
             <AlertDialogTitle>Save this story?</AlertDialogTitle>
             <AlertDialogDescription>
-              You can store up to 5 stories to view later.
+              You can store up to 5 stories to view later. Simulations cannot be saved.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
              <Button variant="ghost" onClick={handleCancelQuit}>Cancel</Button>
             <Button variant="outline" onClick={handleQuitWithoutSaving}>Quit Without Saving</Button>
-            <Button onClick={handleSaveAndQuit}>Save and Quit</Button>
+            <Button onClick={handleSaveAndQuit} disabled={gameMode === 'simulation'}>Save and Quit</Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

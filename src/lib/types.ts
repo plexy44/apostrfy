@@ -12,6 +12,7 @@ export type Speaker = 'user' | 'ai';
 export type StoryPart = {
   speaker: Speaker;
   line: string;
+  personaName?: string;
 };
 
 export type GameState = 

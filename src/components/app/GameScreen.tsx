@@ -25,6 +25,7 @@ interface GameScreenProps {
   onUserSubmit: (input: string) => void;
   onEndGame: () => void;
   onQuitRequest: () => void;
+  gameMode: 'interactive' | 'simulation';
 }
 
 const TimerBar = ({ durationInMinutes, onEndGame, className }: { durationInMinutes: number; onEndGame: () => void, className?: string }) => {
@@ -80,7 +81,7 @@ const TimerBar = ({ durationInMinutes, onEndGame, className }: { durationInMinut
   );
 };
 
-export default function GameScreen({ trope, story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest }: GameScreenProps) {
+export default function GameScreen({ trope, story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest, gameMode }: GameScreenProps) {
   const [userInput, setUserInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -128,6 +129,11 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           <div className="space-y-6">
             {story.map((part, index) => (
               <div key={index} className={`flex flex-col animate-fade-in-up ${part.speaker === 'ai' ? 'items-start' : 'items-end'}`}>
+                 {part.personaName && (
+                  <p className={`text-xs text-muted-foreground mb-1 px-2 ${part.speaker === 'user' ? 'self-end' : 'self-start'}`}>
+                    {part.personaName}
+                  </p>
+                )}
                 <div className={`p-4 rounded-xl max-w-[85%] ${part.speaker === 'ai' ? 'bg-secondary rounded-bl-none' : 'bg-primary/90 text-primary-foreground rounded-br-none'}`}>
                   <p>{part.line}</p>
                 </div>
@@ -150,12 +156,12 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           <Input
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            placeholder="Continue the story..."
-            disabled={isAiTyping}
+            placeholder={gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
+            disabled={isAiTyping || gameMode === 'simulation'}
             className="flex-grow h-12 text-base"
             autoFocus
           />
-          <Button type="submit" size="icon" className="h-12 w-12" disabled={isAiTyping || !userInput.trim()}>
+          <Button type="submit" size="icon" className="h-12 w-12" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation'}>
             {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
           </Button>
         </form>

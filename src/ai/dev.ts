@@ -14,3 +14,4 @@ import '@/ai/flows/generate-style-match.ts';
 import '@/ai/flows/generate-story-keywords.ts';
 import '@/ai/flows/generate-final-script.ts';
 import '@/ai/flows/generate-story-title.ts';
+import '@/ai/flows/generate-simulation-content.ts';

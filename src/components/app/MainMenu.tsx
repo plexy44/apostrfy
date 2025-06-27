@@ -20,10 +20,11 @@ import Orb from "./Orb";
 
 interface MainMenuProps {
   onStartGame: (trope: Trope, duration: number) => void;
+  onStartSimulation: (trope: Trope) => void;
   comingFromOnboarding: boolean;
 }
 
-export default function MainMenu({ onStartGame, comingFromOnboarding }: MainMenuProps) {
+export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnboarding }: MainMenuProps) {
   const [selectedTrope, setSelectedTrope] = useState<Trope>("Cosmic Wanderer");
   const [selectedDuration, setSelectedDuration] = useState<number>(5);
   const [orbMessage, setOrbMessage] = useState("");
@@ -69,6 +70,12 @@ export default function MainMenu({ onStartGame, comingFromOnboarding }: MainMenu
   const handleStart = () => {
     if (selectedTrope) {
       onStartGame(selectedTrope, selectedDuration);
+    }
+  };
+
+  const handleSimulate = () => {
+    if (selectedTrope) {
+      onStartSimulation(selectedTrope);
     }
   };
 
@@ -142,14 +149,25 @@ export default function MainMenu({ onStartGame, comingFromOnboarding }: MainMenu
         </CardContent>
       </Card>
       
-      <Button
-        onClick={handleStart}
-        disabled={!selectedTrope}
-        size="lg"
-        className="mt-8 w-full max-w-lg font-headline text-lg"
-      >
-        Start Writing
-      </Button>
+      <div className="w-full max-w-lg flex flex-col items-center">
+        <Button
+          onClick={handleStart}
+          disabled={!selectedTrope}
+          size="lg"
+          className="mt-8 w-full font-headline text-lg"
+        >
+          Start Writing
+        </Button>
+        <Button
+          onClick={handleSimulate}
+          disabled={!selectedTrope}
+          variant="outline"
+          size="lg"
+          className="mt-4 w-full font-headline text-lg"
+        >
+          Simulate
+        </Button>
+      </div>
     </motion.div>
   );
 }
