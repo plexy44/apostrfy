@@ -260,7 +260,7 @@ export default function ApostrfyClient() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <div className="flex-grow flex items-center justify-center p-4 relative">
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
             {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}
             {gameState.status === "onboarding" && <OnboardingModal key="onboarding" onComplete={handleOnboardingComplete} />}
             {gameState.status === "menu" && <MainMenu key="menu" onStartGame={handleStartGame} comingFromOnboarding={comingFromOnboarding} />}

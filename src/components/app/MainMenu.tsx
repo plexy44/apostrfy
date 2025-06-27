@@ -61,7 +61,9 @@ export default function MainMenu({ onStartGame, comingFromOnboarding }: MainMenu
 
 
   const handleTransitionComplete = () => {
-    setStartTyping(true);
+    if (comingFromOnboarding) {
+        setStartTyping(true);
+    }
   };
 
   const handleStart = () => {
