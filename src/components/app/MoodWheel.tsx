@@ -1,3 +1,8 @@
+/**
+ * @fileoverview This component renders a radial chart (a "mood wheel") to visualize
+ * the primary emotion and confidence score from the sentiment analysis. It uses Recharts
+ * to create the pie chart and dynamically styles it based on the detected emotion.
+ */
 "use client"
 
 import * as React from "react"

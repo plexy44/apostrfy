@@ -1,3 +1,8 @@
+/**
+ * @fileoverview This component renders the main application footer.
+ * It provides links for navigation (e.g., "About", "Past Stories") and
+ * includes the theme toggle switch for light/dark mode.
+ */
 "use client";
 
 import { ThemeToggle } from "@/components/ui/ThemeToggle";

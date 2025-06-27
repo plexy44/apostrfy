@@ -1,3 +1,8 @@
+/**
+ * @fileoverview This is the root layout for the Next.js application.
+ * It defines the main HTML structure, includes global stylesheets and fonts,
+ * and wraps all page content. It also provides a `Toaster` component for notifications.
+ */
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"

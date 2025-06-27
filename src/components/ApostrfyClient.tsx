@@ -64,7 +64,6 @@ export default function ApostrfyClient() {
   const [comingFromOnboarding, setComingFromOnboarding] = useState(false);
   const [quitDialogState, setQuitDialogState] = useState<'closed' | 'confirm_quit' | 'confirm_save'>('closed');
   const [sessionPersonas, setSessionPersonas] = useState<[Persona, Persona] | null>(null);
-  const [loadingPersonaText, setLoadingPersonaText] = useState<string | null>(null);
   const { toast } = useToast();
   const { saveStory } = usePastStories();
 
@@ -92,9 +91,6 @@ export default function ApostrfyClient() {
     const personaKey = getPersonaKey(trope);
     const personaList = inspirationalPersonas[personaKey];
     
-    const loadingPersona = personaList[Math.floor(Math.random() * personaList.length)];
-    setLoadingPersonaText(`Conjuring the spirit of ${loadingPersona.name}...`);
-
     const uniquePersonas = [...personaList].sort(() => 0.5 - Math.random()).slice(0, 2) as [Persona, Persona];
     setSessionPersonas(uniquePersonas);
 

@@ -1,3 +1,8 @@
+/**
+ * @fileoverview This custom hook manages the persistence of past stories.
+ * It uses `localStorage` to save and retrieve a list of the user's most recent
+ * creative sessions, enforcing a maximum limit on the number of stored stories.
+ */
 "use client";
 
 import { useState, useEffect } from "react";
