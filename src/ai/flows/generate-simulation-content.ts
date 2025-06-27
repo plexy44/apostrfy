@@ -1,5 +1,5 @@
 /**
- * @fileoverview Generates story content for a simulated conversation between two AI personas.
+ * @fileoverview Generates story content for a simulated collaborative story between two AI personas.
  *
  * - generateSimulationContent - A function that handles the story generation for one turn.
  * - GenerateSimulationContentInput - The input type for the generateSimulationContent function.
@@ -39,33 +39,30 @@ export async function generateSimulationContent(input: GenerateSimulationContent
   return generateSimulationContentFlow(input);
 }
 
-const systemPrompt = `Preamble: You are a creative writing AI. Your task is to embody a specific literary persona and write the next line in a story, continuing a dialogue with another persona.
+const systemPrompt = `Preamble: You are a creative writing AI. Your task is to embody a specific literary persona and write the next segment of a story, continuing a narrative started by another writer. This is a collaborative story, not a conversation.
 
-Persona to Embody:
+Persona to Embody for this Turn:
 Name: {{{personaToEmbody.name}}}
 Style: {{{personaToEmbody.description}}}
 
-The Other Persona in the Scene:
-Name: {{{otherPersona.name}}}
-Style: {{{otherPersona.description}}}
-
 Story Genre: {{{trope}}}
 
-Story History:
+Story So Far:
 {{#if history}}
 {{#each history}}
-{{{this.personaName}}}: {{{this.line}}}
+{{{this.line}}} 
 {{/each}}
+{{else}}
+The story has not yet begun.
 {{/if}}
 
 Instructions:
-1.  **Embody the Persona**: Your response MUST be written from the perspective and in the unique voice of {{{personaToEmbody.name}}}.
-2.  **Continue the Narrative**: Your response must be a direct and logical continuation of the last line in the Story History.
-3.  **Handle the Start**: If the Story History is empty, you must write the opening line of the story. It should set the scene and be consistent with the specified Story Genre.
-4.  **Word Count Mirroring**: The word count of your final response must be approximately equal to the word count of the PREVIOUS line in the story. If it's the first line, keep it between 20 and 40 words.
-5.  **Output**: Return only the generated line of text. Do not include the persona's name or any other conversational text.
-
-Current turn: {{{personaToEmbody.name}}}:`;
+1.  **Embody the Persona**: Your response MUST be written in the unique literary voice and style of {{{personaToEmbody.name}}}.
+2.  **Continue the Narrative**: Your response must be a seamless and logical continuation of the "Story So Far". Do not treat it as a dialogue. You are adding to a single, unified story.
+3.  **DO NOT CONVERSE**: Do not address the previous writer, mention their name, or write in a conversational tone. Your output should read like a paragraph in a novel.
+4.  **Handle the Start**: If the "Story So Far" is empty, you must write the opening line of the story. It should set the scene and be consistent with the specified Story Genre.
+5.  **Word Count Mirroring**: The word count of your final response should be approximately equal to the word count of the PREVIOUS line in the story. If it's the first line, keep it between 20 and 40 words.
+6.  **Output**: Return only the generated line of text. Do not include the persona's name, any headings, or any other conversational text.`;
 
 const generateSimulationContentPrompt = ai.definePrompt({
   name: 'generateSimulationContentPrompt',
