@@ -108,7 +108,7 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
             </CardHeader>
             <CardContent className="flex-grow">
               <ScrollArea className="h-96 w-full rounded-md border bg-secondary/20 p-4">
-                <div className="font-body text-sm whitespace-pre-wrap px-2 py-2 text-foreground text-left leading-relaxed">
+                <div className="font-script text-lg whitespace-pre-wrap px-2 py-2 text-foreground text-left leading-relaxed">
                   {analysis.finalScript}
                 </div>
               </ScrollArea>
