@@ -28,13 +28,16 @@ const prompt = ai.definePrompt({
   name: 'generateFinalScriptPrompt',
   input: {schema: GenerateFinalScriptInputSchema},
   output: {schema: GenerateFinalScriptOutputSchema},
-  prompt: `You are a skilled story editor. Your task is to take the following raw story transcript, composed of alternating lines from two authors, and weave it into a single, cohesive narrative.
+  prompt: `You are an expert screenplay editor. Your task is to take the following raw story transcript and transform it into a professionally formatted screenplay excerpt.
 
-Your responsibilities are:
-1.  **Correct Spelling and Grammar**: Fix any typos and grammatical errors.
-2.  **Create Fluid Paragraphs**: Combine the short, alternating lines into well-structured paragraphs. Ensure the flow between sentences is natural and seamless.
-3.  **Maintain Narrative Integrity**: Preserve the original story, characters, and plot points. Do not add new ideas or change the intent of the original authors.
-4.  **Output**: Return the complete, edited story as a single block of text. Use newlines to separate paragraphs for readability.
+Follow these rules meticulously:
+1.  **Analyze the Content**: Read the entire transcript to understand the flow, setting, and actions.
+2.  **Format as Action Lines**: Convert the entire narrative into action lines (standard paragraphs). Do NOT invent scene headings (like INT. DINER - NIGHT) unless the location is explicitly and clearly stated. Do NOT invent character names or format any text as dialogue. The entire output should be descriptive action.
+3.  **Merge and Refine**: Weave the alternating lines from the two authors into a single, cohesive narrative. Create fluid, well-structured paragraphs.
+4.  **Correct and Polish**: Correct all spelling and grammar errors. Ensure professional, clean prose.
+5.  **Output**: The final output should be a single block of text representing the action lines of a script. Use standard paragraph breaks.
+
+This is NOT a chat log. It is a creative story. Your job is to make it read like a piece of a movie script.
 
 Raw Story Transcript:
 {{{fullStory}}}`,
