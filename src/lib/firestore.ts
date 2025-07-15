@@ -33,11 +33,13 @@ const sanitizeForFirestore = (data: any): any => {
   if (Array.isArray(data)) {
     return data.map(item => sanitizeForFirestore(item));
   }
-  if (typeof data === 'object' && data !== null && !(data instanceof Date)) {
+  if (typeof data === 'object' && data !== null && !(data instanceof Date) && Object.getPrototypeOf(data) === Object.prototype) {
     const sanitizedObject: { [key: string]: any } = {};
     for (const key in data) {
+      // We only want to sanitize own properties, not properties from the prototype chain.
       if (Object.prototype.hasOwnProperty.call(data, key)) {
         const value = data[key];
+        // Firestore cannot store 'undefined' values. We convert them to 'null'.
         if (value !== undefined) {
           sanitizedObject[key] = sanitizeForFirestore(value);
         }
@@ -47,7 +49,6 @@ const sanitizeForFirestore = (data: any): any => {
   }
   return data;
 };
-
 
 interface StoryToSave {
     transcript: StoryPart[];
