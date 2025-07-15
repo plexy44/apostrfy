@@ -22,7 +22,7 @@ import { Gift } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface MainMenuProps {
-  onStartGame: (trope: Trope, duration: number, analyticsName: string) => void;
+  onStartGame: (trope: Trope, duration: number, analyticsName: 'lightning' | 'minute' | 'twice_a_minute') => void;
   onStartSimulation: (trope: Trope) => void;
   comingFromOnboarding: boolean;
 }
@@ -37,7 +37,6 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
   const { toast } = useToast();
 
   useEffect(() => {
-    logEvent('screen_view', { screen_name: 'main_menu' });
     const message = ORB_MESSAGES[Math.floor(Math.random() * ORB_MESSAGES.length)];
     setOrbMessage(message);
 
@@ -75,7 +74,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
 
   const handleStart = () => {
     if (selectedTrope) {
-      onStartGame(selectedTrope, selectedDuration, selectedAnalyticsName);
+      onStartGame(selectedTrope, selectedDuration, selectedAnalyticsName as any);
     }
   };
 

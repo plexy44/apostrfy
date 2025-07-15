@@ -77,14 +77,36 @@ export default function ApostrfyClient() {
   const analyticsFired = useRef(new Set<string>());
 
   useEffect(() => {
-    const screenName = gameState.status;
-    if (!analyticsFired.current.has(screenName)) {
-        if (screenName === 'loading_screen' || screenName === 'onboarding') {
-            logEvent('screen_view', { screen_name: `${screenName}` });
-            analyticsFired.current.add(screenName);
-        }
+    let screenName: string;
+    switch (gameState.status) {
+      case 'loading_screen':
+        screenName = 'loading_screen';
+        break;
+      case 'onboarding':
+        screenName = 'onboarding';
+        break;
+      case 'menu':
+        screenName = 'main_menu';
+        break;
+      case 'playing':
+      case 'generating_initial_story':
+        screenName = 'game_screen';
+        break;
+      case 'gameover':
+      case 'generating_summary':
+        screenName = 'analysis_screen';
+        break;
+      default:
+        return; // Don't log for intermediate or unknown states
     }
+    
+    if (screenName && !analyticsFired.current.has(screenName)) {
+      logEvent('screen_view', { screen_name: screenName as any });
+      analyticsFired.current.add(screenName);
+    }
+  }, [gameState.status]);
 
+  useEffect(() => {
     if (isFirstVisit === undefined) {
       return; 
     }
@@ -97,7 +119,7 @@ export default function ApostrfyClient() {
     }, 500); 
 
     return () => clearTimeout(timer);
-  }, [isFirstVisit, gameState.status]);
+  }, [isFirstVisit]);
 
   useEffect(() => {
     if (!isAiTyping && gameMode === 'interactive' && gameState.status === 'playing' && !isAdPaused) {
@@ -115,7 +137,6 @@ export default function ApostrfyClient() {
 
   const handleStartGame = async (trope: Trope, duration: number, analyticsName: 'lightning' | 'minute' | 'twice_a_minute') => {
     logEvent('start_game', { game_mode: 'interactive', game_duration: analyticsName });
-    logEvent('screen_view', { screen_name: 'game_screen' });
     setGameMode('interactive');
     setSettings({ trope, duration });
     setStory([]);
@@ -153,7 +174,6 @@ export default function ApostrfyClient() {
 
   const handleStartSimulation = async (trope: Trope) => {
     logEvent('start_game', { game_mode: 'simulation', game_duration: 'lightning' });
-    logEvent('screen_view', { screen_name: 'game_screen' });
     setSettings({ trope, duration: 30 }); 
     setStory([]);
     setComingFromOnboarding(false);
@@ -262,8 +282,7 @@ export default function ApostrfyClient() {
     if (gameState.status === 'generating_summary' || gameState.status === 'gameover') return;
 
     setGameState({ status: "generating_summary" });
-    logEvent('screen_view', { screen_name: 'analysis_screen' });
-
+    
     try {
         const fullStory = story.map(part => `${part.personaName || part.speaker.toUpperCase()}: ${part.line}`).join('\n');
         const fullStoryRaw = story.map(p => p.line).join('\n');
@@ -416,6 +435,7 @@ export default function ApostrfyClient() {
   };
 
   const handlePlayAgain = () => {
+    analyticsFired.current.clear();
     setGameState({ status: "menu" });
     setStory([]);
     setSettings({ trope: null, duration: 60 });
