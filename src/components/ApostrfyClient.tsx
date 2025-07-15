@@ -396,14 +396,7 @@ export default function ApostrfyClient() {
     
     try {
       logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: adUnitName });
-      
-      const didAdLoad = Math.random() > 0.2; 
-      if (!didAdLoad) {
-        throw new Error("Simulated ad load failure");
-      }
-      
-      console.log("Ad loaded successfully, proceeding to analysis.");
-
+      console.log("Ad impression logged, proceeding to analysis.");
     } catch (error) {
       console.error("Ad failed to load:", error);
       logEvent('ad_load_failed', { ad_unit_name: adUnitName, error_message: (error as Error).message });
