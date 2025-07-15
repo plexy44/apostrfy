@@ -72,7 +72,7 @@ export default function ApostrfyClient() {
   const [sessionPersonas, setSessionPersonas] = useState<[Persona, Persona] | null>(null);
   const [isAdPaused, setIsAdPaused] = useState(false);
   const { toast } = useToast();
-  const { saveStory } = usePastStories();
+  const { saveStory: saveStoryToDevice } = usePastStories();
   const inputRef = useRef<HTMLInputElement>(null);
   const analyticsFired = useRef(new Set<string>());
 
@@ -346,7 +346,8 @@ export default function ApostrfyClient() {
 
         logEvent('complete_game', { story_length: story.length, final_mood: mood.primaryEmotion });
         
-        const preSaveAnalysis: Omit<GameAnalysis, 'storyId'> = {
+        const finalAnalysis: GameAnalysis = {
+            storyId: "not_saved", // The story is not saved by default
             title,
             trope: settings.trope!,
             quoteBanner: quote,
@@ -364,20 +365,7 @@ export default function ApostrfyClient() {
             story: story,
         };
 
-        try {
-            const storyId = await saveStoryToFirestore({
-                transcript: story,
-                analysis: preSaveAnalysis,
-                trope: preSaveAnalysis.trope,
-                title: preSaveAnalysis.title,
-            });
-            setAnalysis({ ...preSaveAnalysis, storyId });
-        } catch (e) {
-            console.error("Failed to save story to Firestore:", e);
-            toast({ variant: "destructive", title: "Save Error", description: "Could not save story to the cloud." });
-            setAnalysis({ ...preSaveAnalysis, storyId: "save_failed" });
-        }
-
+        setAnalysis(finalAnalysis);
         setGameState({ status: "gameover" });
     } catch (error) {
         console.error("A critical error occurred during game end analysis:", error);
@@ -462,7 +450,7 @@ export default function ApostrfyClient() {
   const handleSaveAndQuit = () => {
     logEvent('quit_game_confirmed', { saved_story: true, story_length: story.length, game_mode: gameMode });
     if (settings.trope && gameMode === 'interactive') { 
-      saveStory({
+      saveStoryToDevice({
         trope: settings.trope,
         duration: settings.duration,
         story: story,
@@ -483,28 +471,41 @@ export default function ApostrfyClient() {
     setQuitDialogState('closed');
   };
 
-  const handleEmailSubmit = async (email: string, storyId: string) => {
-    if (storyId === 'not_saved' || storyId === 'save_failed') {
-      toast({ variant: "destructive", title: "Error", description: "Cannot email a story that could not be saved." });
-      return false;
+  const handleEmailSubmit = async (email: string) => {
+    if (!analysis) {
+        toast({ variant: "destructive", title: "Error", description: "No analysis data available to email." });
+        return false;
     }
-    
     logEvent('request_transcript', { email_provided: true });
 
     try {
-      await saveSubscriberToFirestore({
-        email: email,
-        storyId: storyId,
-      });
-      toast({
-        title: "Success!",
-        description: "Your story is on its way to your inbox.",
-      });
-      return true;
+        // Step 1: Save the story to Firestore.
+        const storyId = await saveStoryToFirestore({
+            transcript: analysis.story,
+            analysis: analysis, // The full analysis object
+            trope: analysis.trope,
+            title: analysis.title,
+        });
+
+        // Step 2: Save the subscriber info, which triggers the email.
+        await saveSubscriberToFirestore({
+            email: email,
+            storyId: storyId,
+        });
+
+        toast({
+            title: "Success!",
+            description: "Your story is on its way to your inbox.",
+        });
+
+        // Optional: Update local analysis state with the new storyId
+        setAnalysis(prev => prev ? { ...prev, storyId } : null);
+
+        return true;
     } catch (error) {
-      console.error("Failed to save subscriber:", error);
-      toast({ variant: "destructive", title: "Submission Error", description: "Could not process your request. Please try again." });
-      return false;
+        console.error("Failed to save or send story:", error);
+        toast({ variant: "destructive", title: "Submission Error", description: "Could not process your request. Please try again." });
+        return false;
     }
   };
   

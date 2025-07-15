@@ -27,7 +27,7 @@ import { logEvent } from "@/lib/analytics";
 interface GameOverScreenProps {
   analysis: GameAnalysis;
   onPlayAgain: () => void;
-  onEmailSubmit: (email: string, storyId: string) => Promise<boolean>;
+  onEmailSubmit: (email: string) => Promise<boolean>;
 }
 
 export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }: GameOverScreenProps) {
@@ -42,7 +42,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     
-    const success = await onEmailSubmit(email, analysis.storyId);
+    const success = await onEmailSubmit(email);
 
     if (success) {
       setIsModalOpen(false);
@@ -189,7 +189,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
               </div>
                <p className="text-xs text-muted-foreground col-span-4 px-1 pt-2">
                 By submitting, you agree to our terms and may receive future communications.
-              </p>
+               </p>
             </div>
             <DialogFooter>
               <DialogClose asChild>
