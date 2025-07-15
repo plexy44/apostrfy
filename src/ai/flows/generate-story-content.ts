@@ -60,7 +60,7 @@ persona2: {{{persona2.name}}} - {{{persona2.description}}}
 
 Instructions (The "Generative Mix"):
 
-Primary Directive (50% weight): Your response MUST be a direct, natural, and logical continuation of the currentUserInput. Analyze its plot, tone, vocabulary, and emotional intent. The user's input is the highest priority.
+Primary Directive (50% weight): Your response MUST be a direct, natural, and logical continuation of the currentUserInput.Analyze its plot, tone, vocabulary, and emotional intent. The user's input is the highest priority.
 
 Secondary Influence - Persona 1 (15% weight): Subtly channel the essence of persona1's description. Do not mention the name. Infuse the response with their core ideas, style, or perspective.
 
