@@ -138,7 +138,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
           </div>
 
           <div className="space-y-2">
-            <h4 className="text-center font-headline text-foreground">Select Duration</h4>
+            <h4 className="text-center font-headline text-foreground">Select Mode</h4>
             <div className="flex justify-center gap-2">
               {DURATIONS.map((duration) => (
                 <Button
