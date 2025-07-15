@@ -26,6 +26,7 @@ import MainMenu from "@/components/app/MainMenu";
 import GameScreen from "@/components/app/GameScreen";
 import GameOverScreen from "@/components/app/GameOverScreen";
 import AppFooter from "@/components/app/AppFooter";
+import AdOverlay from "@/components/app/AdOverlay";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -68,6 +69,7 @@ export default function ApostrfyClient() {
   const [comingFromOnboarding, setComingFromOnboarding] = useState(false);
   const [quitDialogState, setQuitDialogState] = useState<'closed' | 'confirm_quit' | 'confirm_save'>('closed');
   const [sessionPersonas, setSessionPersonas] = useState<[Persona, Persona] | null>(null);
+  const [isAdPaused, setIsAdPaused] = useState(false);
   const { toast } = useToast();
   const { saveStory } = usePastStories();
 
@@ -156,7 +158,7 @@ export default function ApostrfyClient() {
   };
 
   useEffect(() => {
-    if (gameMode !== 'simulation' || gameState.status !== 'playing' || !sessionPersonas || isAiTyping) {
+    if (gameMode !== 'simulation' || gameState.status !== 'playing' || !sessionPersonas || isAiTyping || isAdPaused) {
       return;
     }
     
@@ -189,11 +191,11 @@ export default function ApostrfyClient() {
     const timeoutId = setTimeout(runSimulationTurn, 1500); // Delay between turns
     return () => clearTimeout(timeoutId);
 
-  }, [story, gameMode, gameState.status, sessionPersonas, settings.trope, isAiTyping]);
+  }, [story, gameMode, gameState.status, sessionPersonas, settings.trope, isAiTyping, isAdPaused]);
 
 
   const handleUserSubmit = async (userInput: string) => {
-    if (!settings.trope || !sessionPersonas || gameMode === 'simulation') return;
+    if (!settings.trope || !sessionPersonas || gameMode === 'simulation' || isAdPaused) return;
     const newStory = [...story, { speaker: "user", line: userInput }] as StoryPart[];
     setStory(newStory);
     setIsAiTyping(true);
@@ -307,6 +309,7 @@ export default function ApostrfyClient() {
     setComingFromOnboarding(false);
     setAnalysis(null);
     setGameMode('interactive');
+    setIsAdPaused(false);
   };
 
   const handleQuitRequest = () => {
@@ -369,11 +372,14 @@ export default function ApostrfyClient() {
                 onEndGame={handleEndGame}
                 onQuitRequest={handleQuitRequest}
                 gameMode={gameMode}
+                onPauseForAd={() => setIsAdPaused(true)}
+                isAdPaused={isAdPaused}
               />
             )}
             {gameState.status === "generating_summary" && <LoadingScreen key="generating" />}
             {gameState.status === "gameover" && analysis && <GameOverScreen key="gameover" analysis={analysis} onPlayAgain={handlePlayAgain} />}
         </AnimatePresence>
+         <AdOverlay isVisible={isAdPaused} onClose={() => setIsAdPaused(false)} />
       </div>
       {gameState.status !== "playing" && gameState.status !== 'generating_summary' && gameState.status !== 'generating_initial_story' && <AppFooter />}
 

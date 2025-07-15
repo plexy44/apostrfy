@@ -4,7 +4,7 @@
  * displaying the timer and game context, a central scrollable area for the story
  * transcript, and a fixed footer containing the user input form. The component
  * adapts for both 'interactive' mode, where the user can submit text, and
- * 'simulation' mode, where input is disabled.
+ * 'simulation' mode, where input is disabled. It can also be paused for ads.
  */
 
 "use client";
@@ -18,25 +18,39 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Loader, ArrowLeft, Timer, Hourglass } from "lucide-react";
 import Orb from "./Orb";
 import { cn } from "@/lib/utils";
+import { logEvent } from "@/lib/analytics";
 
 interface GameScreenProps {
   trope: Trope;
   story: StoryPart[];
-  duration: number; // Duration is now in seconds
+  duration: number; // Duration is in seconds
   isAiTyping: boolean;
   onUserSubmit: (input: string) => void;
   onEndGame: () => void;
   onQuitRequest: () => void;
   gameMode: 'interactive' | 'simulation';
+  onPauseForAd: () => void;
+  isAdPaused: boolean;
 }
 
-const TimerBar = ({ durationInSeconds, onEndGame, className }: { durationInSeconds: number; onEndGame: () => void, className?: string }) => {
+const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused, className }: { durationInSeconds: number; onEndGame: () => void, onPauseForAd: () => void; isPaused: boolean; className?: string }) => {
   const [timeLeft, setTimeLeft] = useState(durationInSeconds);
 
   useEffect(() => {
+    if (isPaused) {
+      return;
+    }
+
     if (timeLeft <= 0) {
       onEndGame();
       return;
+    }
+    
+    // Mid-game ad logic for "Twice a minute" (120s) mode
+    if (durationInSeconds === 120 && timeLeft === 60) {
+        logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'mid_game_interstitial' });
+        onPauseForAd();
+        return; // Pause the timer until the ad is closed
     }
 
     const timer = setInterval(() => {
@@ -44,7 +58,7 @@ const TimerBar = ({ durationInSeconds, onEndGame, className }: { durationInSecon
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, onEndGame]);
+  }, [timeLeft, onEndGame, isPaused, durationInSeconds, onPauseForAd]);
 
   const formatTime = (totalSeconds: number) => {
     const minutes = Math.floor(totalSeconds / 60);
@@ -82,7 +96,7 @@ const TimerBar = ({ durationInSeconds, onEndGame, className }: { durationInSecon
   );
 };
 
-export default function GameScreen({ trope, story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest, gameMode }: GameScreenProps) {
+export default function GameScreen({ trope, story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest, gameMode, onPauseForAd, isAdPaused }: GameScreenProps) {
   const [userInput, setUserInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -114,6 +128,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           className="absolute top-4 -left-16 z-20 rounded-full"
           onClick={onQuitRequest}
           aria-label="Quit game"
+          disabled={isAdPaused}
         >
           <ArrowLeft />
         </Button>
@@ -121,7 +136,12 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
         <div className="flex items-start gap-4 mb-4">
             <div className="flex-grow">
                 <h3 className="font-headline text-lg text-foreground mb-1">{trope}</h3>
-                <TimerBar durationInSeconds={duration} onEndGame={onEndGame} />
+                <TimerBar 
+                    durationInSeconds={duration} 
+                    onEndGame={onEndGame} 
+                    onPauseForAd={onPauseForAd} 
+                    isPaused={isAdPaused}
+                />
             </div>
             <Orb size="tiny" isInteractive={true} className="flex-shrink-0" />
         </div>
@@ -157,12 +177,12 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           <Input
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            placeholder={gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
-            disabled={isAiTyping || gameMode === 'simulation'}
+            placeholder={isAdPaused ? "Game paused..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
+            disabled={isAiTyping || gameMode === 'simulation' || isAdPaused}
             className="flex-grow h-12 text-base"
             autoFocus
           />
-          <Button type="submit" size="icon" className="h-12 w-12" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation'}>
+          <Button type="submit" size="icon" className="h-12 w-12" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation' || isAdPaused}>
             {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
           </Button>
         </form>
@@ -171,7 +191,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           <span>A 30-second response timer will be implemented here.</span>
         </div>
         <div className="text-center py-2">
-          <Button onClick={onEndGame} variant="outline" size="sm">Test End Game</Button>
+          <Button onClick={onEndGame} variant="outline" size="sm" disabled={isAdPaused}>Test End Game</Button>
         </div>
       </div>
 

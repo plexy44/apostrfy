@@ -5,14 +5,23 @@
  * and testing purposes.
  */
 
-type EventName = 'start_game' // Add other event names as needed
+type EventName = 'start_game' | 'ad_impression' | 'ad_click';
 
 interface EventParams {
     start_game: {
         game_mode: 'interactive' | 'simulation';
         game_duration: 'lightning' | 'minute' | 'twice_a_minute';
     };
-    // Define other event param structures here
+    ad_impression: {
+        ad_platform: 'google_admob';
+        ad_source: 'admob';
+        ad_format: 'interstitial' | 'banner' | 'rewarded';
+        ad_unit_name: string;
+    };
+    ad_click: {
+        ad_format: 'interstitial' | 'banner' | 'rewarded';
+        ad_unit_name: string;
+    };
 }
 
 /**
