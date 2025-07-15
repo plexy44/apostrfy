@@ -80,7 +80,7 @@ export default function ApostrfyClient() {
     const screenName = gameState.status;
     if (!analyticsFired.current.has(screenName)) {
         if (screenName === 'loading_screen' || screenName === 'onboarding') {
-            logEvent('screen_view', { screen_name: `${screenName}_screen` });
+            logEvent('screen_view', { screen_name: `${screenName}` });
             analyticsFired.current.add(screenName);
         }
     }
@@ -97,7 +97,7 @@ export default function ApostrfyClient() {
     }, 500); 
 
     return () => clearTimeout(timer);
-  }, [isFirstVisit]);
+  }, [isFirstVisit, gameState.status]);
 
   useEffect(() => {
     if (!isAiTyping && gameMode === 'interactive' && gameState.status === 'playing' && !isAdPaused) {

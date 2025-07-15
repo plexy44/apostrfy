@@ -25,7 +25,7 @@ type EventName =
 // Interface defining the parameters for each event
 interface EventParams {
     screen_view: {
-        screen_name: 'loading_screen' | 'onboarding_screen' | 'main_menu' | 'game_screen' | 'analysis_screen' | 'about_us' | 'privacy_policy' | 'terms_of_service';
+        screen_name: 'loading_screen' | 'onboarding' | 'main_menu' | 'game_screen' | 'analysis_screen' | 'about_us' | 'privacy_policy' | 'terms_of_service';
     };
     onboarding_completed: {};
     start_game: {

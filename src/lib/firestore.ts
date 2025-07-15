@@ -53,18 +53,9 @@ interface SubscriberData {
 
 export const saveSubscriberToFirestore = async (subscriberData: SubscriberData) => {
     try {
-        // This simulates getting user metadata. In a real app, you'd want a more
-        // robust way to get this, potentially from a server-side context.
-        const metadata = {
-            ipAddress: '127.0.0.1', // Placeholder
-            browserType: navigator.userAgent,
-            operatingSystem: navigator.platform,
-        };
-
         const docRef = await addDoc(collection(db, "subscribers"), {
             ...subscriberData,
-            submissionTimestamp: serverTimestamp(),
-            metadata: metadata
+            submissionTimestamp: serverTimestamp()
         });
         console.log("Subscriber saved with ID: ", docRef.id);
         return docRef;
@@ -73,5 +64,3 @@ export const saveSubscriberToFirestore = async (subscriberData: SubscriberData) 
         throw new Error("Could not save subscriber to Firestore.");
     }
 };
-
-    
