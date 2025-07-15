@@ -42,6 +42,7 @@ import { useIsFirstVisit } from "@/hooks/useIsFirstVisit";
 import { usePastStories } from "@/hooks/usePastStories";
 import personasData from "@/lib/personas.json";
 import famousQuotesData from "@/lib/famousQuotes.json";
+import { logEvent } from "@/lib/analytics";
 
 const { inspirationalPersonas } = personasData as { inspirationalPersonas: InspirationalPersonas };
 const quotes = famousQuotesData as Record<string, string>;
@@ -60,7 +61,7 @@ export default function ApostrfyClient() {
   const { isFirstVisit, setHasVisited } = useIsFirstVisit();
   const [gameState, setGameState] = useState<GameState>({ status: "loading_screen" });
   const [gameMode, setGameMode] = useState<'interactive' | 'simulation'>('interactive');
-  const [settings, setSettings] = useState<{ trope: Trope | null; duration: number }>({ trope: null, duration: 5 });
+  const [settings, setSettings] = useState<{ trope: Trope | null; duration: number }>({ trope: null, duration: 60 });
   const [story, setStory] = useState<StoryPart[]>([]);
   const [analysis, setAnalysis] = useState<GameAnalysis | null>(null);
   const [isAiTyping, setIsAiTyping] = useState(false);
@@ -88,7 +89,8 @@ export default function ApostrfyClient() {
     setGameState({ status: "menu" });
   };
 
-  const handleStartGame = async (trope: Trope, duration: number) => {
+  const handleStartGame = async (trope: Trope, duration: number, analyticsName: string) => {
+    logEvent('start_game', { game_mode: 'interactive', game_duration: analyticsName });
     setGameMode('interactive');
     setSettings({ trope, duration });
     setStory([]);
@@ -105,7 +107,7 @@ export default function ApostrfyClient() {
     try {
       const input: GenerateStoryContentInput = {
         trope,
-        duration,
+        duration: duration / 60, // Pass duration in minutes to AI
         userInput: "Start the story.",
         history: [],
         persona1: uniquePersonas[0],
@@ -122,7 +124,8 @@ export default function ApostrfyClient() {
   };
 
   const handleStartSimulation = async (trope: Trope) => {
-    setSettings({ trope, duration: 1 });
+    logEvent('start_game', { game_mode: 'simulation', game_duration: 'minute' });
+    setSettings({ trope, duration: 60 }); // Simulation is always 1 minute
     setStory([]);
     setComingFromOnboarding(false);
     setGameMode('simulation');
@@ -198,7 +201,7 @@ export default function ApostrfyClient() {
     try {
       const input: GenerateStoryContentInput = {
         trope: settings.trope,
-        duration: settings.duration,
+        duration: settings.duration / 60, // Pass duration in minutes
         userInput,
         history: newStory.map(s => ({ speaker: s.speaker, line: s.line })),
         persona1: sessionPersonas[0],
@@ -300,7 +303,7 @@ export default function ApostrfyClient() {
   const handlePlayAgain = () => {
     setGameState({ status: "menu" });
     setStory([]);
-    setSettings({ trope: null, duration: 5 });
+    setSettings({ trope: null, duration: 60 });
     setComingFromOnboarding(false);
     setAnalysis(null);
     setGameMode('interactive');

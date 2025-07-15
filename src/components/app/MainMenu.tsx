@@ -19,14 +19,15 @@ import ApostrfyLogo from "../icons/ApostrfyLogo";
 import Orb from "./Orb";
 
 interface MainMenuProps {
-  onStartGame: (trope: Trope, duration: number) => void;
+  onStartGame: (trope: Trope, duration: number, analyticsName: string) => void;
   onStartSimulation: (trope: Trope) => void;
   comingFromOnboarding: boolean;
 }
 
 export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnboarding }: MainMenuProps) {
   const [selectedTrope, setSelectedTrope] = useState<Trope>("Cosmic Wanderer");
-  const [selectedDuration, setSelectedDuration] = useState<number>(5);
+  const [selectedDuration, setSelectedDuration] = useState<number>(60);
+  const [selectedAnalyticsName, setSelectedAnalyticsName] = useState<string>('minute');
   const [orbMessage, setOrbMessage] = useState("");
   const [displayedMessage, setDisplayedMessage] = useState("");
   const [startTyping, setStartTyping] = useState(false);
@@ -69,7 +70,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
 
   const handleStart = () => {
     if (selectedTrope) {
-      onStartGame(selectedTrope, selectedDuration);
+      onStartGame(selectedTrope, selectedDuration, selectedAnalyticsName);
     }
   };
 
@@ -78,6 +79,11 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
       onStartSimulation(selectedTrope);
     }
   };
+
+  const handleDurationSelect = (duration: typeof DURATIONS[0]) => {
+    setSelectedDuration(duration.value);
+    setSelectedAnalyticsName(duration.analyticsName);
+  }
 
   const isTyping = startTyping && displayedMessage.length < orbMessage.length;
 
@@ -138,8 +144,8 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
                 <Button
                   key={duration.value}
                   variant={selectedDuration === duration.value ? "default" : "secondary"}
-                  onClick={() => setSelectedDuration(duration.value)}
-                  className="w-28"
+                  onClick={() => handleDurationSelect(duration)}
+                  className="w-32"
                 >
                   {duration.label}
                 </Button>

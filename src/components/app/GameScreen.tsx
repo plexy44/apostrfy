@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 interface GameScreenProps {
   trope: Trope;
   story: StoryPart[];
-  duration: number;
+  duration: number; // Duration is now in seconds
   isAiTyping: boolean;
   onUserSubmit: (input: string) => void;
   onEndGame: () => void;
@@ -30,8 +30,7 @@ interface GameScreenProps {
   gameMode: 'interactive' | 'simulation';
 }
 
-const TimerBar = ({ durationInMinutes, onEndGame, className }: { durationInMinutes: number; onEndGame: () => void, className?: string }) => {
-  const durationInSeconds = durationInMinutes * 60;
+const TimerBar = ({ durationInSeconds, onEndGame, className }: { durationInSeconds: number; onEndGame: () => void, className?: string }) => {
   const [timeLeft, setTimeLeft] = useState(durationInSeconds);
 
   useEffect(() => {
@@ -122,7 +121,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
         <div className="flex items-start gap-4 mb-4">
             <div className="flex-grow">
                 <h3 className="font-headline text-lg text-foreground mb-1">{trope}</h3>
-                <TimerBar durationInMinutes={duration} onEndGame={onEndGame} />
+                <TimerBar durationInSeconds={duration} onEndGame={onEndGame} />
             </div>
             <Orb size="tiny" isInteractive={true} className="flex-shrink-0" />
         </div>

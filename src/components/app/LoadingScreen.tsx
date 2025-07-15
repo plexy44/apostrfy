@@ -15,7 +15,7 @@ import { motion } from "framer-motion";
 
 interface LoadingScreenProps {
   trope?: Trope;
-  duration?: number;
+  duration?: number; // duration is in seconds
 }
 
 export default function LoadingScreen({ trope, duration }: LoadingScreenProps) {
@@ -26,6 +26,18 @@ export default function LoadingScreen({ trope, duration }: LoadingScreenProps) {
       setPlaceholder(LITERARY_PLACEHOLDERS[Math.floor(Math.random() * LITERARY_PLACEHOLDERS.length)]);
     }
   }, [trope]);
+
+  const formatDuration = (seconds: number) => {
+    if (seconds < 60) {
+      return `${seconds} seconds`;
+    }
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    if (remainingSeconds === 0) {
+      return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    }
+    return `${minutes}m ${remainingSeconds}s`;
+  }
 
   return (
     <div className="fixed inset-0 bg-background flex flex-col items-center justify-center overflow-hidden z-[100] animate-fade-in">
@@ -48,7 +60,7 @@ export default function LoadingScreen({ trope, duration }: LoadingScreenProps) {
                         Style: <span className="text-foreground font-bold">{trope}</span>
                     </p>
                     <p className="text-base text-muted-foreground">
-                        Time: <span className="text-foreground/90 font-semibold">{duration} minutes</span>
+                        Time: <span className="text-foreground/90 font-semibold">{formatDuration(duration)}</span>
                     </p>
                 </motion.div>
             ) : (

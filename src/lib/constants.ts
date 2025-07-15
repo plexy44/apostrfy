@@ -41,10 +41,10 @@ export const TROPES: { name: Trope; description: string }[] = [
   },
 ];
 
-export const DURATIONS: { label: string; value: number }[] = [
-  { label: "3 Mins", value: 3 },
-  { label: "5 Mins", value: 5 },
-  { label: "10 Mins", value: 10 },
+export const DURATIONS: { label: string; value: number, analyticsName: 'lightning' | 'minute' | 'twice_a_minute' }[] = [
+  { label: "Lightning", value: 30, analyticsName: 'lightning' },
+  { label: "Minute", value: 60, analyticsName: 'minute' },
+  { label: "Twice a minute", value: 120, analyticsName: 'twice_a_minute' },
 ];
 
 export const ONBOARDING_CONTENT = [
