@@ -89,7 +89,7 @@ export default function ApostrfyClient() {
     setGameState({ status: "menu" });
   };
 
-  const handleStartGame = async (trope: Trope, duration: number, analyticsName: string) => {
+  const handleStartGame = async (trope: Trope, duration: number, analyticsName: 'lightning' | 'minute' | 'twice_a_minute') => {
     logEvent('start_game', { game_mode: 'interactive', game_duration: analyticsName });
     setGameMode('interactive');
     setSettings({ trope, duration });
@@ -124,8 +124,8 @@ export default function ApostrfyClient() {
   };
 
   const handleStartSimulation = async (trope: Trope) => {
-    logEvent('start_game', { game_mode: 'simulation', game_duration: 'minute' });
-    setSettings({ trope, duration: 60 }); // Simulation is always 1 minute
+    logEvent('start_game', { game_mode: 'simulation', game_duration: 'lightning' });
+    setSettings({ trope, duration: 30 }); // Simulation is now 30 seconds
     setStory([]);
     setComingFromOnboarding(false);
     setGameMode('simulation');
