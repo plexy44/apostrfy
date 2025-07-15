@@ -5,12 +5,48 @@
  * and testing purposes.
  */
 
-type EventName = 'start_game' | 'ad_impression' | 'ad_click';
+// Union of all possible event names
+type EventName = 
+  | 'screen_view'
+  | 'onboarding_completed'
+  | 'start_game'
+  | 'complete_game'
+  | 'request_transcript'
+  | 'user_turn_taken'
+  | 'ai_turn_generated'
+  | 'theme_switched'
+  | 'ad_impression'
+  | 'ad_click'
+  | 'rewarded_ad_flow';
 
+// Interface defining the parameters for each event
 interface EventParams {
+    screen_view: {
+        screen_name: 'loading_screen' | 'onboarding_screen' | 'main_menu' | 'game_screen' | 'analysis_screen' | 'about_us' | 'privacy_policy' | 'terms_of_service';
+    };
+    onboarding_completed: {};
     start_game: {
         game_mode: 'interactive' | 'simulation';
         game_duration: 'lightning' | 'minute' | 'twice_a_minute';
+    };
+    complete_game: {
+        story_length: number;
+        final_mood: string;
+    };
+    request_transcript: {
+        email_provided: boolean;
+    };
+    user_turn_taken: {
+        turn_time_seconds: number;
+        word_count: number;
+    };
+    ai_turn_generated: {
+        generation_time_ms: number;
+        persona_1: string;
+        persona_2: string;
+    };
+    theme_switched: {
+        selected_theme: string;
     };
     ad_impression: {
         ad_platform: 'google_admob';
@@ -22,6 +58,9 @@ interface EventParams {
         ad_format: 'interstitial' | 'banner' | 'rewarded';
         ad_unit_name: string;
     };
+    rewarded_ad_flow: {
+        status: 'offered' | 'completed' | 'declined';
+    }
 }
 
 /**

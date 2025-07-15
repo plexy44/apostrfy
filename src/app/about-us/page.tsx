@@ -2,10 +2,18 @@
  * @fileoverview This page provides information about the Apostrfy application.
  * It serves as a placeholder for the "About Us" content.
  */
+"use client";
+
+import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import { logEvent } from '@/lib/analytics';
 
 export default function AboutUsPage() {
+  useEffect(() => {
+    logEvent('screen_view', { screen_name: 'about_us' });
+  }, []);
+
   return (
     <div className="container mx-auto max-w-3xl py-12 px-4">
       <Card className="glassmorphism">

@@ -17,6 +17,9 @@ import { TROPES, DURATIONS, ORB_MESSAGES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import ApostrfyLogo from "../icons/ApostrfyLogo";
 import Orb from "./Orb";
+import { logEvent } from "@/lib/analytics";
+import { Gift } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface MainMenuProps {
   onStartGame: (trope: Trope, duration: number, analyticsName: string) => void;
@@ -31,8 +34,10 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
   const [orbMessage, setOrbMessage] = useState("");
   const [displayedMessage, setDisplayedMessage] = useState("");
   const [startTyping, setStartTyping] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
+    logEvent('screen_view', { screen_name: 'main_menu' });
     const message = ORB_MESSAGES[Math.floor(Math.random() * ORB_MESSAGES.length)];
     setOrbMessage(message);
 
@@ -84,6 +89,20 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
     setSelectedDuration(duration.value);
     setSelectedAnalyticsName(duration.analyticsName);
   }
+  
+  const handleThemeSwitch = (trope: Trope) => {
+    logEvent('theme_switched', { selected_theme: trope });
+    setSelectedTrope(trope);
+  }
+  
+  const handleRewardedAd = () => {
+    logEvent('rewarded_ad_flow', { status: 'offered' });
+    logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'rewarded', ad_unit_name: 'unlock_secret_style_reward' });
+    // Simulate watching an ad
+    toast({ title: "Simulating Rewarded Ad", description: "You've unlocked a new secret style (placeholder)!" });
+    logEvent('rewarded_ad_flow', { status: 'completed' });
+    // In a real app, you would unlock a feature here.
+  }
 
   const isTyping = startTyping && displayedMessage.length < orbMessage.length;
 
@@ -125,7 +144,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
             {TROPES.map((trope) => (
               <button
                 key={trope.name}
-                onClick={() => setSelectedTrope(trope.name)}
+                onClick={() => handleThemeSwitch(trope.name)}
                 className={cn(
                   "p-4 rounded-lg border-2 text-left transition-all hover:border-accent",
                   selectedTrope === trope.name ? "border-accent bg-accent/20 shadow-lg shadow-accent/50" : "border-border"
@@ -172,6 +191,14 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
           className="mt-4 w-full font-headline text-lg"
         >
           Simulate
+        </Button>
+        <Button
+            onClick={handleRewardedAd}
+            variant="link"
+            className="mt-4 text-accent"
+        >
+            <Gift className="mr-2 h-4 w-4" />
+            Unlock a Secret Style (Ad)
         </Button>
       </div>
     </motion.div>

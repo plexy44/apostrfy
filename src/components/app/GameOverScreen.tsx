@@ -22,6 +22,7 @@ import { Mail, RefreshCw, Send } from "lucide-react";
 import { motion } from "framer-motion";
 import MoodWheel from "./MoodWheel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { logEvent } from "@/lib/analytics";
 
 interface GameOverScreenProps {
   analysis: GameAnalysis;
@@ -34,6 +35,7 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
 
   const handleEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    logEvent('request_transcript', { email_provided: true });
     // Here you would typically trigger a Firebase Cloud Function.
     // For this example, we'll just show a success toast.
     toast({
@@ -42,6 +44,11 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
     });
     setIsModalOpen(false);
   };
+
+  const handleOpenEmailModal = () => {
+    logEvent('request_transcript', { email_provided: false });
+    setIsModalOpen(true);
+  }
 
   const AnalysisCard = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <Card className="bg-background/30 border-border/10 flex-1 min-w-[280px]">
@@ -137,12 +144,23 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
         </Card>
       </div>
 
+       {/* Ad Banner Placeholder */}
+      <div className="w-full max-w-lg my-4">
+        <div 
+            className="h-24 bg-secondary rounded-lg flex items-center justify-center text-center text-muted-foreground border border-border"
+            data-ai-hint="advertisement"
+            onClick={() => logEvent('ad_click', { ad_format: 'banner', ad_unit_name: 'analysis_screen_banner' })}
+        >
+            <p className="text-sm">Ad Unit 2: Analysis Screen Banner <br />(ca-app-pub-3940256099942544/6300978111)</p>
+        </div>
+      </div>
+
       <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
         <Button onClick={onPlayAgain} size="lg">
           <RefreshCw />
           Play Again
         </Button>
-        <Button onClick={() => setIsModalOpen(true)} variant="outline" size="lg">
+        <Button onClick={handleOpenEmailModal} variant="outline" size="lg">
           <Mail />
           Email Story
         </Button>

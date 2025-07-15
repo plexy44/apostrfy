@@ -2,10 +2,18 @@
  * @fileoverview This page outlines the application's privacy policy.
  * It serves as a placeholder for official legal content.
  */
+"use client";
+
+import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import { logEvent } from '@/lib/analytics';
 
 export default function PrivacyPolicyPage() {
+  useEffect(() => {
+    logEvent('screen_view', { screen_name: 'privacy_policy' });
+  }, []);
+
   return (
     <div className="container mx-auto max-w-3xl py-12 px-4">
       <Card className="glassmorphism">

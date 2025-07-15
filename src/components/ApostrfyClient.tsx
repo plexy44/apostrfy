@@ -75,10 +75,12 @@ export default function ApostrfyClient() {
 
 
   useEffect(() => {
+    logEvent('screen_view', { screen_name: 'loading_screen' });
     if (isFirstVisit === undefined) {
       return; // Wait until the hook determines the visit status
     }
     if (isFirstVisit) {
+      logEvent('screen_view', { screen_name: 'onboarding_screen' });
       setGameState({ status: 'onboarding', step: 1 });
     } else {
       setGameState({ status: 'menu' });
@@ -86,6 +88,7 @@ export default function ApostrfyClient() {
   }, [isFirstVisit]);
 
   const handleOnboardingComplete = () => {
+    logEvent('onboarding_completed', {});
     setHasVisited();
     setComingFromOnboarding(true);
     setGameState({ status: "menu" });
@@ -93,6 +96,7 @@ export default function ApostrfyClient() {
 
   const handleStartGame = async (trope: Trope, duration: number, analyticsName: 'lightning' | 'minute' | 'twice_a_minute') => {
     logEvent('start_game', { game_mode: 'interactive', game_duration: analyticsName });
+    logEvent('screen_view', { screen_name: 'game_screen' });
     setGameMode('interactive');
     setSettings({ trope, duration });
     setStory([]);
@@ -107,6 +111,7 @@ export default function ApostrfyClient() {
     setGameState({ status: "generating_initial_story" });
 
     try {
+      const aiStartTime = Date.now();
       const input: GenerateStoryContentInput = {
         trope,
         duration: duration / 60, // Pass duration in minutes to AI
@@ -116,6 +121,8 @@ export default function ApostrfyClient() {
         persona2: uniquePersonas[1],
       };
       const result = await generateStoryContent(input);
+      const aiEndTime = Date.now();
+      logEvent('ai_turn_generated', { generation_time_ms: aiEndTime - aiStartTime, persona_1: uniquePersonas[0].name, persona_2: uniquePersonas[1].name });
       setStory([{ speaker: "ai", line: result.aiResponse }]);
       setGameState({ status: "playing" });
     } catch (error) {
@@ -127,6 +134,7 @@ export default function ApostrfyClient() {
 
   const handleStartSimulation = async (trope: Trope) => {
     logEvent('start_game', { game_mode: 'simulation', game_duration: 'lightning' });
+    logEvent('screen_view', { screen_name: 'game_screen' });
     setSettings({ trope, duration: 30 }); // Simulation is now 30 seconds
     setStory([]);
     setComingFromOnboarding(false);
@@ -141,6 +149,7 @@ export default function ApostrfyClient() {
     setGameState({ status: "generating_initial_story" });
 
     try {
+      const aiStartTime = Date.now();
       const input: GenerateSimulationContentInput = {
         trope,
         history: [],
@@ -148,6 +157,8 @@ export default function ApostrfyClient() {
         otherPersona: uniquePersonas[1],
       };
       const result = await generateSimulationContent(input);
+      const aiEndTime = Date.now();
+      logEvent('ai_turn_generated', { generation_time_ms: aiEndTime - aiStartTime, persona_1: uniquePersonas[0].name, persona_2: uniquePersonas[1].name });
       setStory([{ speaker: "user", line: result.aiResponse, personaName: uniquePersonas[0].name }]);
       setGameState({ status: "playing" });
     } catch (error) {
@@ -172,6 +183,7 @@ export default function ApostrfyClient() {
 
       setIsAiTyping(true);
       try {
+        const aiStartTime = Date.now();
         const input: GenerateSimulationContentInput = {
           trope: settings.trope!,
           history: story,
@@ -179,6 +191,8 @@ export default function ApostrfyClient() {
           otherPersona,
         };
         const result = await generateSimulationContent(input);
+        const aiEndTime = Date.now();
+        logEvent('ai_turn_generated', { generation_time_ms: aiEndTime - aiStartTime, persona_1: personaToEmbody.name, persona_2: otherPersona.name });
         setStory(prev => [...prev, { speaker: nextSpeakerLabel, line: result.aiResponse, personaName: personaToEmbody.name }]);
       } catch (error) {
         console.error("Failed to get AI simulation response:", error);
@@ -194,13 +208,17 @@ export default function ApostrfyClient() {
   }, [story, gameMode, gameState.status, sessionPersonas, settings.trope, isAiTyping, isAdPaused]);
 
 
-  const handleUserSubmit = async (userInput: string) => {
+  const handleUserSubmit = async (userInput: string, turnTime: number) => {
     if (!settings.trope || !sessionPersonas || gameMode === 'simulation' || isAdPaused) return;
+
+    logEvent('user_turn_taken', { turn_time_seconds: Math.round(turnTime), word_count: userInput.split(' ').length });
+    
     const newStory = [...story, { speaker: "user", line: userInput }] as StoryPart[];
     setStory(newStory);
     setIsAiTyping(true);
 
     try {
+      const aiStartTime = Date.now();
       const input: GenerateStoryContentInput = {
         trope: settings.trope,
         duration: settings.duration / 60, // Pass duration in minutes
@@ -210,6 +228,8 @@ export default function ApostrfyClient() {
         persona2: sessionPersonas[1],
       };
       const result = await generateStoryContent(input);
+      const aiEndTime = Date.now();
+      logEvent('ai_turn_generated', { generation_time_ms: aiEndTime - aiStartTime, persona_1: sessionPersonas[0].name, persona_2: sessionPersonas[1].name });
       setStory(prev => [...prev, { speaker: "ai", line: result.aiResponse }]);
     } catch (error) {
       console.error("Failed to get AI response:", error);
@@ -221,7 +241,10 @@ export default function ApostrfyClient() {
 
   const handleEndGame = async () => {
     setGameState({ status: "generating_summary" });
+    logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'end_of_game_interstitial' });
+
     try {
+      logEvent('screen_view', { screen_name: 'analysis_screen' });
       const fullStory = story.map(part => `${part.personaName || part.speaker.toUpperCase()}: ${part.line}`).join('\n');
       const fullStoryRaw = story.map(p => p.line).join('\n');
       
@@ -232,6 +255,7 @@ export default function ApostrfyClient() {
 
       if (gameMode === 'interactive' && analysisContent.trim() === "") {
         // Handle case with no user input
+        logEvent('complete_game', { story_length: story.length, final_mood: 'Serenity' });
         setAnalysis({
           title: "An Unwritten Tale",
           trope: settings.trope!,
@@ -263,6 +287,8 @@ export default function ApostrfyClient() {
       const winner = styleResult.styleMatches[0];
       const famousQuote = quotes[winner] ? { author: winner, quote: quotes[winner] } : null;
 
+      logEvent('complete_game', { story_length: story.length, final_mood: moodResult.primaryEmotion });
+      
       setAnalysis({
         title: titleResult.title,
         trope: settings.trope!,
@@ -286,6 +312,7 @@ export default function ApostrfyClient() {
       console.error("Failed to generate sentiment snapshot:", error);
       toast({ variant: "destructive", title: "Analysis Error", description: "Could not generate the full story analysis. Please try again." });
       // Fallback analysis
+      logEvent('complete_game', { story_length: story.length, final_mood: 'Melancholy' });
       setAnalysis({
         title: "A Story Untold",
         trope: settings.trope || "Freeflow",

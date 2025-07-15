@@ -25,7 +25,7 @@ interface GameScreenProps {
   story: StoryPart[];
   duration: number; // Duration is in seconds
   isAiTyping: boolean;
-  onUserSubmit: (input: string) => void;
+  onUserSubmit: (input: string, turnTime: number) => void;
   onEndGame: () => void;
   onQuitRequest: () => void;
   gameMode: 'interactive' | 'simulation';
@@ -99,6 +99,7 @@ const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused, classN
 export default function GameScreen({ trope, story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest, gameMode, onPauseForAd, isAdPaused }: GameScreenProps) {
   const [userInput, setUserInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const turnTimerRef = useRef<number>(Date.now());
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -107,8 +108,10 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (userInput.trim() && !isAiTyping) {
-      onUserSubmit(userInput.trim());
+      const turnTime = (Date.now() - turnTimerRef.current) / 1000;
+      onUserSubmit(userInput.trim(), turnTime);
       setUserInput("");
+      turnTimerRef.current = Date.now();
     }
   };
 
