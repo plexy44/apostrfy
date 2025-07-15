@@ -256,121 +256,118 @@ export default function ApostrfyClient() {
     logEvent('screen_view', { screen_name: 'analysis_screen' });
 
     try {
-      const fullStory = story.map(part => `${part.personaName || part.speaker.toUpperCase()}: ${part.line}`).join('\n');
-      const fullStoryRaw = story.map(p => p.line).join('\n');
-      
-      const analysisContent = story.filter(part => part.speaker === "user").map(part => part.line).join("\n");
+        const fullStory = story.map(part => `${part.personaName || part.speaker.toUpperCase()}: ${part.line}`).join('\n');
+        const fullStoryRaw = story.map(p => p.line).join('\n');
+        const analysisContent = story.filter(part => part.speaker === "user").map(part => part.line).join("\n");
 
-      // Handle case with no user input to prevent AI errors
-      if (gameMode === 'interactive' && analysisContent.trim() === "") {
-        logEvent('complete_game', { story_length: story.length, final_mood: 'N/A' });
-        const finalAnalysis: GameAnalysis = {
-          storyId: "not_saved",
-          title: "An Unwritten Tale",
-          trope: settings.trope!,
-          quoteBanner: "The story concluded, its words echoing in the quiet.",
-          mood: { primaryEmotion: "Serenity", confidenceScore: 0.8 },
-          style: { primaryMatch: "The Silent Observer", secondaryMatch: "The Patient Chronicler" },
-          famousQuote: null,
-          keywords: ['Reflection', 'Silence', 'Stillness', 'Pause', 'Contemplation', 'End'],
-          finalScript: "The page is blank. The story was not written.",
-          story: story,
-        };
-        setAnalysis(finalAnalysis);
-        setGameState({ status: "gameover" });
-        return;
-      }
-      
-      let titleResult = { title: "A Story" };
-      try {
-        titleResult = await generateStoryTitle({ fullStory: fullStoryRaw });
-      } catch (e) { console.error("Title generation failed:", e); }
-
-      let quoteResult = { quote: "Every story has an end." };
-      try {
-        quoteResult = await generateQuoteBanner({ fullStory: fullStoryRaw });
-      } catch (e) { console.error("Quote generation failed:", e); }
-
-      let moodResult = { primaryEmotion: "Melancholy" as const, confidenceScore: 0.5 };
-      try {
-        moodResult = await generateMoodAnalysis({ userContent: analysisContent });
-      } catch (e) { console.error("Mood analysis failed:", e); }
-      
-      let styleResult = { styleMatches: ["The Storyteller", "The Dreamer"] };
-      try {
-        if (gameMode === 'simulation' && sessionPersonas) {
-          styleResult = { styleMatches: [sessionPersonas[0].name, sessionPersonas[1].name] };
-        } else {
-          styleResult = await generateStyleMatch({ userContent: analysisContent, personas: JSON.stringify(inspirationalPersonas) });
+        if (gameMode === 'interactive' && analysisContent.trim() === "") {
+            logEvent('complete_game', { story_length: story.length, final_mood: 'N/A' });
+            const finalAnalysis: GameAnalysis = {
+                storyId: "not_saved",
+                title: "An Unwritten Tale",
+                trope: settings.trope!,
+                quoteBanner: "The story concluded, its words echoing in the quiet.",
+                mood: { primaryEmotion: "Serenity", confidenceScore: 0.8 },
+                style: { primaryMatch: "The Silent Observer", secondaryMatch: "The Patient Chronicler" },
+                famousQuote: null,
+                keywords: ['Reflection', 'Silence', 'Stillness', 'Pause', 'Contemplation', 'End'],
+                finalScript: "The page is blank. The story was not written.",
+                story: story,
+            };
+            setAnalysis(finalAnalysis);
+            setGameState({ status: "gameover" });
+            return;
         }
-      } catch (e) { console.error("Style match failed:", e); }
 
-      let keywordsResult = { keywords: ['Mystery', 'Suspense', 'Hope', 'Wonder', 'Resolve'] };
-      try {
-        keywordsResult = await generateStoryKeywords({ userContent: analysisContent });
-      } catch (e) { console.error("Keywords generation failed:", e); }
+        const [
+            titleResult,
+            quoteResult,
+            moodResult,
+            styleResult,
+            keywordsResult,
+            scriptResult
+        ] = await Promise.allSettled([
+            generateStoryTitle({ fullStory: fullStoryRaw }),
+            generateQuoteBanner({ fullStory: fullStoryRaw }),
+            generateMoodAnalysis({ userContent: analysisContent }),
+            (gameMode === 'simulation' && sessionPersonas)
+                ? Promise.resolve({ styleMatches: [sessionPersonas[0].name, sessionPersonas[1].name] })
+                : generateStyleMatch({ userContent: analysisContent, personas: JSON.stringify(inspirationalPersonas) }),
+            generateStoryKeywords({ userContent: analysisContent }),
+            generateFinalScript({ fullStory })
+        ]);
 
-      let scriptResult = { finalScript: fullStoryRaw };
-      try {
-        scriptResult = await generateFinalScript({ fullStory });
-      } catch (e) { console.error("Script generation failed:", e); }
+        const getResult = <T, >(result: PromiseSettledResult<T>, defaultValue: T, name: string): T => {
+            if (result.status === 'fulfilled') {
+                return result.value;
+            }
+            console.error(`${name} generation failed:`, result.reason);
+            return defaultValue;
+        };
 
-      const winner = styleResult.styleMatches[0];
-      const famousQuote = quotes[winner] ? { author: winner, quote: quotes[winner] } : null;
+        const title = getResult(titleResult, { title: "A Story" }, "Title").title;
+        const quote = getResult(quoteResult, { quote: "Every story has an end." }, "Quote").quote;
+        const mood = getResult(moodResult, { primaryEmotion: "Melancholy" as const, confidenceScore: 0.5 }, "Mood");
+        const style = getResult(styleResult, { styleMatches: ["The Storyteller", "The Dreamer"] }, "Style");
+        const keywords = getResult(keywordsResult, { keywords: ['Mystery', 'Suspense', 'Hope', 'Wonder', 'Resolve'] }, "Keywords").keywords;
+        const finalScript = getResult(scriptResult, { finalScript: fullStoryRaw }, "Script").finalScript;
 
-      logEvent('complete_game', { story_length: story.length, final_mood: moodResult.primaryEmotion });
-      
-      const preSaveAnalysis: Omit<GameAnalysis, 'storyId'> = {
-        title: titleResult.title,
-        trope: settings.trope!,
-        quoteBanner: quoteResult.quote,
-        mood: {
-          primaryEmotion: moodResult.primaryEmotion,
-          confidenceScore: moodResult.confidenceScore,
-        },
-        style: {
-          primaryMatch: styleResult.styleMatches[0],
-          secondaryMatch: styleResult.styleMatches[1],
-        },
-        famousQuote,
-        keywords: keywordsResult.keywords,
-        finalScript: scriptResult.finalScript,
-        story: story,
-      };
+        const winner = style.styleMatches[0];
+        const famousQuote = quotes[winner] ? { author: winner, quote: quotes[winner] } : null;
 
-      try {
-        const storyId = await saveStoryToFirestore({
-            transcript: story,
-            analysis: preSaveAnalysis,
-            trope: preSaveAnalysis.trope,
-            title: preSaveAnalysis.title,
-        });
-        setAnalysis({ ...preSaveAnalysis, storyId });
-      } catch (e) {
-        console.error("Failed to save story to Firestore:", e);
-        toast({ variant: "destructive", title: "Save Error", description: "Could not save story to the cloud." });
-        setAnalysis({ ...preSaveAnalysis, storyId: "save_failed" });
-      }
+        logEvent('complete_game', { story_length: story.length, final_mood: mood.primaryEmotion });
+        
+        const preSaveAnalysis: Omit<GameAnalysis, 'storyId'> = {
+            title,
+            trope: settings.trope!,
+            quoteBanner: quote,
+            mood: {
+                primaryEmotion: mood.primaryEmotion,
+                confidenceScore: mood.confidenceScore,
+            },
+            style: {
+                primaryMatch: style.styleMatches[0],
+                secondaryMatch: style.styleMatches[1],
+            },
+            famousQuote,
+            keywords,
+            finalScript,
+            story: story,
+        };
 
-      setGameState({ status: "gameover" });
+        try {
+            const storyId = await saveStoryToFirestore({
+                transcript: story,
+                analysis: preSaveAnalysis,
+                trope: preSaveAnalysis.trope,
+                title: preSaveAnalysis.title,
+            });
+            setAnalysis({ ...preSaveAnalysis, storyId });
+        } catch (e) {
+            console.error("Failed to save story to Firestore:", e);
+            toast({ variant: "destructive", title: "Save Error", description: "Could not save story to the cloud." });
+            setAnalysis({ ...preSaveAnalysis, storyId: "save_failed" });
+        }
+
+        setGameState({ status: "gameover" });
     } catch (error) {
-      console.error("A critical error occurred during game end analysis:", error);
-      toast({ variant: "destructive", title: "Analysis Error", description: "Could not generate the full story analysis." });
-      
-      logEvent('complete_game', { story_length: story.length, final_mood: 'Error' });
-      setAnalysis({
-        storyId: "error_state",
-        title: "A Story Untold",
-        trope: settings.trope || "Freeflow",
-        quoteBanner: "The story ended, a universe of feeling left in its wake.",
-        mood: { primaryEmotion: "Melancholy", confidenceScore: 0.7 },
-        style: { primaryMatch: "The Storyteller", secondaryMatch: "The Dreamer" },
-        famousQuote: null,
-        keywords: ['Mystery', 'Suspense', 'Hope', 'Wonder', 'Resolve'],
-        finalScript: story.map(part => part.line).join('\n\n'),
-        story: story,
-      });
-      setGameState({ status: "gameover" });
+        console.error("A critical error occurred during game end analysis:", error);
+        toast({ variant: "destructive", title: "Analysis Error", description: "Could not generate the full story analysis." });
+        
+        logEvent('complete_game', { story_length: story.length, final_mood: 'Error' });
+        setAnalysis({
+            storyId: "error_state",
+            title: "A Story Untold",
+            trope: settings.trope || "Freeflow",
+            quoteBanner: "The story ended, a universe of feeling left in its wake.",
+            mood: { primaryEmotion: "Melancholy", confidenceScore: 0.7 },
+            style: { primaryMatch: "The Storyteller", secondaryMatch: "The Dreamer" },
+            famousQuote: null,
+            keywords: ['Mystery', 'Suspense', 'Hope', 'Wonder', 'Resolve'],
+            finalScript: story.map(part => part.line).join('\n\n'),
+            story: story,
+        });
+        setGameState({ status: "gameover" });
     }
   };
 
