@@ -161,7 +161,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
         <ScrollArea className="flex-grow pr-2 md:pr-4">
           <div className="space-y-4 md:space-y-6">
             {story.map((part, index) => {
-                const isUserSpeaker = gameMode === 'interactive' ? part.speaker === 'user' : index % 2 === 0;
+                const isUserSpeaker = part.speaker === 'user';
                 const alignment = isUserSpeaker ? 'items-end' : 'items-start';
                 const bubbleStyles = isUserSpeaker
                   ? 'bg-primary/90 text-primary-foreground rounded-br-none'
