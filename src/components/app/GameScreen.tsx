@@ -48,7 +48,6 @@ const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused, classN
     
     // Mid-game ad logic for "Twice a minute" (120s) mode
     if (durationInSeconds === 120 && timeLeft === 60) {
-        logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'mid_game_interstitial' });
         onPauseForAd();
         return; // Pause the timer until the ad is closed
     }
@@ -99,11 +98,19 @@ const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused, classN
 export default function GameScreen({ trope, story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest, gameMode, onPauseForAd, isAdPaused }: GameScreenProps) {
   const [userInput, setUserInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const turnTimerRef = useRef<number>(Date.now());
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [story]);
+
+  // Effect to focus the input when it's the user's turn
+  useEffect(() => {
+    if (!isAiTyping && gameMode === 'interactive' && !isAdPaused) {
+      inputRef.current?.focus();
+    }
+  }, [isAiTyping, gameMode, isAdPaused]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,12 +185,12 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
         <form onSubmit={handleSubmit} className="flex items-center gap-2 pt-4">
           <Input
+            ref={inputRef}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             placeholder={isAdPaused ? "Game paused..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
             disabled={isAiTyping || gameMode === 'simulation' || isAdPaused}
             className="flex-grow h-12 text-base"
-            autoFocus
           />
           <Button type="submit" size="icon" className="h-12 w-12" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation' || isAdPaused}>
             {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
