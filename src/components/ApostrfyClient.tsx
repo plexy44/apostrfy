@@ -27,7 +27,6 @@ import GameScreen from "@/components/app/GameScreen";
 import GameOverScreen from "@/components/app/GameOverScreen";
 import AppFooter from "@/components/app/AppFooter";
 import AdOverlay from "@/components/app/AdOverlay";
-import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,7 +39,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useIsFirstVisit } from "@/hooks/useIsFirstVisit";
-import { usePastStories } from "@/hooks/usePastStories";
 import personasData from "@/lib/personas.json";
 import famousQuotesData from "@/lib/famousQuotes.json";
 import { logEvent } from "@/lib/analytics";
@@ -68,11 +66,10 @@ export default function ApostrfyClient() {
   const [analysis, setAnalysis] = useState<GameAnalysis | null>(null);
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [comingFromOnboarding, setComingFromOnboarding] = useState(false);
-  const [quitDialogState, setQuitDialogState] = useState<'closed' | 'confirm_quit' | 'confirm_save'>('closed');
+  const [isQuitDialogOpen, setIsQuitDialogOpen] = useState(false);
   const [sessionPersonas, setSessionPersonas] = useState<[Persona, Persona] | null>(null);
   const [isAdPaused, setIsAdPaused] = useState(false);
   const { toast } = useToast();
-  const { saveStory: saveStoryToDevice } = usePastStories();
   const inputRef = useRef<HTMLInputElement>(null);
   const analyticsFired = useRef(new Set<string>());
 
@@ -428,39 +425,17 @@ export default function ApostrfyClient() {
 
   const handleQuitRequest = () => {
     logEvent('quit_game_prompted', { story_length: story.length, game_mode: gameMode });
-    setQuitDialogState('confirm_quit');
+    setIsQuitDialogOpen(true);
   };
-
+  
   const handleConfirmQuit = () => {
-    if (gameMode === 'simulation' || story.length < 2) {
-      handleQuitWithoutSaving();
-    } else {
-      setQuitDialogState('confirm_save');
-    }
-  };
-
-  const handleSaveAndQuit = () => {
-    logEvent('quit_game_confirmed', { saved_story: true, story_length: story.length, game_mode: gameMode });
-    if (settings.trope && gameMode === 'interactive') { 
-      saveStoryToDevice({
-        trope: settings.trope,
-        duration: settings.duration,
-        story: story,
-      });
-      toast({ title: "Story Saved", description: "Your story has been saved to your device." });
-    }
-    handlePlayAgain();
-    setQuitDialogState('closed');
-  };
-
-  const handleQuitWithoutSaving = () => {
     logEvent('quit_game_confirmed', { saved_story: false, story_length: story.length, game_mode: gameMode });
     handlePlayAgain();
-    setQuitDialogState('closed');
+    setIsQuitDialogOpen(false);
   };
   
   const handleCancelQuit = () => {
-    setQuitDialogState('closed');
+    setIsQuitDialogOpen(false);
   };
 
   const handleEmailSubmit = async (email: string) => {
@@ -479,6 +454,7 @@ export default function ApostrfyClient() {
                 line: part.line,
                 personaName: part.personaName || null,
             })),
+            famousQuote: analysis.famousQuote || null,
         };
 
         // Step 1: Save the story to Firestore.
@@ -555,33 +531,17 @@ export default function ApostrfyClient() {
       </main>
       {gameState.status !== "playing" && gameState.status !== 'generating_summary' && gameState.status !== 'generating_initial_story' && <AppFooter />}
 
-      <AlertDialog open={quitDialogState === 'confirm_quit'} onOpenChange={(open) => !open && handleCancelQuit()}>
+      <AlertDialog open={isQuitDialogOpen} onOpenChange={setIsQuitDialogOpen}>
         <AlertDialogContent className="glassmorphism">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure you want to quit?</AlertDialogTitle>
             <AlertDialogDescription>
-              {gameMode === 'interactive' ? 'Your progress in the current story will not be saved automatically.' : 'This simulation will be cancelled.'}
+              Your progress will be lost. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={handleCancelQuit}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmQuit}>Quit</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={quitDialogState === 'confirm_save'} onOpenChange={(open) => !open && handleCancelQuit()}>
-        <AlertDialogContent className="glassmorphism">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Save this story?</AlertDialogTitle>
-            <AlertDialogDescription>
-              You can store up to 5 stories to view later. Simulations cannot be saved.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-             <Button variant="ghost" onClick={handleCancelQuit}>Cancel</Button>
-            <Button variant="outline" onClick={handleQuitWithoutSaving}>Quit Without Saving</Button>
-            <Button onClick={handleSaveAndQuit} disabled={gameMode === 'simulation'}>Save and Quit</Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
