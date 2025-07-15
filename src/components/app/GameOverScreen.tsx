@@ -23,48 +23,32 @@ import { motion } from "framer-motion";
 import MoodWheel from "./MoodWheel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { logEvent } from "@/lib/analytics";
-import { saveSubscriberToFirestore } from "@/lib/firestore";
 
 interface GameOverScreenProps {
   analysis: GameAnalysis;
   onPlayAgain: () => void;
+  onEmailSubmit: (email: string, storyId: string) => Promise<boolean>;
 }
 
-export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreenProps) {
+export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }: GameOverScreenProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleEmailSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleEmailFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (analysis.storyId === 'not_saved' || analysis.storyId === 'save_failed') {
-      toast({ variant: "destructive", title: "Error", description: "Cannot email a story that could not be saved." });
-      return;
-    }
-    
     setIsSubmitting(true);
+    
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     
-    logEvent('request_transcript', { email_provided: true });
+    const success = await onEmailSubmit(email, analysis.storyId);
 
-    try {
-      await saveSubscriberToFirestore({
-        email: email,
-        storyId: analysis.storyId,
-      });
-
-      toast({
-        title: "Success!",
-        description: "Your story is on its way to your inbox.",
-      });
+    if (success) {
       setIsModalOpen(false);
-    } catch (error) {
-      console.error("Failed to save subscriber:", error);
-      toast({ variant: "destructive", title: "Submission Error", description: "Could not process your request. Please try again." });
-    } finally {
-      setIsSubmitting(false);
     }
+    
+    setIsSubmitting(false);
   };
 
 
@@ -197,7 +181,7 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
               Enter your email below to receive a copy of your co-created story.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleEmailSubmit}>
+          <form onSubmit={handleEmailFormSubmit}>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="email" className="text-right">Email</Label>
@@ -222,3 +206,5 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
     </motion.div>
   );
 }
+
+    

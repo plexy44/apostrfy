@@ -27,7 +27,7 @@ const db = getFirestore();
 
 interface StoryToSave {
     transcript: StoryPart[];
-    analysis: GameAnalysis;
+    analysis: Omit<GameAnalysis, 'storyId'>;
     trope: string;
     title: string;
 }
@@ -73,3 +73,5 @@ export const saveSubscriberToFirestore = async (subscriberData: SubscriberData) 
         throw new Error("Could not save subscriber to Firestore.");
     }
 };
+
+    

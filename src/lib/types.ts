@@ -64,3 +64,5 @@ export interface GameAnalysis {
   finalScript: string;
   story: StoryPart[];
 }
+
+    

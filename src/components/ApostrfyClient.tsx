@@ -44,7 +44,7 @@ import { usePastStories } from "@/hooks/usePastStories";
 import personasData from "@/lib/personas.json";
 import famousQuotesData from "@/lib/famousQuotes.json";
 import { logEvent } from "@/lib/analytics";
-import { saveStoryToFirestore } from "@/lib/firestore";
+import { saveStoryToFirestore, saveSubscriberToFirestore } from "@/lib/firestore";
 
 const { inspirationalPersonas } = personasData as { inspirationalPersonas: InspirationalPersonas };
 const quotes = famousQuotesData as Record<string, string>;
@@ -254,9 +254,9 @@ export default function ApostrfyClient() {
           : story.filter(part => part.speaker === "user")
       ).map(part => part.line).join("\n");
 
+      // Handle case with no user input to prevent AI errors
       if (gameMode === 'interactive' && analysisContent.trim() === "") {
-        // Handle case with no user input
-        logEvent('complete_game', { story_length: story.length, final_mood: 'Serenity' });
+        logEvent('complete_game', { story_length: story.length, final_mood: 'N/A' });
         const finalAnalysis: GameAnalysis = {
           storyId: "not_saved",
           title: "An Unwritten Tale",
@@ -292,8 +292,7 @@ export default function ApostrfyClient() {
 
       logEvent('complete_game', { story_length: story.length, final_mood: moodResult.primaryEmotion });
       
-      const finalAnalysis: GameAnalysis = {
-        storyId: "temp",
+      const preSaveAnalysis: Omit<GameAnalysis, 'storyId'> = {
         title: titleResult.title,
         trope: settings.trope!,
         quoteBanner: quoteResult.quote,
@@ -314,15 +313,15 @@ export default function ApostrfyClient() {
       try {
         const storyId = await saveStoryToFirestore({
             transcript: story,
-            analysis: finalAnalysis,
-            trope: finalAnalysis.trope,
-            title: finalAnalysis.title,
+            analysis: preSaveAnalysis,
+            trope: preSaveAnalysis.trope,
+            title: preSaveAnalysis.title,
         });
-        setAnalysis({ ...finalAnalysis, storyId });
+        setAnalysis({ ...preSaveAnalysis, storyId });
       } catch (e) {
         console.error("Failed to save story to Firestore:", e);
         toast({ variant: "destructive", title: "Save Error", description: "Could not save story to the cloud." });
-        setAnalysis({ ...finalAnalysis, storyId: "save_failed" });
+        setAnalysis({ ...preSaveAnalysis, storyId: "save_failed" });
       }
 
 
@@ -393,6 +392,31 @@ export default function ApostrfyClient() {
   const handleCancelQuit = () => {
     setQuitDialogState('closed');
   };
+
+  const handleEmailSubmit = async (email: string, storyId: string) => {
+    if (storyId === 'not_saved' || storyId === 'save_failed') {
+      toast({ variant: "destructive", title: "Error", description: "Cannot email a story that could not be saved." });
+      return false;
+    }
+    
+    logEvent('request_transcript', { email_provided: true });
+
+    try {
+      await saveSubscriberToFirestore({
+        email: email,
+        storyId: storyId,
+      });
+      toast({
+        title: "Success!",
+        description: "Your story is on its way to your inbox.",
+      });
+      return true;
+    } catch (error) {
+      console.error("Failed to save subscriber:", error);
+      toast({ variant: "destructive", title: "Submission Error", description: "Could not process your request. Please try again." });
+      return false;
+    }
+  };
   
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -424,7 +448,14 @@ export default function ApostrfyClient() {
               />
             )}
             {gameState.status === "generating_summary" && <LoadingScreen key="generating" />}
-            {gameState.status === "gameover" && analysis && <GameOverScreen key="gameover" analysis={analysis} onPlayAgain={handlePlayAgain} />}
+            {gameState.status === "gameover" && analysis && (
+              <GameOverScreen 
+                key="gameover" 
+                analysis={analysis} 
+                onPlayAgain={handlePlayAgain}
+                onEmailSubmit={handleEmailSubmit}
+              />
+            )}
         </AnimatePresence>
          <AdOverlay isVisible={isAdPaused} onClose={() => setIsAdPaused(false)} />
       </div>
@@ -463,3 +494,5 @@ export default function ApostrfyClient() {
     </div>
   );
 }
+
+    
