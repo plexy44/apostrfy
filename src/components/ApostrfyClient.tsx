@@ -44,6 +44,7 @@ import { usePastStories } from "@/hooks/usePastStories";
 import personasData from "@/lib/personas.json";
 import famousQuotesData from "@/lib/famousQuotes.json";
 import { logEvent } from "@/lib/analytics";
+import { saveStoryToFirestore } from "@/lib/firestore";
 
 const { inspirationalPersonas } = personasData as { inspirationalPersonas: InspirationalPersonas };
 const quotes = famousQuotesData as Record<string, string>;
@@ -256,7 +257,8 @@ export default function ApostrfyClient() {
       if (gameMode === 'interactive' && analysisContent.trim() === "") {
         // Handle case with no user input
         logEvent('complete_game', { story_length: story.length, final_mood: 'Serenity' });
-        setAnalysis({
+        const finalAnalysis: GameAnalysis = {
+          storyId: "not_saved",
           title: "An Unwritten Tale",
           trope: settings.trope!,
           quoteBanner: "The story concluded, its words echoing in the quiet.",
@@ -266,7 +268,8 @@ export default function ApostrfyClient() {
           keywords: ['Reflection', 'Silence', 'Stillness', 'Pause', 'Contemplation', 'End'],
           finalScript: "The page is blank. The story was not written.",
           story: story,
-        });
+        };
+        setAnalysis(finalAnalysis);
         setGameState({ status: "gameover" });
         return;
       }
@@ -289,7 +292,8 @@ export default function ApostrfyClient() {
 
       logEvent('complete_game', { story_length: story.length, final_mood: moodResult.primaryEmotion });
       
-      setAnalysis({
+      const finalAnalysis: GameAnalysis = {
+        storyId: "temp",
         title: titleResult.title,
         trope: settings.trope!,
         quoteBanner: quoteResult.quote,
@@ -305,7 +309,22 @@ export default function ApostrfyClient() {
         keywords: keywordsResult.keywords,
         finalScript: scriptResult.finalScript,
         story: story,
-      });
+      };
+
+      try {
+        const storyId = await saveStoryToFirestore({
+            transcript: story,
+            analysis: finalAnalysis,
+            trope: finalAnalysis.trope,
+            title: finalAnalysis.title,
+        });
+        setAnalysis({ ...finalAnalysis, storyId });
+      } catch (e) {
+        console.error("Failed to save story to Firestore:", e);
+        toast({ variant: "destructive", title: "Save Error", description: "Could not save story to the cloud." });
+        setAnalysis({ ...finalAnalysis, storyId: "save_failed" });
+      }
+
 
       setGameState({ status: "gameover" });
     } catch (error) {
@@ -314,6 +333,7 @@ export default function ApostrfyClient() {
       // Fallback analysis
       logEvent('complete_game', { story_length: story.length, final_mood: 'Melancholy' });
       setAnalysis({
+        storyId: "error_state",
         title: "A Story Untold",
         trope: settings.trope || "Freeflow",
         quoteBanner: "The story ended, a universe of feeling left in its wake.",
@@ -359,7 +379,7 @@ export default function ApostrfyClient() {
         duration: settings.duration,
         story: story,
       });
-      toast({ title: "Story Saved", description: "Your story has been saved." });
+      toast({ title: "Story Saved", description: "Your story has been saved to your device." });
     }
     handlePlayAgain();
     setQuitDialogState('closed');

@@ -18,11 +18,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, RefreshCw, Send } from "lucide-react";
+import { Mail, RefreshCw, Send, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import MoodWheel from "./MoodWheel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { logEvent } from "@/lib/analytics";
+import { saveSubscriberToFirestore } from "@/lib/firestore";
 
 interface GameOverScreenProps {
   analysis: GameAnalysis;
@@ -31,42 +32,41 @@ interface GameOverScreenProps {
 
 export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreenProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleEmailSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (analysis.storyId === 'not_saved' || analysis.storyId === 'save_failed') {
+      toast({ variant: "destructive", title: "Error", description: "Cannot email a story that could not be saved." });
+      return;
+    }
+    
+    setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     
-    // Task 4.4 (Analytics)
     logEvent('request_transcript', { email_provided: true });
 
-    // Task 4.2 / 4.3 (Backend Placeholder)
-    // In a real app, this would be handled by a secure backend.
-    // For now, we simulate the data structure for the Cloud Function trigger.
-    const storyId = `${analysis.title.replace(/\s+/g, '-')}-${Date.now()}`;
-    const subscriberDocument = {
-      email: email,
-      storyId: storyId,
-      submissionTimestamp: new Date().toISOString(),
-      storyContent: analysis.finalScript, // For simulation purposes
-      metadata: {
-        // These would be captured on the backend for accuracy
-        ipAddress: '127.0.0.1', 
-        browserType: navigator.userAgent,
-        operatingSystem: navigator.platform,
-      }
-    };
-    
-    console.log("[BACKEND] Simulating document creation in 'subscribers' collection:", subscriberDocument);
-    console.log("[BACKEND] This would trigger the 'sendStoryWithMailGun' Cloud Function.");
+    try {
+      await saveSubscriberToFirestore({
+        email: email,
+        storyId: analysis.storyId,
+      });
 
-    toast({
-      title: "Success!",
-      description: "Your story is on its way to your inbox.",
-    });
-    setIsModalOpen(false);
+      toast({
+        title: "Success!",
+        description: "Your story is on its way to your inbox.",
+      });
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Failed to save subscriber:", error);
+      toast({ variant: "destructive", title: "Submission Error", description: "Could not process your request. Please try again." });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   const handleOpenEmailModal = () => {
     setIsModalOpen(true);
@@ -92,8 +92,8 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
         &ldquo;{analysis.quoteBanner}&rdquo;
       </h2>
       
-      {/* Top Analysis Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-6">
+        {/* Left Column */}
         <div className="flex flex-col gap-6">
           <AnalysisCard title="Mood">
             <MoodWheel mood={analysis.mood.primaryEmotion} score={analysis.mood.confidenceScore} />
@@ -108,6 +108,7 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
             </div>
           </AnalysisCard>
         </div>
+        {/* Right Column */}
         <div className="flex flex-col gap-6">
           <AnalysisCard title="Style">
             <div className="text-center">
@@ -152,7 +153,7 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
                  <ScrollArea className="h-96 w-full rounded-md border bg-secondary/20 p-4">
                   <div className="space-y-6">
                     {analysis.story.map((part, index) => (
-                      <div key={index} className={`flex flex-col ${part.speaker === 'ai' ? 'items-start' : 'items-end'}`}>
+                      <div key={index} className={`flex flex-col animate-fade-in-up ${part.speaker === 'ai' ? 'items-start' : 'items-end'}`}>
                         <div className={`p-4 rounded-xl max-w-[85%] ${part.speaker === 'ai' ? 'bg-secondary rounded-bl-none' : 'bg-primary/90 text-primary-foreground rounded-br-none'}`}>
                           <p>{part.line}</p>
                         </div>
@@ -200,7 +201,7 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="email" className="text-right">Email</Label>
-                <Input id="email" name="email" type="email" placeholder="you@example.com" className="col-span-3" required />
+                <Input id="email" name="email" type="email" placeholder="you@example.com" className="col-span-3" required disabled={isSubmitting} />
               </div>
                <p className="text-xs text-muted-foreground col-span-4 px-1 pt-2">
                 By submitting, you agree to our terms and may receive future communications.
@@ -208,11 +209,11 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
             </div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="button" variant="secondary">Cancel</Button>
+                <Button type="button" variant="secondary" disabled={isSubmitting}>Cancel</Button>
               </DialogClose>
-              <Button type="submit">
-                <Send />
-                Send
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="animate-spin" /> : <Send />}
+                {isSubmitting ? "Sending..." : "Send"}
               </Button>
             </DialogFooter>
           </form>
