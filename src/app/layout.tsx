@@ -54,7 +54,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body className="font-body antialiased min-h-screen flex flex-col">
-        <div className="flex-grow">{children}</div>
+        <div className="flex-grow p-2 md:p-0">{children}</div>
         <Toaster />
       </body>
     </html>

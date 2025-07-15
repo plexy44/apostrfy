@@ -18,21 +18,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Loader, ArrowLeft, Timer, Hourglass } from "lucide-react";
 import Orb from "./Orb";
 import { cn } from "@/lib/utils";
-import { logEvent } from "@/lib/analytics";
-
-interface GameScreenProps {
-  trope: Trope;
-  story: StoryPart[];
-  duration: number; // Duration is in seconds
-  isAiTyping: boolean;
-  onUserSubmit: (input: string, turnTime: number) => void;
-  onEndGame: () => void;
-  onQuitRequest: () => void;
-  gameMode: 'interactive' | 'simulation';
-  onPauseForAd: () => void;
-  isAdPaused: boolean;
-  inputRef: React.RefObject<HTMLInputElement>;
-}
 
 const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused, className }: { durationInSeconds: number; onEndGame: () => void, onPauseForAd: () => void; isPaused: boolean; className?: string }) => {
   const [timeLeft, setTimeLeft] = useState(durationInSeconds);
@@ -126,7 +111,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   return (
     <motion.div
-      className="flex flex-col items-center justify-center h-full md:h-[90vh] w-full max-w-3xl mx-auto"
+      className="flex flex-col items-center justify-center h-full w-full max-w-3xl mx-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -137,7 +122,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
         <Button
           variant="ghost"
           size="icon"
-          className="absolute top-2 -left-12 md:top-4 md:-left-16 z-20 rounded-full"
+          className="absolute top-2 -left-1 md:top-4 md:-left-16 z-20 rounded-full"
           onClick={onQuitRequest}
           aria-label="Quit game"
           disabled={isTimerPaused}
@@ -158,8 +143,8 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
             <Orb size="tiny" isInteractive={true} className="flex-shrink-0" />
         </div>
         
-        <ScrollArea className="flex-grow pr-2 md:pr-4">
-          <div className="space-y-4 md:space-y-6">
+        <ScrollArea className="flex-grow pr-2">
+          <div className="space-y-4">
             {story.map((part, index) => {
                 const isUserSpeaker = part.speaker === 'user';
                 let alignment, bubbleStyles;
@@ -185,15 +170,15 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                         {part.personaName}
                       </p>
                     )}
-                    <div className={`p-3 md:p-4 rounded-xl max-w-[85%] ${bubbleStyles}`}>
-                      <p className="text-sm md:text-base">{part.line}</p>
+                    <div className={`p-3 rounded-xl max-w-[85%] ${bubbleStyles}`}>
+                      <p className="text-sm">{part.line}</p>
                     </div>
                   </div>
                 );
             })}
             {isAiTyping && (
               <div className="flex items-start">
-                 <div className="p-3 md:p-4 rounded-xl max-w-[85%] bg-secondary rounded-bl-none flex items-center space-x-2">
+                 <div className="p-3 rounded-xl max-w-[85%] bg-secondary rounded-bl-none flex items-center space-x-2">
                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.3s]"></div>
                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.15s]"></div>
                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
@@ -204,16 +189,16 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           </div>
         </ScrollArea>
 
-        <form onSubmit={handleSubmit} className="flex items-center gap-2 pt-2 md:pt-4">
+        <form onSubmit={handleSubmit} className="flex items-center gap-2 pt-2">
           <Input
             ref={inputRef}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             placeholder={isAiTyping ? "AI is thinking..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
             disabled={isTimerPaused || gameMode === 'simulation'}
-            className="flex-grow h-11 md:h-12 text-sm md:text-base"
+            className="flex-grow h-11 text-sm"
           />
-          <Button type="submit" size="icon" className="h-11 w-11 md:h-12 md:w-12" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation'}>
+          <Button type="submit" size="icon" className="h-11 w-11" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation'}>
             {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
           </Button>
         </form>

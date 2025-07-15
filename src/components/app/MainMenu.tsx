@@ -127,13 +127,13 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
     <button
       onClick={() => handleThemeSwitch(trope.name)}
       className={cn(
-        "p-3 md:p-4 rounded-lg border-2 text-left transition-all hover:border-accent w-full",
-        selectedTrope === trope.name ? "border-accent bg-accent/20 shadow-lg shadow-accent/50" : "border-border"
+        "p-3 rounded-lg border-2 text-left transition-all hover:border-accent w-full",
+        selectedTrope === trope.name ? "border-accent bg-accent/20 shadow-lg shadow-accent/20" : "border-border"
       )}
       {...props}
     >
-      <h3 className="font-headline text-base md:text-lg text-foreground">{trope.name}</h3>
-      <p className="text-xs md:text-sm text-muted-foreground">{trope.description}</p>
+      <h3 className="font-headline text-base text-foreground">{trope.name}</h3>
+      <p className="text-xs text-muted-foreground">{trope.description}</p>
     </button>
   );
 
@@ -146,19 +146,19 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="flex flex-col items-center text-center mb-4 md:mb-8">
-        <ApostrfyLogo className="w-40 h-auto mb-1 md:w-48 md:mb-2 text-foreground" />
-        <p className="font-headline text-muted-foreground tracking-widest text-sm md:text-base">connect || co-create</p>
+      <div className="flex flex-col items-center text-center mb-4 md:mb-6">
+        <ApostrfyLogo className="w-36 h-auto mb-1 md:w-48 md:mb-2 text-foreground" />
+        <p className="font-headline text-muted-foreground tracking-widest text-sm">connect || co-create</p>
       </div>
 
-      <div className="flex flex-col items-center gap-4 mb-4 md:mb-8">
+      <div className="flex flex-col items-center gap-4 mb-4">
         <Orb 
           layoutId="main-orb" 
           size="large" 
           isInteractive 
           onTransitionComplete={handleTransitionComplete} 
         />
-        <div className="w-full max-w-xs p-3 md:p-4 text-center rounded-lg glassmorphism">
+        <div className="w-full max-w-xs p-3 text-center rounded-lg glassmorphism">
             <p className="text-sm text-foreground/90 font-sans min-h-[3em] flex items-center justify-center">
               {displayedMessage}
               {isTyping && <span className="animate-pulse ml-1">|</span>}
@@ -166,13 +166,13 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
         </div>
       </div>
       
-      <Card className="w-full max-w-lg glassmorphism">
-        <CardHeader className="p-4 md:p-6">
-          <CardTitle className="font-headline text-xl md:text-2xl text-center text-foreground">Co-create a story</CardTitle>
-          <CardDescription className="text-center">First, choose a style for your AI companion.</CardDescription>
+      <Card className="w-full max-w-md glassmorphism">
+        <CardHeader className="p-4">
+          <CardTitle className="font-headline text-xl text-center text-foreground">Co-create a story</CardTitle>
+          <CardDescription className="text-center text-xs">First, choose a style for your AI companion.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6 p-4 md:p-6">
-           <div className="grid grid-cols-2 gap-2 md:gap-4">
+        <CardContent className="space-y-4 p-4">
+           <div className="grid grid-cols-2 gap-2">
             <AnimatePresence>
                 <TropeButton key={initialTropes[0].name} trope={initialTropes[0]} />
                 <TropeButton key={initialTropes[1].name} trope={initialTropes[1]} />
@@ -197,22 +197,24 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
                         </motion.div>
                     </>
                 ) : (
-                    <motion.div key={initialTropes[2].name} className="col-span-2 flex justify-center" layout>
-                         <TropeButton trope={initialTropes[2]} />
+                    <motion.div key="centered-trope" className="col-span-2 flex justify-center" layout>
+                         <div className="w-1/2">
+                            <TropeButton trope={initialTropes[2]} />
+                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
           </div>
 
-          <div className="space-y-2">
-            <h4 className="text-center font-headline text-foreground">Select Mode</h4>
+          <div className="space-y-2 pt-2">
+            <h4 className="text-center font-headline text-foreground text-sm">Select Mode</h4>
             <div className="flex justify-center gap-2">
               {DURATIONS.map((duration) => (
                 <Button
                   key={duration.value}
                   variant={selectedDuration === duration.value ? "default" : "secondary"}
                   onClick={() => handleDurationSelect(duration)}
-                  className="w-28 md:w-32"
+                  className="w-24 md:w-32"
                 >
                   {duration.label}
                 </Button>
@@ -222,12 +224,12 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
         </CardContent>
       </Card>
       
-      <div className="w-full max-w-lg flex flex-col items-center">
+      <div className="w-full max-w-md flex flex-col items-center">
         <Button
           onClick={handleStart}
           disabled={!selectedTrope}
           size="lg"
-          className="mt-6 md:mt-8 w-full font-headline text-lg"
+          className="mt-4 w-full font-headline text-lg"
         >
           Start Writing
         </Button>
@@ -236,14 +238,14 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
           disabled={!selectedTrope}
           variant="outline"
           size="lg"
-          className="mt-3 md:mt-4 w-full font-headline text-lg"
+          className="mt-2 w-full font-headline text-lg"
         >
           Simulate
         </Button>
         <Button
             onClick={handleRewardedAd}
             variant="link"
-            className="mt-2 md:mt-4 text-accent"
+            className="mt-2 text-accent"
         >
             <Gift className="mr-2 h-4 w-4" />
             Unlock a Secret Style (Ad)
