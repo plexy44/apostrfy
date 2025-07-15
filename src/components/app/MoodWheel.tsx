@@ -8,6 +8,8 @@
 import * as React from "react"
 import { Pie, PieChart, Cell } from "recharts"
 import type { Emotion } from "@/lib/types";
+import type { TooltipProps } from 'recharts';
+import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 import {
   ChartConfig,
@@ -34,6 +36,23 @@ interface MoodWheelProps {
     score: number;
 }
 
+const CustomTooltipContent = (props: TooltipProps<ValueType, NameType>) => {
+  const { active, payload } = props;
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    if (data.name !== 'Remaining' && data.value) {
+        return (
+          <div className="p-2 text-sm bg-background/80 backdrop-blur-sm rounded-md border border-border/20 shadow-lg">
+            <p className="font-bold" style={{ color: data.payload.fill }}>{`${data.name}`}</p>
+            <p className="text-foreground">{`Match: ${Math.round(Number(data.value) * 100)}%`}</p>
+          </div>
+        );
+    }
+  }
+  return null;
+};
+
+
 export default function MoodWheel({ mood, score }: MoodWheelProps) {
     const chartData = [
         { name: mood, value: score, fill: MOOD_COLORS_HSL[mood] },
@@ -57,7 +76,7 @@ export default function MoodWheel({ mood, score }: MoodWheelProps) {
       <PieChart>
         <ChartTooltip
           cursor={false}
-          content={<ChartTooltipContent hideLabel />}
+          content={<CustomTooltipContent />}
         />
         <Pie
           data={chartData}
