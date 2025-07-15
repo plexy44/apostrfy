@@ -124,8 +124,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
   const isTyping = startTyping && displayedMessage.length < orbMessage.length;
   
   const TropeButton = ({ trope, ...props }: { trope: { name: Trope, description: string }, [key: string]: any }) => (
-    <motion.button
-      key={trope.name}
+    <button
       onClick={() => handleThemeSwitch(trope.name)}
       className={cn(
         "p-3 md:p-4 rounded-lg border-2 text-left transition-all hover:border-accent w-full",
@@ -135,7 +134,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
     >
       <h3 className="font-headline text-base md:text-lg text-foreground">{trope.name}</h3>
       <p className="text-xs md:text-sm text-muted-foreground">{trope.description}</p>
-    </motion.button>
+    </button>
   );
 
 
@@ -175,17 +174,20 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
         <CardContent className="space-y-6 p-4 md:p-6">
            <div className="grid grid-cols-2 gap-2 md:gap-4">
             <AnimatePresence>
-                <TropeButton trope={initialTropes[0]} />
-                <TropeButton trope={initialTropes[1]} />
+                <TropeButton key={initialTropes[0].name} trope={initialTropes[0]} />
+                <TropeButton key={initialTropes[1].name} trope={initialTropes[1]} />
                 
                 {isFreeflowUnlocked ? (
                     <>
-                        <TropeButton 
-                            trope={initialTropes[2]} 
+                        <motion.div 
+                            key={initialTropes[2].name}
                             layout
                             transition={{ ease: "easeInOut", duration: 0.5 }}
-                        />
+                        >
+                             <TropeButton trope={initialTropes[2]} />
+                        </motion.div>
                         <motion.div
+                            key={freeflowTrope.name}
                             layout
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -195,7 +197,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
                         </motion.div>
                     </>
                 ) : (
-                    <motion.div className="col-span-2 flex justify-center" layout>
+                    <motion.div key={initialTropes[2].name} className="col-span-2 flex justify-center" layout>
                          <TropeButton trope={initialTropes[2]} />
                     </motion.div>
                 )}
