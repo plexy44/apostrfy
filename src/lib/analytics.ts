@@ -1,8 +1,7 @@
 /**
- * @fileoverview This file contains placeholder functions for analytics tracking.
- * In a real-world application, this would be integrated with a service like
- * Google Analytics. For now, it logs events to the console for development
- * and testing purposes.
+ * @fileoverview This file contains utility functions for analytics tracking.
+ * It provides a structured way to send custom events to Google Analytics
+ * using the global `gtag.js` function.
  */
 
 // Union of all possible event names
@@ -80,17 +79,16 @@ interface EventParams {
 }
 
 /**
- * Logs an analytics event.
+ * Logs an analytics event to Google Analytics.
  * @param eventName The name of the event to log.
  * @param params The parameters associated with the event.
  */
 export function logEvent<T extends EventName>(eventName: T, params: EventParams[T]) {
-  // In a real app, this would send data to Google Analytics or another service.
-  // For now, we'll just log to the console.
   console.log(`[ANALYTICS] Event: ${eventName}`, params);
   
-  // Example of how you might integrate with a real analytics SDK:
-  // if (typeof window.gtag === 'function') {
-  //   window.gtag('event', eventName, params);
-  // }
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', eventName, params);
+  } else {
+    console.warn('Google Analytics `gtag` function not found.');
+  }
 }
