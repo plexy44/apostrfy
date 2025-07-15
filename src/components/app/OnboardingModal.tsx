@@ -43,7 +43,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
   const renderSpecialContent = () => {
     if (!special) return null;
     switch(special) {
-        case 'logo': return <ApostrfyLogo className="w-48 h-auto my-4 text-foreground"/>
+        case 'logo': return <ApostrfyLogo className="w-40 md:w-48 h-auto my-4 text-foreground"/>
         case 'dialogue': return <DialogueAnimation />;
         case 'orb': return <Orb layoutId="main-orb" size="small" isInteractive={false} className="my-4" />;
         default: return null;
@@ -65,11 +65,11 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.5, ease: 'easeInOut' }}
-          className="w-full max-w-md glassmorphism rounded-2xl p-8 text-center flex flex-col items-center"
+          className="w-full max-w-md glassmorphism rounded-2xl p-6 md:p-8 text-center flex flex-col items-center"
         >
           {renderSpecialContent()}
-          <h2 className="font-headline text-3xl mb-4 text-foreground">{ONBOARDING_CONTENT[currentStep - 1].title}</h2>
-          <p className="text-foreground/80 mb-8 h-20">{text}</p>
+          <h2 className="font-headline text-2xl md:text-3xl mb-4 text-foreground">{ONBOARDING_CONTENT[currentStep - 1].title}</h2>
+          <p className="text-foreground/80 mb-8 h-20 text-sm md:text-base">{text}</p>
 
           <div className="flex items-center justify-center space-x-2 my-4">
             {[...Array(totalSteps)].map((_, i) => (

@@ -38,7 +38,6 @@ const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused, classN
   const [timeLeft, setTimeLeft] = useState(durationInSeconds);
 
   useEffect(() => {
-    // Timer is paused if the game is paused for an ad or the AI is typing.
     if (isPaused) {
       return;
     }
@@ -82,7 +81,7 @@ const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused, classN
           <span>{formatTime(durationInSeconds)}</span>
         </div>
       </div>
-      <div className="w-full h-3 bg-secondary rounded-full overflow-hidden">
+      <div className="w-full h-2 md:h-3 bg-secondary rounded-full overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-1000 ease-linear"
           style={{
@@ -127,18 +126,18 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   return (
     <motion.div
-      className="flex flex-col items-center justify-center h-[90vh] w-full max-w-3xl mx-auto"
+      className="flex flex-col items-center justify-center h-full md:h-[90vh] w-full max-w-3xl mx-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
     >
       {/* Game Panel */}
-      <div className="flex flex-col h-full w-full flex-grow p-4 glassmorphism rounded-lg relative">
+      <div className="flex flex-col h-full w-full flex-grow p-2 md:p-4 glassmorphism rounded-lg relative">
         <Button
           variant="ghost"
           size="icon"
-          className="absolute top-4 -left-16 z-20 rounded-full"
+          className="absolute top-2 -left-12 md:top-4 md:-left-16 z-20 rounded-full"
           onClick={onQuitRequest}
           aria-label="Quit game"
           disabled={isTimerPaused}
@@ -146,9 +145,9 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           <ArrowLeft />
         </Button>
         
-        <div className="flex items-start gap-4 mb-4">
+        <div className="flex items-start gap-4 mb-2 md:mb-4">
             <div className="flex-grow">
-                <h3 className="font-headline text-lg text-foreground mb-1">{trope}</h3>
+                <h3 className="font-headline text-base md:text-lg text-foreground mb-1">{trope}</h3>
                 <TimerBar 
                     durationInSeconds={duration} 
                     onEndGame={onEndGame} 
@@ -159,8 +158,8 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
             <Orb size="tiny" isInteractive={true} className="flex-shrink-0" />
         </div>
         
-        <ScrollArea className="flex-grow pr-4">
-          <div className="space-y-6">
+        <ScrollArea className="flex-grow pr-2 md:pr-4">
+          <div className="space-y-4 md:space-y-6">
             {story.map((part, index) => (
               <div key={index} className={`flex flex-col animate-fade-in-up ${part.speaker === 'ai' ? 'items-start' : 'items-end'}`}>
                  {part.personaName && (
@@ -168,14 +167,14 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                     {part.personaName}
                   </p>
                 )}
-                <div className={`p-4 rounded-xl max-w-[85%] ${part.speaker === 'ai' ? 'bg-secondary rounded-bl-none' : 'bg-primary/90 text-primary-foreground rounded-br-none'}`}>
-                  <p>{part.line}</p>
+                <div className={`p-3 md:p-4 rounded-xl max-w-[85%] ${part.speaker === 'ai' ? 'bg-secondary rounded-bl-none' : 'bg-primary/90 text-primary-foreground rounded-br-none'}`}>
+                  <p className="text-sm md:text-base">{part.line}</p>
                 </div>
               </div>
             ))}
             {isAiTyping && (
               <div className="flex items-start">
-                 <div className="p-4 rounded-xl max-w-[85%] bg-secondary rounded-bl-none flex items-center space-x-2">
+                 <div className="p-3 md:p-4 rounded-xl max-w-[85%] bg-secondary rounded-bl-none flex items-center space-x-2">
                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.3s]"></div>
                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.15s]"></div>
                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
@@ -186,16 +185,16 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           </div>
         </ScrollArea>
 
-        <form onSubmit={handleSubmit} className="flex items-center gap-2 pt-4">
+        <form onSubmit={handleSubmit} className="flex items-center gap-2 pt-2 md:pt-4">
           <Input
             ref={inputRef}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             placeholder={isTimerPaused ? "AI is thinking..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
             disabled={isTimerPaused || gameMode === 'simulation'}
-            className="flex-grow h-12 text-base"
+            className="flex-grow h-11 md:h-12 text-sm md:text-base"
           />
-          <Button type="submit" size="icon" className="h-12 w-12" disabled={isTimerPaused || !userInput.trim() || gameMode === 'simulation'}>
+          <Button type="submit" size="icon" className="h-11 w-11 md:h-12 md:w-12" disabled={isTimerPaused || !userInput.trim() || gameMode === 'simulation'}>
             {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
           </Button>
         </form>

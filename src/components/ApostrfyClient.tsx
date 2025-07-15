@@ -249,6 +249,9 @@ export default function ApostrfyClient() {
   };
 
   const proceedToAnalysis = async () => {
+    // Prevent double-triggering if already generating
+    if (gameState.status === 'generating_summary' || gameState.status === 'gameover') return;
+
     setGameState({ status: "generating_summary" });
     logEvent('screen_view', { screen_name: 'analysis_screen' });
 
@@ -256,10 +259,7 @@ export default function ApostrfyClient() {
       const fullStory = story.map(part => `${part.personaName || part.speaker.toUpperCase()}: ${part.line}`).join('\n');
       const fullStoryRaw = story.map(p => p.line).join('\n');
       
-      const analysisContent = (gameMode === 'simulation' 
-          ? story.filter(part => part.speaker === "user")
-          : story.filter(part => part.speaker === "user")
-      ).map(part => part.line).join("\n");
+      const analysisContent = story.filter(part => part.speaker === "user").map(part => part.line).join("\n");
 
       // Handle case with no user input to prevent AI errors
       if (gameMode === 'interactive' && analysisContent.trim() === "") {
@@ -486,7 +486,7 @@ export default function ApostrfyClient() {
   
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <div className="flex-grow flex items-center justify-center p-4 relative">
+      <main className="flex-grow flex items-center justify-center p-0 md:p-4 relative">
         <AnimatePresence mode="wait">
             {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}
             {gameState.status === "onboarding" && <OnboardingModal key="onboarding" onComplete={handleOnboardingComplete} />}
@@ -525,7 +525,7 @@ export default function ApostrfyClient() {
             )}
         </AnimatePresence>
          <AdOverlay isVisible={isAdPaused} onClose={() => setIsAdPaused(false)} />
-      </div>
+      </main>
       {gameState.status !== "playing" && gameState.status !== 'generating_summary' && gameState.status !== 'generating_initial_story' && <AppFooter />}
 
       <AlertDialog open={quitDialogState === 'confirm_quit'} onOpenChange={(open) => !open && handleCancelQuit()}>
