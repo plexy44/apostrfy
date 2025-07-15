@@ -35,18 +35,40 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
 
   const handleEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    
+    // Task 4.4 (Analytics)
     logEvent('request_transcript', { email_provided: true });
-    // Here you would typically trigger a Firebase Cloud Function.
-    // For this example, we'll just show a success toast.
+
+    // Task 4.2 / 4.3 (Backend Placeholder)
+    // In a real app, this would be handled by a secure backend.
+    // For now, we simulate the data structure for the Cloud Function trigger.
+    const storyId = `${analysis.title.replace(/\s+/g, '-')}-${Date.now()}`;
+    const subscriberDocument = {
+      email: email,
+      storyId: storyId,
+      submissionTimestamp: new Date().toISOString(),
+      storyContent: analysis.finalScript, // For simulation purposes
+      metadata: {
+        // These would be captured on the backend for accuracy
+        ipAddress: '127.0.0.1', 
+        browserType: navigator.userAgent,
+        operatingSystem: navigator.platform,
+      }
+    };
+    
+    console.log("[BACKEND] Simulating document creation in 'subscribers' collection:", subscriberDocument);
+    console.log("[BACKEND] This would trigger the 'sendStoryWithMailGun' Cloud Function.");
+
     toast({
       title: "Success!",
-      description: "Your story has been sent to your email.",
+      description: "Your story is on its way to your inbox.",
     });
     setIsModalOpen(false);
   };
 
   const handleOpenEmailModal = () => {
-    logEvent('request_transcript', { email_provided: false });
     setIsModalOpen(true);
   }
 
@@ -169,21 +191,20 @@ export default function GameOverScreen({ analysis, onPlayAgain }: GameOverScreen
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="glassmorphism">
           <DialogHeader>
-            <DialogTitle className="font-headline text-2xl">Email Story Transcript</DialogTitle>
+            <DialogTitle className="font-headline text-2xl">Receive Your Story</DialogTitle>
             <DialogDescription>
-              Enter your details below to receive a copy of your co-created story.
+              Enter your email below to receive a copy of your co-created story.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEmailSubmit}>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">Name</Label>
-                <Input id="name" placeholder="Alex" className="col-span-3" required />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="email" className="text-right">Email</Label>
-                <Input id="email" type="email" placeholder="alex@example.com" className="col-span-3" required />
+                <Input id="email" name="email" type="email" placeholder="you@example.com" className="col-span-3" required />
               </div>
+               <p className="text-xs text-muted-foreground col-span-4 px-1 pt-2">
+                By submitting, you agree to our terms and may receive future communications.
+              </p>
             </div>
             <DialogFooter>
               <DialogClose asChild>
