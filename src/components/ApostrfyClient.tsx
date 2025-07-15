@@ -241,6 +241,9 @@ export default function ApostrfyClient() {
   };
 
   const handleEndGame = async () => {
+    // Prevent double-triggering
+    if (gameState.status === 'generating_summary' || gameState.status === 'gameover') return;
+
     setGameState({ status: "generating_summary" });
     logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'end_of_game_interstitial' });
 
@@ -347,6 +350,11 @@ export default function ApostrfyClient() {
     }
   };
 
+  const handlePauseForAd = () => {
+    logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'mid_game_interstitial' });
+    setIsAdPaused(true);
+  };
+
 
   const handlePlayAgain = () => {
     setGameState({ status: "menu" });
@@ -421,7 +429,7 @@ export default function ApostrfyClient() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <div className="flex-grow flex items-center justify-center p-4 relative">
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
             {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}
             {gameState.status === "onboarding" && <OnboardingModal key="onboarding" onComplete={handleOnboardingComplete} />}
             {gameState.status === "menu" && <MainMenu key="menu" onStartGame={handleStartGame} onStartSimulation={handleStartSimulation} comingFromOnboarding={comingFromOnboarding} />}
@@ -443,7 +451,7 @@ export default function ApostrfyClient() {
                 onEndGame={handleEndGame}
                 onQuitRequest={handleQuitRequest}
                 gameMode={gameMode}
-                onPauseForAd={() => setIsAdPaused(true)}
+                onPauseForAd={handlePauseForAd}
                 isAdPaused={isAdPaused}
               />
             )}
@@ -494,5 +502,3 @@ export default function ApostrfyClient() {
     </div>
   );
 }
-
-    

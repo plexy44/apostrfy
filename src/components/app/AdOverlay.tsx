@@ -37,14 +37,18 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
             <p className="text-muted-foreground text-sm mb-4">Advertisement</p>
             
             <div 
-              className="w-11/12 h-4/5 bg-background flex items-center justify-center cursor-pointer"
+              className="w-11/12 h-4/5 bg-background flex items-center justify-center cursor-pointer p-4 text-center"
               data-ai-hint="advertisement"
               onClick={handleAdClick}
             >
-              <p className="font-bold text-2xl text-foreground">Placeholder for Ad Unit 4</p>
+              <p className="font-bold text-xl text-foreground">
+                Mid-Game Interstitial Ad
+                <br />
+                <span className="text-sm font-normal text-muted-foreground">(Placeholder)</span>
+              </p>
             </div>
             
-            <p className="text-muted-foreground text-xs mt-4">Ad placeholder ID: ca-app-pub-3940256099942544/1033173712</p>
+            <p className="text-muted-foreground text-xs mt-4 px-4">Test Ad Unit ID: ca-app-pub-3940256099942544/1033173712</p>
 
             <Button
               variant="ghost"
