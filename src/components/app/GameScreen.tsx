@@ -162,15 +162,26 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           <div className="space-y-4 md:space-y-6">
             {story.map((part, index) => {
                 const isUserSpeaker = part.speaker === 'user';
-                const alignment = isUserSpeaker ? 'items-end' : 'items-start';
-                const bubbleStyles = isUserSpeaker
-                  ? 'bg-primary/90 text-primary-foreground rounded-br-none'
-                  : 'bg-secondary rounded-bl-none';
+                let alignment, bubbleStyles;
+
+                if (gameMode === 'simulation') {
+                    // In simulation, 'user' is Persona 1 (right), 'ai' is Persona 2 (left)
+                    alignment = isUserSpeaker ? 'items-end' : 'items-start';
+                    bubbleStyles = isUserSpeaker
+                        ? 'bg-primary/90 text-primary-foreground rounded-br-none'
+                        : 'bg-secondary rounded-bl-none';
+                } else {
+                    // In interactive, 'ai' is AI (left), 'user' is the human player (right)
+                    alignment = isUserSpeaker ? 'items-end' : 'items-start';
+                    bubbleStyles = isUserSpeaker
+                      ? 'bg-primary/90 text-primary-foreground rounded-br-none'
+                      : 'bg-secondary rounded-bl-none';
+                }
 
                 return (
                   <div key={index} className={`flex flex-col animate-fade-in-up ${alignment}`}>
                     {part.personaName && (
-                      <p className={`text-xs text-muted-foreground mb-1 px-2 ${isUserSpeaker ? 'self-end' : 'self-start'}`}>
+                      <p className={`text-xs text-muted-foreground mb-1 px-2 ${alignment === 'items-end' ? 'self-end' : 'self-start'}`}>
                         {part.personaName}
                       </p>
                     )}
@@ -207,7 +218,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           </Button>
         </form>
         <div className="text-center py-2">
-          <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused}>Test End Game</Button>
+          <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused}>End Game</Button>
         </div>
       </div>
 

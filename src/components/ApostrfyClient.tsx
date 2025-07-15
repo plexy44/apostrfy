@@ -439,9 +439,8 @@ export default function ApostrfyClient() {
   };
 
   const handleConfirmQuit = () => {
-    if (story.length < 2) {
-      handlePlayAgain();
-      setQuitDialogState('closed');
+    if (gameMode === 'simulation' || story.length < 2) {
+      handleQuitWithoutSaving();
     } else {
       setQuitDialogState('confirm_save');
     }
@@ -483,7 +482,8 @@ export default function ApostrfyClient() {
         const sanitizedAnalysis = {
             ...analysis,
             story: analysis.story.map(part => ({
-                ...part,
+                speaker: part.speaker,
+                line: part.line,
                 personaName: part.personaName || null,
             })),
         };
