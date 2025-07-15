@@ -3,23 +3,30 @@
  * It allows users to select a story style (trope) and session duration.
  * It features the central interactive AI orb and provides options to start an
  * interactive co-creation session or begin an automated 'simulation' between
- * two AI personas.
+ * two AI personas. It also includes a feature to unlock a secret style via a rewarded ad.
  */
 
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import type { Trope } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TROPES, DURATIONS, ORB_MESSAGES } from "@/lib/constants";
+import { DURATIONS, ORB_MESSAGES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import ApostrfyLogo from "../icons/ApostrfyLogo";
 import Orb from "./Orb";
 import { logEvent } from "@/lib/analytics";
 import { Gift } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+const TROPES_DATA: { name: Trope; description: string }[] = [
+  { name: "Noir Detective", description: "Rain-slicked streets and whispered secrets." },
+  { name: "Cosmic Wanderer", description: "Lost constellations and alien whispers." },
+  { name: "Gothic Romance", description: "Crumbling manors and timeless heartbreak." },
+  { name: "Freeflow", description: "Your voice, your story. I'll follow your lead." },
+];
 
 interface MainMenuProps {
   onStartGame: (trope: Trope, duration: number, analyticsName: 'lightning' | 'minute' | 'twice_a_minute') => void;
@@ -34,16 +41,18 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
   const [orbMessage, setOrbMessage] = useState("");
   const [displayedMessage, setDisplayedMessage] = useState("");
   const [startTyping, setStartTyping] = useState(false);
+  const [isFreeflowUnlocked, setIsFreeflowUnlocked] = useState(false);
   const { toast } = useToast();
+  
+  const visibleTropes = TROPES_DATA.filter(t => t.name !== 'Freeflow' || isFreeflowUnlocked);
 
   useEffect(() => {
     const message = ORB_MESSAGES[Math.floor(Math.random() * ORB_MESSAGES.length)];
     setOrbMessage(message);
 
-    // Start typing almost immediately unless coming from the smooth onboarding transition.
     const timer = setTimeout(() => {
         setStartTyping(true);
-    }, 100); // Reduced delay for faster start
+    }, 100);
     return () => clearTimeout(timer);
   }, []);
 
@@ -58,7 +67,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
         } else {
           clearInterval(intervalId);
         }
-      }, 40); // Slightly faster typing speed
+      }, 40);
 
       return () => clearInterval(intervalId);
     }
@@ -66,7 +75,6 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
 
 
   const handleTransitionComplete = () => {
-    // This allows the orb's shared layout animation to complete before starting to type.
     if (comingFromOnboarding) {
         setStartTyping(true);
     }
@@ -95,12 +103,21 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
   }
   
   const handleRewardedAd = () => {
+    if (isFreeflowUnlocked) {
+      toast({ title: "Already Unlocked!", description: "You can now select the Freeflow style." });
+      return;
+    }
     logEvent('rewarded_ad_flow', { status: 'offered' });
     logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'rewarded', ad_unit_name: 'unlock_secret_style_reward' });
-    // Simulate watching an ad
-    toast({ title: "Simulating Rewarded Ad", description: "You've unlocked a new secret style (placeholder)!" });
+    
+    toast({ 
+      title: "Ad Finished!", 
+      description: "You've unlocked the secret 'Freeflow' style!" 
+    });
+
+    setIsFreeflowUnlocked(true);
+    setSelectedTrope("Freeflow"); // auto-select the new style
     logEvent('rewarded_ad_flow', { status: 'completed' });
-    // In a real app, you would unlock a feature here.
   }
 
   const isTyping = startTyping && displayedMessage.length < orbMessage.length;
@@ -140,19 +157,26 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
         </CardHeader>
         <CardContent className="space-y-6 p-4 md:p-6">
           <div className="grid grid-cols-2 gap-2 md:gap-4">
-            {TROPES.map((trope) => (
-              <button
-                key={trope.name}
-                onClick={() => handleThemeSwitch(trope.name)}
-                className={cn(
-                  "p-3 md:p-4 rounded-lg border-2 text-left transition-all hover:border-accent",
-                  selectedTrope === trope.name ? "border-accent bg-accent/20 shadow-lg shadow-accent/50" : "border-border"
-                )}
-              >
-                <h3 className="font-headline text-base md:text-lg text-foreground">{trope.name}</h3>
-                <p className="text-xs md:text-sm text-muted-foreground">{trope.description}</p>
-              </button>
-            ))}
+            <AnimatePresence>
+              {visibleTropes.map((trope) => (
+                <motion.button
+                  key={trope.name}
+                  onClick={() => handleThemeSwitch(trope.name)}
+                  className={cn(
+                    "p-3 md:p-4 rounded-lg border-2 text-left transition-all hover:border-accent",
+                    "origin-bottom", // Set origin for animation
+                    selectedTrope === trope.name ? "border-accent bg-accent/20 shadow-lg shadow-accent/50" : "border-border"
+                  )}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.4, ease: "backOut" }}
+                >
+                  <h3 className="font-headline text-base md:text-lg text-foreground">{trope.name}</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground">{trope.description}</p>
+                </motion.button>
+              ))}
+            </AnimatePresence>
           </div>
 
           <div className="space-y-2">

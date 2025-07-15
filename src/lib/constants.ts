@@ -22,25 +22,6 @@ export const ORB_MESSAGES: string[] = [
     "Let's get lost in a new world.",
 ];
 
-export const TROPES: { name: Trope; description: string }[] = [
-  {
-    name: "Noir Detective",
-    description: "Rain-slicked streets and whispered secrets.",
-  },
-  {
-    name: "Cosmic Wanderer",
-    description: "Lost constellations and alien whispers.",
-  },
-  {
-    name: "Gothic Romance",
-    description: "Crumbling manors and timeless heartbreak.",
-  },
-  {
-    name: "Freeflow",
-    description: "Your voice, your story. I'll follow your lead.",
-  },
-];
-
 export const DURATIONS: { label: string; value: number, analyticsName: 'lightning' | 'minute' | 'twice_a_minute' }[] = [
   { label: "Lightning", value: 30, analyticsName: 'lightning' },
   { label: "Minute", value: 60, analyticsName: 'minute' },
