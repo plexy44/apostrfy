@@ -25,6 +25,30 @@ if (!getApps().length) {
 
 const db = getFirestore();
 
+// Helper function to sanitize data for Firestore
+const sanitizeForFirestore = (data: any): any => {
+  if (data === undefined) {
+    return null;
+  }
+  if (Array.isArray(data)) {
+    return data.map(item => sanitizeForFirestore(item));
+  }
+  if (typeof data === 'object' && data !== null && !(data instanceof Date)) {
+    const sanitizedObject: { [key: string]: any } = {};
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        const value = data[key];
+        if (value !== undefined) {
+          sanitizedObject[key] = sanitizeForFirestore(value);
+        }
+      }
+    }
+    return sanitizedObject;
+  }
+  return data;
+};
+
+
 interface StoryToSave {
     transcript: StoryPart[];
     analysis: Omit<GameAnalysis, 'storyId'>;
@@ -34,8 +58,9 @@ interface StoryToSave {
 
 export const saveStoryToFirestore = async (storyData: StoryToSave): Promise<string> => {
     try {
+        const sanitizedStoryData = sanitizeForFirestore(storyData);
         const docRef = await addDoc(collection(db, "stories"), {
-            ...storyData,
+            ...sanitizedStoryData,
             createdAt: serverTimestamp(),
         });
         console.log("Story saved with ID: ", docRef.id);
@@ -53,8 +78,9 @@ interface SubscriberData {
 
 export const saveSubscriberToFirestore = async (subscriberData: SubscriberData) => {
     try {
+        const sanitizedSubscriberData = sanitizeForFirestore(subscriberData);
         const docRef = await addDoc(collection(db, "subscribers"), {
-            ...subscriberData,
+            ...sanitizedSubscriberData,
             submissionTimestamp: serverTimestamp()
         });
         console.log("Subscriber saved with ID: ", docRef.id);
