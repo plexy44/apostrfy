@@ -128,7 +128,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
       key={trope.name}
       onClick={() => handleThemeSwitch(trope.name)}
       className={cn(
-        "p-3 md:p-4 rounded-lg border-2 text-left transition-all hover:border-accent",
+        "p-3 md:p-4 rounded-lg border-2 text-left transition-all hover:border-accent w-full",
         selectedTrope === trope.name ? "border-accent bg-accent/20 shadow-lg shadow-accent/50" : "border-border"
       )}
       {...props}
@@ -174,33 +174,31 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
         </CardHeader>
         <CardContent className="space-y-6 p-4 md:p-6">
            <div className="grid grid-cols-2 gap-2 md:gap-4">
-            <TropeButton trope={initialTropes[0]} layout />
-            <TropeButton trope={initialTropes[1]} layout />
-
-            <AnimatePresence initial={false}>
-              {isFreeflowUnlocked ? (
-                <>
-                  <TropeButton 
-                    trope={initialTropes[2]} 
-                    layoutId="trope-button-3" 
-                  />
-                  <TropeButton 
-                    trope={freeflowTrope}
-                    layout
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1, transition: { delay: 0.2 } }}
-                  />
-                </>
-              ) : (
-                <motion.div
-                  className="col-span-2 flex justify-center"
-                  layoutId="trope-button-3"
-                >
-                  <div className="w-full md:w-[calc(50%-0.5rem)]">
-                     <TropeButton trope={initialTropes[2]} className="w-full"/>
-                  </div>
-                </motion.div>
-              )}
+            <AnimatePresence>
+                <TropeButton trope={initialTropes[0]} />
+                <TropeButton trope={initialTropes[1]} />
+                
+                {isFreeflowUnlocked ? (
+                    <>
+                        <TropeButton 
+                            trope={initialTropes[2]} 
+                            layout
+                            transition={{ ease: "easeInOut", duration: 0.5 }}
+                        />
+                        <motion.div
+                            layout
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ ease: "easeInOut", duration: 0.5, delay: 0.2 }}
+                        >
+                            <TropeButton trope={freeflowTrope} />
+                        </motion.div>
+                    </>
+                ) : (
+                    <motion.div className="col-span-2 flex justify-center" layout>
+                         <TropeButton trope={initialTropes[2]} />
+                    </motion.div>
+                )}
             </AnimatePresence>
           </div>
 
