@@ -41,10 +41,11 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
     const message = ORB_MESSAGES[Math.floor(Math.random() * ORB_MESSAGES.length)];
     setOrbMessage(message);
 
+    // Start typing almost immediately unless coming from the smooth onboarding transition.
     if (!comingFromOnboarding) {
         const timer = setTimeout(() => {
             setStartTyping(true);
-        }, 300); // Small delay for fade-in animation
+        }, 100); // Reduced delay for faster start
         return () => clearTimeout(timer);
     }
   }, [comingFromOnboarding]);
@@ -60,7 +61,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
         } else {
           clearInterval(intervalId);
         }
-      }, 50); // Typing speed
+      }, 40); // Slightly faster typing speed
 
       return () => clearInterval(intervalId);
     }
@@ -68,6 +69,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
 
 
   const handleTransitionComplete = () => {
+    // This allows the orb's shared layout animation to complete before starting to type.
     if (comingFromOnboarding) {
         setStartTyping(true);
     }
