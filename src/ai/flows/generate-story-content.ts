@@ -95,7 +95,7 @@ const generateStoryContentFlow = ai.defineFlow(
     inputSchema: GenerateStoryContentInputSchema,
     outputSchema: GenerateStoryContentOutputSchema,
   },
-  async (input, streamingCallback, context) => {
+  async (input) => {
     const maxRetries = 3;
     let attempt = 0;
     let lastError: any = null;
