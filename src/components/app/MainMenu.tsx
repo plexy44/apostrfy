@@ -44,7 +44,8 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
   const [isFreeflowUnlocked, setIsFreeflowUnlocked] = useState(false);
   const { toast } = useToast();
   
-  const visibleTropes = TROPES_DATA.filter(t => t.name !== 'Freeflow' || isFreeflowUnlocked);
+  const initialTropes = TROPES_DATA.filter(t => t.name !== 'Freeflow');
+  const freeflowTrope = TROPES_DATA.find(t => t.name === 'Freeflow')!;
 
   useEffect(() => {
     const message = ORB_MESSAGES[Math.floor(Math.random() * ORB_MESSAGES.length)];
@@ -121,6 +122,22 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
   }
 
   const isTyping = startTyping && displayedMessage.length < orbMessage.length;
+  
+  const TropeButton = ({ trope, ...props }: { trope: { name: Trope, description: string }, [key: string]: any }) => (
+    <motion.button
+      key={trope.name}
+      onClick={() => handleThemeSwitch(trope.name)}
+      className={cn(
+        "p-3 md:p-4 rounded-lg border-2 text-left transition-all hover:border-accent",
+        selectedTrope === trope.name ? "border-accent bg-accent/20 shadow-lg shadow-accent/50" : "border-border"
+      )}
+      {...props}
+    >
+      <h3 className="font-headline text-base md:text-lg text-foreground">{trope.name}</h3>
+      <p className="text-xs md:text-sm text-muted-foreground">{trope.description}</p>
+    </motion.button>
+  );
+
 
   return (
     <motion.div
@@ -156,26 +173,34 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
           <CardDescription className="text-center">First, choose a style for your AI companion.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 p-4 md:p-6">
-          <div className="grid grid-cols-2 gap-2 md:gap-4">
-            <AnimatePresence>
-              {visibleTropes.map((trope) => (
-                <motion.button
-                  key={trope.name}
-                  onClick={() => handleThemeSwitch(trope.name)}
-                  className={cn(
-                    "p-3 md:p-4 rounded-lg border-2 text-left transition-all hover:border-accent",
-                    "origin-bottom", // Set origin for animation
-                    selectedTrope === trope.name ? "border-accent bg-accent/20 shadow-lg shadow-accent/50" : "border-border"
-                  )}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.4, ease: "backOut" }}
+           <div className="grid grid-cols-2 gap-2 md:gap-4">
+            <TropeButton trope={initialTropes[0]} layout />
+            <TropeButton trope={initialTropes[1]} layout />
+
+            <AnimatePresence initial={false}>
+              {isFreeflowUnlocked ? (
+                <>
+                  <TropeButton 
+                    trope={initialTropes[2]} 
+                    layoutId="trope-button-3" 
+                  />
+                  <TropeButton 
+                    trope={freeflowTrope}
+                    layout
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1, transition: { delay: 0.2 } }}
+                  />
+                </>
+              ) : (
+                <motion.div
+                  className="col-span-2 flex justify-center"
+                  layoutId="trope-button-3"
                 >
-                  <h3 className="font-headline text-base md:text-lg text-foreground">{trope.name}</h3>
-                  <p className="text-xs md:text-sm text-muted-foreground">{trope.description}</p>
-                </motion.button>
-              ))}
+                  <div className="w-full md:w-[calc(50%-0.5rem)]">
+                     <TropeButton trope={initialTropes[2]} className="w-full"/>
+                  </div>
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
 
