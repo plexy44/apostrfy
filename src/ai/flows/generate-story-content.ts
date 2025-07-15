@@ -112,10 +112,6 @@ const generateStoryContentFlow = ai.defineFlow(
 
         if (isServiceUnavailable) {
           attempt++;
-          context.instrumentation?.trace('retrying-story-content-flow', {
-            attempt: attempt,
-            maxRetries: maxRetries,
-          });
           if (attempt < maxRetries) {
             await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt))); // Exponential backoff
           }
