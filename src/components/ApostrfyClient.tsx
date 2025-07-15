@@ -81,12 +81,16 @@ export default function ApostrfyClient() {
     if (isFirstVisit === undefined) {
       return; // Wait until the hook determines the visit status
     }
-    if (isFirstVisit) {
-      logEvent('screen_view', { screen_name: 'onboarding_screen' });
-      setGameState({ status: 'onboarding', step: 1 });
-    } else {
-      setGameState({ status: 'menu' });
-    }
+    const timer = setTimeout(() => {
+        if (isFirstVisit) {
+            logEvent('screen_view', { screen_name: 'onboarding_screen' });
+            setGameState({ status: 'onboarding', step: 1 });
+        } else {
+            setGameState({ status: 'menu' });
+        }
+    }, 500); // Give a brief moment for loading screen to show
+
+    return () => clearTimeout(timer);
   }, [isFirstVisit]);
 
   useEffect(() => {
