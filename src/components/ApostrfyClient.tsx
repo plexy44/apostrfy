@@ -77,7 +77,6 @@ export default function ApostrfyClient() {
   const analyticsFired = useRef(new Set<string>());
 
   useEffect(() => {
-    // Log screen view event only if it hasn't been logged for the current state yet
     const screenName = gameState.status;
     if (!analyticsFired.current.has(screenName)) {
         if (screenName === 'loading_screen' || screenName === 'onboarding') {
@@ -87,7 +86,7 @@ export default function ApostrfyClient() {
     }
 
     if (isFirstVisit === undefined) {
-      return; // Wait until the hook determines the visit status
+      return; 
     }
     const timer = setTimeout(() => {
         if (isFirstVisit) {
@@ -95,10 +94,10 @@ export default function ApostrfyClient() {
         } else {
             setGameState({ status: 'menu' });
         }
-    }, 500); // Give a brief moment for loading screen to show
+    }, 500); 
 
     return () => clearTimeout(timer);
-  }, [isFirstVisit, gameState.status]);
+  }, [isFirstVisit]);
 
   useEffect(() => {
     if (!isAiTyping && gameMode === 'interactive' && gameState.status === 'playing' && !isAdPaused) {
@@ -134,7 +133,7 @@ export default function ApostrfyClient() {
       const aiStartTime = Date.now();
       const input: GenerateStoryContentInput = {
         trope,
-        duration: duration / 60, // Pass duration in minutes to AI
+        duration: duration / 60, 
         userInput: "Start the story.",
         history: [],
         persona1: uniquePersonas[0],
@@ -155,7 +154,7 @@ export default function ApostrfyClient() {
   const handleStartSimulation = async (trope: Trope) => {
     logEvent('start_game', { game_mode: 'simulation', game_duration: 'lightning' });
     logEvent('screen_view', { screen_name: 'game_screen' });
-    setSettings({ trope, duration: 30 }); // Simulation is now 30 seconds
+    setSettings({ trope, duration: 30 }); 
     setStory([]);
     setComingFromOnboarding(false);
     setGameMode('simulation');
@@ -194,7 +193,7 @@ export default function ApostrfyClient() {
     }
     
     const runSimulationTurn = async () => {
-      // Determine whose turn it is
+      
       const lastSpeaker = story[story.length - 1]?.speaker;
       const nextSpeakerIsPersona2 = lastSpeaker === 'user';
       const personaToEmbody = nextSpeakerIsPersona2 ? sessionPersonas[1] : sessionPersonas[0];
@@ -222,7 +221,7 @@ export default function ApostrfyClient() {
       }
     };
     
-    const timeoutId = setTimeout(runSimulationTurn, 1500); // Delay between turns
+    const timeoutId = setTimeout(runSimulationTurn, 1500); 
     return () => clearTimeout(timeoutId);
 
   }, [story, gameMode, gameState.status, sessionPersonas, settings.trope, isAiTyping, isAdPaused]);
@@ -241,7 +240,7 @@ export default function ApostrfyClient() {
       const aiStartTime = Date.now();
       const input: GenerateStoryContentInput = {
         trope: settings.trope,
-        duration: settings.duration / 60, // Pass duration in minutes
+        duration: settings.duration / 60, 
         userInput,
         history: newStory.map(s => ({ speaker: s.speaker, line: s.line })),
         persona1: sessionPersonas[0],
@@ -260,7 +259,6 @@ export default function ApostrfyClient() {
   };
 
   const proceedToAnalysis = async () => {
-    // Prevent double-triggering if already generating
     if (gameState.status === 'generating_summary' || gameState.status === 'gameover') return;
 
     setGameState({ status: "generating_summary" });
@@ -385,23 +383,18 @@ export default function ApostrfyClient() {
 
 
   const handleEndGame = async () => {
-    // Prevent double-triggering
     if (gameState.status === 'generating_summary' || gameState.status === 'gameover') return;
 
     const adUnitName = 'end_of_game_interstitial';
     
-    // Simulate an ad call
     try {
       logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: adUnitName });
       
-      // SIMULATION: Replace with your actual ad SDK call.
-      // We'll simulate a failure randomly for demonstration.
-      const didAdLoad = Math.random() > 0.2; // 80% success rate
+      const didAdLoad = Math.random() > 0.2; 
       if (!didAdLoad) {
         throw new Error("Simulated ad load failure");
       }
       
-      // If ad "loads", show it (or in this case, just proceed)
       console.log("Ad loaded successfully, proceeding to analysis.");
 
     } catch (error) {
@@ -413,7 +406,6 @@ export default function ApostrfyClient() {
         description: "Continuing to your results.",
       });
     } finally {
-      // Whether the ad succeeded or failed, always proceed to the analysis.
       await proceedToAnalysis();
     }
   };
@@ -449,7 +441,7 @@ export default function ApostrfyClient() {
 
   const handleSaveAndQuit = () => {
     logEvent('quit_game_confirmed', { saved_story: true, story_length: story.length, game_mode: gameMode });
-    if (settings.trope && gameMode === 'interactive') { // Only save interactive stories
+    if (settings.trope && gameMode === 'interactive') { 
       saveStory({
         trope: settings.trope,
         duration: settings.duration,
@@ -519,7 +511,7 @@ export default function ApostrfyClient() {
                 isAiTyping={isAiTyping}
                 onUserSubmit={handleUserSubmit}
                 onEndGame={handleEndGame}
-                onQuitRequest={onQuitRequest}
+                onQuitRequest={handleQuitRequest}
                 gameMode={gameMode}
                 onPauseForAd={handlePauseForAd}
                 isAdPaused={isAdPaused}
