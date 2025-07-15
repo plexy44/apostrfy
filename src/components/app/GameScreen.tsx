@@ -198,10 +198,6 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
             {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
           </Button>
         </form>
-         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mt-2">
-          <Timer className="h-4 w-4" />
-          <span>A 30-second response timer will be implemented here.</span>
-        </div>
         <div className="text-center py-2">
           <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused}>Test End Game</Button>
         </div>
