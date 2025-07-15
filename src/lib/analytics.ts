@@ -17,6 +17,7 @@ type EventName =
   | 'theme_switched'
   | 'ad_impression'
   | 'ad_click'
+  | 'ad_load_failed'
   | 'rewarded_ad_flow';
 
 // Interface defining the parameters for each event
@@ -57,6 +58,10 @@ interface EventParams {
     ad_click: {
         ad_format: 'interstitial' | 'banner' | 'rewarded';
         ad_unit_name: string;
+    };
+    ad_load_failed: {
+        ad_unit_name: string;
+        error_message: string;
     };
     rewarded_ad_flow: {
         status: 'offered' | 'completed' | 'declined';

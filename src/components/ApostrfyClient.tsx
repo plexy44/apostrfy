@@ -248,15 +248,11 @@ export default function ApostrfyClient() {
     }
   };
 
-  const handleEndGame = async () => {
-    // Prevent double-triggering
-    if (gameState.status === 'generating_summary' || gameState.status === 'gameover') return;
-
+  const proceedToAnalysis = async () => {
     setGameState({ status: "generating_summary" });
-    logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'end_of_game_interstitial' });
+    logEvent('screen_view', { screen_name: 'analysis_screen' });
 
     try {
-      logEvent('screen_view', { screen_name: 'analysis_screen' });
       const fullStory = story.map(part => `${part.personaName || part.speaker.toUpperCase()}: ${part.line}`).join('\n');
       const fullStoryRaw = story.map(p => p.line).join('\n');
       
@@ -319,7 +315,6 @@ export default function ApostrfyClient() {
         scriptResult = await generateFinalScript({ fullStory });
       } catch (e) { console.error("Script generation failed:", e); }
 
-
       const winner = styleResult.styleMatches[0];
       const famousQuote = quotes[winner] ? { author: winner, quote: quotes[winner] } : null;
 
@@ -357,7 +352,6 @@ export default function ApostrfyClient() {
         setAnalysis({ ...preSaveAnalysis, storyId: "save_failed" });
       }
 
-
       setGameState({ status: "gameover" });
     } catch (error) {
       console.error("A critical error occurred during game end analysis:", error);
@@ -380,11 +374,45 @@ export default function ApostrfyClient() {
     }
   };
 
+
+  const handleEndGame = async () => {
+    // Prevent double-triggering
+    if (gameState.status === 'generating_summary' || gameState.status === 'gameover') return;
+
+    const adUnitName = 'end_of_game_interstitial';
+    
+    // Simulate an ad call
+    try {
+      logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: adUnitName });
+      
+      // SIMULATION: Replace with your actual ad SDK call.
+      // We'll simulate a failure randomly for demonstration.
+      const didAdLoad = Math.random() > 0.2; // 80% success rate
+      if (!didAdLoad) {
+        throw new Error("Simulated ad load failure");
+      }
+      
+      // If ad "loads", show it (or in this case, just proceed)
+      console.log("Ad loaded successfully, proceeding to analysis.");
+
+    } catch (error) {
+      console.error("Ad failed to load:", error);
+      logEvent('ad_load_failed', { ad_unit_name: adUnitName, error_message: (error as Error).message });
+      toast({
+        variant: "destructive",
+        title: "Ad failed to load",
+        description: "Continuing to your results.",
+      });
+    } finally {
+      // Whether the ad succeeded or failed, always proceed to the analysis.
+      await proceedToAnalysis();
+    }
+  };
+
   const handlePauseForAd = () => {
     logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'mid_game_interstitial' });
     setIsAdPaused(true);
   };
-
 
   const handlePlayAgain = () => {
     setGameState({ status: "menu" });
