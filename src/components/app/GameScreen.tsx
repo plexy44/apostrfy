@@ -122,7 +122,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
     }
   };
 
-  const isTimerPaused = isAdPaused || (gameMode === 'interactive' && isAiTyping);
+  const isTimerPaused = isAdPaused || isAiTyping;
 
   return (
     <motion.div
@@ -160,18 +160,26 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
         
         <ScrollArea className="flex-grow pr-2 md:pr-4">
           <div className="space-y-4 md:space-y-6">
-            {story.map((part, index) => (
-              <div key={index} className={`flex flex-col animate-fade-in-up ${part.speaker === 'ai' ? 'items-start' : 'items-end'}`}>
-                 {part.personaName && (
-                  <p className={`text-xs text-muted-foreground mb-1 px-2 ${part.speaker === 'user' ? 'self-end' : 'self-start'}`}>
-                    {part.personaName}
-                  </p>
-                )}
-                <div className={`p-3 md:p-4 rounded-xl max-w-[85%] ${part.speaker === 'ai' ? 'bg-secondary rounded-bl-none' : 'bg-primary/90 text-primary-foreground rounded-br-none'}`}>
-                  <p className="text-sm md:text-base">{part.line}</p>
-                </div>
-              </div>
-            ))}
+            {story.map((part, index) => {
+                const isUserSpeaker = gameMode === 'interactive' ? part.speaker === 'user' : index % 2 === 0;
+                const alignment = isUserSpeaker ? 'items-end' : 'items-start';
+                const bubbleStyles = isUserSpeaker
+                  ? 'bg-primary/90 text-primary-foreground rounded-br-none'
+                  : 'bg-secondary rounded-bl-none';
+
+                return (
+                  <div key={index} className={`flex flex-col animate-fade-in-up ${alignment}`}>
+                    {part.personaName && (
+                      <p className={`text-xs text-muted-foreground mb-1 px-2 ${isUserSpeaker ? 'self-end' : 'self-start'}`}>
+                        {part.personaName}
+                      </p>
+                    )}
+                    <div className={`p-3 md:p-4 rounded-xl max-w-[85%] ${bubbleStyles}`}>
+                      <p className="text-sm md:text-base">{part.line}</p>
+                    </div>
+                  </div>
+                );
+            })}
             {isAiTyping && (
               <div className="flex items-start">
                  <div className="p-3 md:p-4 rounded-xl max-w-[85%] bg-secondary rounded-bl-none flex items-center space-x-2">
@@ -190,11 +198,11 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
             ref={inputRef}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            placeholder={isTimerPaused ? "AI is thinking..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
+            placeholder={isAiTyping ? "AI is thinking..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
             disabled={isTimerPaused || gameMode === 'simulation'}
             className="flex-grow h-11 md:h-12 text-sm md:text-base"
           />
-          <Button type="submit" size="icon" className="h-11 w-11 md:h-12 md:w-12" disabled={isTimerPaused || !userInput.trim() || gameMode === 'simulation'}>
+          <Button type="submit" size="icon" className="h-11 w-11 md:h-12 md:w-12" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation'}>
             {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
           </Button>
         </form>
