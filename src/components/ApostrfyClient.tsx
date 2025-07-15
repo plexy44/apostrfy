@@ -479,12 +479,21 @@ export default function ApostrfyClient() {
     logEvent('request_transcript', { email_provided: true });
 
     try {
+        // Sanitize the analysis object to prevent Firestore errors
+        const sanitizedAnalysis = {
+            ...analysis,
+            story: analysis.story.map(part => ({
+                ...part,
+                personaName: part.personaName || null,
+            })),
+        };
+
         // Step 1: Save the story to Firestore.
         const storyId = await saveStoryToFirestore({
-            transcript: analysis.story,
-            analysis: analysis, // The full analysis object
-            trope: analysis.trope,
-            title: analysis.title,
+            transcript: sanitizedAnalysis.story,
+            analysis: sanitizedAnalysis, 
+            trope: sanitizedAnalysis.trope,
+            title: sanitizedAnalysis.title,
         });
 
         // Step 2: Save the subscriber info, which triggers the email.
