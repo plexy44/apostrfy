@@ -74,21 +74,18 @@ export default function ApostrfyClient() {
   const { toast } = useToast();
   const { saveStory } = usePastStories();
   const inputRef = useRef<HTMLInputElement>(null);
-  const analyticsFired = useRef(new Set());
-
+  const analyticsFired = useRef(new Set<string>());
 
   useEffect(() => {
+    // Log screen view event only if it hasn't been logged for the current state yet
     const screenName = gameState.status;
     if (!analyticsFired.current.has(screenName)) {
-      if (screenName === 'onboarding') {
-        logEvent('screen_view', { screen_name: 'onboarding_screen' });
-        analyticsFired.current.add(screenName);
-      } else if (screenName === 'loading_screen') {
-        logEvent('screen_view', { screen_name: 'loading_screen' });
-        analyticsFired.current.add(screenName);
-      }
+        if (screenName === 'loading_screen' || screenName === 'onboarding') {
+            logEvent('screen_view', { screen_name: `${screenName}_screen` });
+            analyticsFired.current.add(screenName);
+        }
     }
-    
+
     if (isFirstVisit === undefined) {
       return; // Wait until the hook determines the visit status
     }
@@ -316,6 +313,7 @@ export default function ApostrfyClient() {
                 return result.value;
             }
             console.error(`${name} generation failed:`, result.reason);
+            toast({ variant: "destructive", title: "Analysis Step Failed", description: `Could not generate ${name.toLowerCase()}.` });
             return defaultValue;
         };
 
@@ -521,7 +519,7 @@ export default function ApostrfyClient() {
                 isAiTyping={isAiTyping}
                 onUserSubmit={handleUserSubmit}
                 onEndGame={handleEndGame}
-                onQuitRequest={handleQuitRequest}
+                onQuitRequest={onQuitRequest}
                 gameMode={gameMode}
                 onPauseForAd={handlePauseForAd}
                 isAdPaused={isAdPaused}
