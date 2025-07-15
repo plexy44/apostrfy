@@ -74,16 +74,26 @@ export default function ApostrfyClient() {
   const { toast } = useToast();
   const { saveStory } = usePastStories();
   const inputRef = useRef<HTMLInputElement>(null);
+  const analyticsFired = useRef(new Set());
 
 
   useEffect(() => {
-    logEvent('screen_view', { screen_name: 'loading_screen' });
+    const screenName = gameState.status;
+    if (!analyticsFired.current.has(screenName)) {
+      if (screenName === 'onboarding') {
+        logEvent('screen_view', { screen_name: 'onboarding_screen' });
+        analyticsFired.current.add(screenName);
+      } else if (screenName === 'loading_screen') {
+        logEvent('screen_view', { screen_name: 'loading_screen' });
+        analyticsFired.current.add(screenName);
+      }
+    }
+    
     if (isFirstVisit === undefined) {
       return; // Wait until the hook determines the visit status
     }
     const timer = setTimeout(() => {
         if (isFirstVisit) {
-            logEvent('screen_view', { screen_name: 'onboarding_screen' });
             setGameState({ status: 'onboarding', step: 1 });
         } else {
             setGameState({ status: 'menu' });
@@ -91,7 +101,7 @@ export default function ApostrfyClient() {
     }, 500); // Give a brief moment for loading screen to show
 
     return () => clearTimeout(timer);
-  }, [isFirstVisit]);
+  }, [isFirstVisit, gameState.status]);
 
   useEffect(() => {
     if (!isAiTyping && gameMode === 'interactive' && gameState.status === 'playing' && !isAdPaused) {
@@ -426,6 +436,7 @@ export default function ApostrfyClient() {
   };
 
   const handleQuitRequest = () => {
+    logEvent('quit_game_prompted', { story_length: story.length, game_mode: gameMode });
     setQuitDialogState('confirm_quit');
   };
 
@@ -439,6 +450,7 @@ export default function ApostrfyClient() {
   };
 
   const handleSaveAndQuit = () => {
+    logEvent('quit_game_confirmed', { saved_story: true, story_length: story.length, game_mode: gameMode });
     if (settings.trope && gameMode === 'interactive') { // Only save interactive stories
       saveStory({
         trope: settings.trope,
@@ -452,6 +464,7 @@ export default function ApostrfyClient() {
   };
 
   const handleQuitWithoutSaving = () => {
+    logEvent('quit_game_confirmed', { saved_story: false, story_length: story.length, game_mode: gameMode });
     handlePlayAgain();
     setQuitDialogState('closed');
   };

@@ -18,7 +18,9 @@ type EventName =
   | 'ad_impression'
   | 'ad_click'
   | 'ad_load_failed'
-  | 'rewarded_ad_flow';
+  | 'rewarded_ad_flow'
+  | 'quit_game_prompted'
+  | 'quit_game_confirmed';
 
 // Interface defining the parameters for each event
 interface EventParams {
@@ -65,7 +67,16 @@ interface EventParams {
     };
     rewarded_ad_flow: {
         status: 'offered' | 'completed' | 'declined';
-    }
+    };
+    quit_game_prompted: {
+        story_length: number;
+        game_mode: 'interactive' | 'simulation';
+    };
+    quit_game_confirmed: {
+        saved_story: boolean;
+        story_length: number;
+        game_mode: 'interactive' | 'simulation';
+    };
 }
 
 /**
