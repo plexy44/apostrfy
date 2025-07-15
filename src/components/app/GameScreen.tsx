@@ -31,6 +31,7 @@ interface GameScreenProps {
   gameMode: 'interactive' | 'simulation';
   onPauseForAd: () => void;
   isAdPaused: boolean;
+  inputRef: React.RefObject<HTMLInputElement>;
 }
 
 const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused, className }: { durationInSeconds: number; onEndGame: () => void, onPauseForAd: () => void; isPaused: boolean; className?: string }) => {
@@ -96,10 +97,9 @@ const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused, classN
   );
 };
 
-export default function GameScreen({ trope, story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest, gameMode, onPauseForAd, isAdPaused }: GameScreenProps) {
+export default function GameScreen({ trope, story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest, gameMode, onPauseForAd, isAdPaused, inputRef }: GameScreenProps) {
   const [userInput, setUserInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const turnTimerRef = useRef<number>(Date.now());
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
     if (!isAiTyping && gameMode === 'interactive' && !isAdPaused) {
       inputRef.current?.focus();
     }
-  }, [isAiTyping, gameMode, isAdPaused]);
+  }, [isAiTyping, gameMode, isAdPaused, inputRef]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,7 +123,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
     }
   };
 
-  const isTimerPaused = isAdPaused || isAiTyping;
+  const isTimerPaused = isAdPaused || (gameMode === 'interactive' && isAiTyping);
 
   return (
     <motion.div

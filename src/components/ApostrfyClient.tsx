@@ -8,7 +8,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AnimatePresence } from "framer-motion";
 import type { GameState, StoryPart, Trope, Persona, TropePersonaKey, InspirationalPersonas, GameAnalysis } from "@/lib/types";
 import { generateStoryContent, GenerateStoryContentInput } from "@/ai/flows/generate-story-content";
@@ -73,6 +73,7 @@ export default function ApostrfyClient() {
   const [isAdPaused, setIsAdPaused] = useState(false);
   const { toast } = useToast();
   const { saveStory } = usePastStories();
+  const inputRef = useRef<HTMLInputElement>(null);
 
 
   useEffect(() => {
@@ -87,6 +88,13 @@ export default function ApostrfyClient() {
       setGameState({ status: 'menu' });
     }
   }, [isFirstVisit]);
+
+  useEffect(() => {
+    if (!isAiTyping && gameMode === 'interactive' && gameState.status === 'playing' && !isAdPaused) {
+      inputRef.current?.focus();
+    }
+  }, [isAiTyping, gameMode, gameState.status, isAdPaused]);
+
 
   const handleOnboardingComplete = () => {
     logEvent('onboarding_completed', {});
@@ -277,18 +285,40 @@ export default function ApostrfyClient() {
         return;
       }
       
-      const stylePromise = gameMode === 'simulation' && sessionPersonas
-        ? Promise.resolve({ styleMatches: [sessionPersonas[0].name, sessionPersonas[1].name] })
-        : generateStyleMatch({ userContent: analysisContent, personas: JSON.stringify(inspirationalPersonas) });
+      let titleResult = { title: "A Story" };
+      try {
+        titleResult = await generateStoryTitle({ fullStory: fullStoryRaw });
+      } catch (e) { console.error("Title generation failed:", e); }
 
-      const [quoteResult, moodResult, styleResult, keywordsResult, scriptResult, titleResult] = await Promise.all([
-        generateQuoteBanner({ fullStory: fullStoryRaw }),
-        generateMoodAnalysis({ userContent: analysisContent }),
-        stylePromise,
-        generateStoryKeywords({ userContent: analysisContent }),
-        generateFinalScript({ fullStory }),
-        generateStoryTitle({ fullStory: fullStoryRaw }),
-      ]);
+      let quoteResult = { quote: "Every story has an end." };
+      try {
+        quoteResult = await generateQuoteBanner({ fullStory: fullStoryRaw });
+      } catch (e) { console.error("Quote generation failed:", e); }
+
+      let moodResult = { primaryEmotion: "Melancholy" as const, confidenceScore: 0.5 };
+      try {
+        moodResult = await generateMoodAnalysis({ userContent: analysisContent });
+      } catch (e) { console.error("Mood analysis failed:", e); }
+      
+      let styleResult = { styleMatches: ["The Storyteller", "The Dreamer"] };
+      try {
+        if (gameMode === 'simulation' && sessionPersonas) {
+          styleResult = { styleMatches: [sessionPersonas[0].name, sessionPersonas[1].name] };
+        } else {
+          styleResult = await generateStyleMatch({ userContent: analysisContent, personas: JSON.stringify(inspirationalPersonas) });
+        }
+      } catch (e) { console.error("Style match failed:", e); }
+
+      let keywordsResult = { keywords: ['Mystery', 'Suspense', 'Hope', 'Wonder', 'Resolve'] };
+      try {
+        keywordsResult = await generateStoryKeywords({ userContent: analysisContent });
+      } catch (e) { console.error("Keywords generation failed:", e); }
+
+      let scriptResult = { finalScript: fullStoryRaw };
+      try {
+        scriptResult = await generateFinalScript({ fullStory });
+      } catch (e) { console.error("Script generation failed:", e); }
+
 
       const winner = styleResult.styleMatches[0];
       const famousQuote = quotes[winner] ? { author: winner, quote: quotes[winner] } : null;
@@ -330,10 +360,10 @@ export default function ApostrfyClient() {
 
       setGameState({ status: "gameover" });
     } catch (error) {
-      console.error("Failed to generate sentiment snapshot:", error);
-      toast({ variant: "destructive", title: "Analysis Error", description: "Could not generate the full story analysis. Please try again." });
-      // Fallback analysis
-      logEvent('complete_game', { story_length: story.length, final_mood: 'Melancholy' });
+      console.error("A critical error occurred during game end analysis:", error);
+      toast({ variant: "destructive", title: "Analysis Error", description: "Could not generate the full story analysis." });
+      
+      logEvent('complete_game', { story_length: story.length, final_mood: 'Error' });
       setAnalysis({
         storyId: "error_state",
         title: "A Story Untold",
@@ -453,6 +483,7 @@ export default function ApostrfyClient() {
                 gameMode={gameMode}
                 onPauseForAd={handlePauseForAd}
                 isAdPaused={isAdPaused}
+                inputRef={inputRef}
               />
             )}
             {gameState.status === "generating_summary" && <LoadingScreen key="generating" />}
