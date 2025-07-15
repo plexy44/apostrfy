@@ -37,6 +37,7 @@ const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused, classN
   const [timeLeft, setTimeLeft] = useState(durationInSeconds);
 
   useEffect(() => {
+    // Timer is paused if the game is paused for an ad or the AI is typing.
     if (isPaused) {
       return;
     }
@@ -122,6 +123,8 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
     }
   };
 
+  const isTimerPaused = isAdPaused || isAiTyping;
+
   return (
     <motion.div
       className="flex flex-col items-center justify-center h-[90vh] w-full max-w-3xl mx-auto"
@@ -138,7 +141,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           className="absolute top-4 -left-16 z-20 rounded-full"
           onClick={onQuitRequest}
           aria-label="Quit game"
-          disabled={isAdPaused}
+          disabled={isTimerPaused}
         >
           <ArrowLeft />
         </Button>
@@ -150,7 +153,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                     durationInSeconds={duration} 
                     onEndGame={onEndGame} 
                     onPauseForAd={onPauseForAd} 
-                    isPaused={isAdPaused}
+                    isPaused={isTimerPaused}
                 />
             </div>
             <Orb size="tiny" isInteractive={true} className="flex-shrink-0" />
@@ -188,11 +191,11 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
             ref={inputRef}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            placeholder={isAdPaused ? "Game paused..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
-            disabled={isAiTyping || gameMode === 'simulation' || isAdPaused}
+            placeholder={isTimerPaused ? "AI is thinking..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
+            disabled={isTimerPaused || gameMode === 'simulation'}
             className="flex-grow h-12 text-base"
           />
-          <Button type="submit" size="icon" className="h-12 w-12" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation' || isAdPaused}>
+          <Button type="submit" size="icon" className="h-12 w-12" disabled={isTimerPaused || !userInput.trim() || gameMode === 'simulation'}>
             {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
           </Button>
         </form>
@@ -201,7 +204,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           <span>A 30-second response timer will be implemented here.</span>
         </div>
         <div className="text-center py-2">
-          <Button onClick={onEndGame} variant="outline" size="sm" disabled={isAdPaused}>Test End Game</Button>
+          <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused}>Test End Game</Button>
         </div>
       </div>
 
