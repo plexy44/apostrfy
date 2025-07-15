@@ -42,13 +42,13 @@ export default function PrivacyPolicyPage() {
           <h3 className="font-headline text-xl text-foreground">2. How We Use Your Information</h3>
            <p>
             Your information is used to:
-            <ul>
-              <li>Power the collaborative writing experience.</li>
-              <li>Generate your end-of-session analysis.</li>
-              <li>Send your story to your email address, upon your request.</li>
-              <li>Improve and optimize the application based on usage patterns.</li>
-            </ul>
           </p>
+          <ul>
+            <li>Power the collaborative writing experience.</li>
+            <li>Generate your end-of-session analysis.</li>
+            <li>Send your story to your email address, upon your request.</li>
+            <li>Improve and optimize the application based on usage patterns.</li>
+          </ul>
 
           <h3 className="font-headline text-xl text-foreground">3. Third-Party Services & Advertising</h3>
           <p>
