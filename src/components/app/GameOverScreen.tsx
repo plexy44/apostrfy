@@ -56,8 +56,8 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
     setIsModalOpen(true);
   }
 
-  const AnalysisCard = ({ title, children }: { title: string, children: React.ReactNode }) => (
-    <Card className="bg-background/30 border-border/10 flex-1 min-w-0 md:min-w-[280px]">
+  const AnalysisCard = ({ title, children, className }: { title: string, children: React.ReactNode, className?: string }) => (
+    <Card className={cn("bg-background/30 border-border/10 flex-1 min-w-0 md:min-w-[280px]", className)}>
       <CardHeader className="p-4 md:p-6">
         <CardTitle className="font-headline text-base md:text-xl text-foreground">{title}</CardTitle>
       </CardHeader>
