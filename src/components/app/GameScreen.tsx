@@ -124,13 +124,13 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   return (
     <motion.div
-      className="h-full w-full max-w-2xl mx-auto flex flex-col"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
+      className="h-full w-full flex items-center justify-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={{ duration: 0.5, ease: 'easeInOut' }}
     >
-      <div className="flex flex-col h-full w-full bg-secondary/20 rounded-lg border border-border/20 shadow-2xl">
+      <div className="h-full md:h-[85vh] w-full max-w-2xl flex flex-col bg-secondary/20 rounded-lg border border-border/20 shadow-2xl">
         {/* Header */}
         <div className="flex-shrink-0 p-4 border-b border-border/20 flex items-center gap-4">
            <Button
@@ -209,7 +209,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                 {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
               </Button>
             </form>
-            <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused} className="w-full">
+            <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused} className="w-full mt-1">
                   End Game
             </Button>
           </div>
