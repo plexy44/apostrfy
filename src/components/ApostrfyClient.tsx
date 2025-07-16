@@ -562,7 +562,7 @@ export default function ApostrfyClient() {
         </AnimatePresence>
          <AdOverlay isVisible={isAdVisible} onClose={handleAdClosed} />
       </main>
-      {gameState.status !== "playing" && gameState.status !== 'generating_summary' && gameState.status !== 'generating_initial_story' && <AppFooter />}
+      {gameState.status !== 'generating_summary' && gameState.status !== 'generating_initial_story' && <AppFooter />}
 
       <AlertDialog open={isQuitDialogOpen} onOpenChange={setIsQuitDialogOpen}>
         <AlertDialogContent className="glassmorphism">
