@@ -3,19 +3,18 @@
  */
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { logEvent } from '@/lib/analytics';
 
 export default function TermsOfServicePage() {
+  const [currentDate, setCurrentDate] = useState('');
+
   useEffect(() => {
     logEvent('screen_view', { screen_name: 'terms_of_service' });
+    setCurrentDate(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
   }, []);
-
-  const getCurrentDate = () => {
-    return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  }
 
   return (
     <div className="container mx-auto max-w-3xl py-8 md:py-12 px-4">
@@ -24,7 +23,7 @@ export default function TermsOfServicePage() {
           <CardTitle className="text-2xl md:text-3xl font-headline text-center">Terms of Service</CardTitle>
         </CardHeader>
         <CardContent className="prose prose-invert max-w-none text-foreground/80 space-y-4 text-sm md:text-base">
-            <p className="text-muted-foreground text-sm text-center">Last Updated: {getCurrentDate()}</p>
+            <p className="text-muted-foreground text-sm text-center">Last Updated: {currentDate}</p>
             <p>
                 By using the Apostrfy application ("the app"), you agree to be bound by these Terms of Service. Please read them carefully.
             </p>

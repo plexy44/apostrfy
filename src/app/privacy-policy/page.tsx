@@ -3,19 +3,18 @@
  */
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { logEvent } from '@/lib/analytics';
 
 export default function PrivacyPolicyPage() {
+  const [currentDate, setCurrentDate] = useState('');
+
   useEffect(() => {
     logEvent('screen_view', { screen_name: 'privacy_policy' });
+    setCurrentDate(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
   }, []);
-
-  const getCurrentDate = () => {
-    return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  }
 
   return (
     <div className="container mx-auto max-w-3xl py-8 md:py-12 px-4">
@@ -24,7 +23,7 @@ export default function PrivacyPolicyPage() {
           <CardTitle className="text-2xl md:text-3xl font-headline text-center">Privacy Policy</CardTitle>
         </CardHeader>
         <CardContent className="prose prose-invert max-w-none text-foreground/80 space-y-4 text-sm md:text-base">
-          <p className="text-muted-foreground text-sm text-center">Last Updated: {getCurrentDate()}</p>
+          <p className="text-muted-foreground text-sm text-center">Last Updated: {currentDate}</p>
           <p>
             Welcome to Apostrfy. We are committed to protecting your privacy and providing a transparent experience. This policy outlines how we handle your information.
           </p>
