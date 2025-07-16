@@ -1,11 +1,11 @@
 /**
- * @fileoverview Renders the 'Sentiment Analysis' screen displayed after a session concludes.
- * It provides a comprehensive breakdown of the user's writing, including a mood
- * wheel, style matches, and evocative keywords, all in a responsive layout.
- * A key feature is the toggle allowing users to switch between the final,
- * AI-polished script and the original raw chat transcript.
+ * @fileoverview This component displays the sentiment analysis screen after a session.
+ * It shows a mood wheel, style matches, and keywords. It also includes a toggle
+ * between the final, AI-polished script and the raw chat transcript.
+ *
+ * - GameOverScreen - The component that renders the game over screen.
+ * - GameOverScreenProps - The props for the GameOverScreen component.
  */
-
 "use client";
 
 import { useState } from "react";

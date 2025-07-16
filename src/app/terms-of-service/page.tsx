@@ -1,5 +1,8 @@
 /**
- * @fileoverview This page outlines the application's terms of service, covering user rights, content ownership, and disclaimers.
+ * @fileoverview This page outlines the terms of service for the application,
+ * covering user rights, content ownership, and disclaimers.
+ *
+ * - TermsOfServicePage - The component that renders the terms of service.
  */
 "use client";
 

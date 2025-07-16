@@ -1,11 +1,12 @@
 /**
- * @fileoverview This component serves as the main menu for the application.
- * It allows users to select a story style (trope) and session duration.
- * It features the central interactive AI orb and provides options to start an
- * interactive co-creation session or begin an automated 'simulation' between
- * two AI personas. It also includes a feature to unlock a secret style via a rewarded ad.
+ * @fileoverview This component is the main menu of the application. It allows
+ * users to select a story style (trope) and a session duration. It features
+ * the central interactive AI orb and provides options to start an interactive
+or an automated 'simulation' session.
+ *
+ * - MainMenu - The component that renders the main menu.
+ * - MainMenuProps - The props for the MainMenu component.
  */
-
 "use client";
 
 import { useState, useEffect } from "react";

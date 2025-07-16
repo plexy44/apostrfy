@@ -1,6 +1,8 @@
 /**
- * @fileoverview This page provides information about the Apostrfy application.
- * It serves as a placeholder for the "About Us" content.
+ * @fileoverview This page contains information about the Apostrfy application,
+ * explaining its purpose and mission.
+ *
+ * - AboutUsPage - The component that renders the about us page.
  */
 "use client";
 

@@ -1,5 +1,8 @@
 /**
- * @fileoverview This page outlines the application's privacy policy, detailing data collection, usage, and user rights.
+ * @fileoverview This page outlines the privacy policy for the application,
+ * detailing how user data is collected, used, and protected.
+ *
+ * - PrivacyPolicyPage - The component that renders the privacy policy.
  */
 "use client";
 
