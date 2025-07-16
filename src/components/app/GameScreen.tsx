@@ -1,6 +1,7 @@
 /**
  * @fileoverview Renders the primary game interface. This component supports
  * both interactive user input and automated simulation modes. The layout
+
  * consists of a static header and footer with a central, internally scrollable
  * area for the story transcript.
  */
@@ -121,15 +122,15 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   return (
     <motion.div
-      className="h-full w-full flex flex-col items-center justify-center"
+      className="h-full w-full flex flex-col md:items-center md:justify-center"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5, ease: 'easeInOut' }}
     >
-      <div className="h-full md:h-[85vh] w-full max-w-2xl flex flex-col bg-secondary/20 md:rounded-lg border-border/20 md:shadow-2xl">
+      <div className="h-full w-full max-w-2xl flex flex-col bg-secondary/20 md:h-[85vh] md:rounded-lg md:border-border/20 md:shadow-2xl">
         {/* Header */}
-        <div className="flex-shrink-0 p-2 md:p-4 border-b border-border/20 flex items-center gap-4">
+        <header className="flex-shrink-0 p-2 md:p-4 border-b border-border/20 flex items-center gap-4">
            <Button
             variant="ghost"
             size="icon"
@@ -150,10 +151,10 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
             />
           </div>
           <Orb size="tiny" isInteractive={false} />
-        </div>
+        </header>
         
         {/* Story/Chat Area */}
-        <div className="flex-grow min-h-0">
+        <main className="flex-grow min-h-0 overflow-y-auto">
           <ScrollArea className="h-full">
             <div className="p-2 md:p-4 space-y-6">
                 {story.map((part, index) => {
@@ -190,9 +191,9 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                 <div ref={messagesEndRef} />
             </div>
           </ScrollArea>
-        </div>
+        </main>
         {/* Footer/Input */}
-        <div className="flex-shrink-0 p-2 md:p-4 border-t border-border/20">
+        <footer className="flex-shrink-0 p-2 md:p-4 border-t border-border/20">
           <div className="flex flex-col gap-2">
             <form onSubmit={handleSubmit} className="flex items-center gap-2">
               <Input
@@ -211,7 +212,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                   End Game
             </Button>
           </div>
-        </div>
+        </footer>
       </div>
     </motion.div>
   );
