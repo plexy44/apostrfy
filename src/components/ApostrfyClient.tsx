@@ -1,11 +1,10 @@
 /**
- * @fileoverview Main client component for Apostrfy.
- * Manages the application's state machine, handling transitions between game states
- * like loading, menu, playing, and game over. It orchestrates user settings, story
- * progression, and interactions with Genkit AI flows for both 'interactive' and
- * 'simulation' modes.
+ * @fileoverview Main client component for Apostrfy. Manages the application's
+ * state machine, handling transitions between game states like loading, menu,
+ * playing, and game over. It orchestrates user settings, story progression, and
+ * interactions with Genkit AI flows for both 'interactive' and 'simulation'
+ * modes.
  */
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";

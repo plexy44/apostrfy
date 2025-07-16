@@ -1,8 +1,8 @@
 /**
- * @fileoverview Renders the primary interface for story creation, supporting
- * both interactive user input and automated simulation modes. The layout consists
- * of a static header and footer with a central, internally scrollable area for the
- * story transcript. Optimized for both desktop and mobile views.
+ * @fileoverview Renders the primary game interface. This component supports
+ * both interactive user input and automated simulation modes. The layout
+ * consists of a static header and footer with a central, internally scrollable
+ * area for the story transcript.
  */
 "use client";
 
@@ -121,7 +121,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   return (
     <motion.div
-      className="h-full w-full flex flex-col md:items-center md:justify-center"
+      className="h-full w-full flex flex-col items-center justify-center"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -153,43 +153,44 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
         </div>
         
         {/* Story/Chat Area */}
-        <ScrollArea className="flex-grow min-h-0">
-          <div className="p-2 md:p-4 space-y-6">
-              {story.map((part, index) => {
-                  const isUserSpeaker = part.speaker === 'user';
-                  let alignment, bubbleStyles;
+        <div className="flex-grow min-h-0">
+          <ScrollArea className="h-full">
+            <div className="p-2 md:p-4 space-y-6">
+                {story.map((part, index) => {
+                    const isUserSpeaker = part.speaker === 'user';
+                    let alignment, bubbleStyles;
 
-                  alignment = isUserSpeaker ? 'items-end' : 'items-start';
-                  bubbleStyles = isUserSpeaker
-                    ? 'bg-primary text-primary-foreground rounded-br-none'
-                    : 'bg-secondary rounded-bl-none';
+                    alignment = isUserSpeaker ? 'items-end' : 'items-start';
+                    bubbleStyles = isUserSpeaker
+                      ? 'bg-primary text-primary-foreground rounded-br-none'
+                      : 'bg-secondary rounded-bl-none';
 
-                  return (
-                    <div key={index} className={`flex flex-col animate-fade-in-up ${alignment}`}>
-                      {part.personaName && (
-                        <p className={`text-xs text-muted-foreground mb-1 px-2 ${alignment === 'items-end' ? 'self-end' : 'self-start'}`}>
-                          {part.personaName}
-                        </p>
-                      )}
-                      <div className={`p-2 md:p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
-                        <p className="text-sm">{part.line}</p>
+                    return (
+                      <div key={index} className={`flex flex-col animate-fade-in-up ${alignment}`}>
+                        {part.personaName && (
+                          <p className={`text-xs text-muted-foreground mb-1 px-2 ${alignment === 'items-end' ? 'self-end' : 'self-start'}`}>
+                            {part.personaName}
+                          </p>
+                        )}
+                        <div className={`p-2 md:p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
+                          <p className="text-sm">{part.line}</p>
+                        </div>
                       </div>
-                    </div>
-                  );
-              })}
-              {isAiTyping && (
-                <div className="flex items-start">
-                   <div className="p-3 rounded-lg max-w-[85%] bg-secondary rounded-bl-none flex items-center space-x-2 shadow-md">
-                     <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.3s]"></div>
-                     <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.15s]"></div>
-                     <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
-                   </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-          </div>
-        </ScrollArea>
-
+                    );
+                })}
+                {isAiTyping && (
+                  <div className="flex items-start">
+                     <div className="p-3 rounded-lg max-w-[85%] bg-secondary rounded-bl-none flex items-center space-x-2 shadow-md">
+                       <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.3s]"></div>
+                       <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.15s]"></div>
+                       <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
+                     </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+            </div>
+          </ScrollArea>
+        </div>
         {/* Footer/Input */}
         <div className="flex-shrink-0 p-2 md:p-4 border-t border-border/20">
           <div className="flex flex-col gap-2">
