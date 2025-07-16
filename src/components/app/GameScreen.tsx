@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Loader, ArrowLeft, Timer, Hourglass } from "lucide-react";
-import Orb from "./Orb";
 import { cn } from "@/lib/utils";
 
 interface GameScreenProps {
@@ -126,57 +125,48 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   return (
     <motion.div
-      className="flex flex-col h-full w-full max-w-3xl mx-auto"
+      className="flex flex-col h-full w-full max-w-2xl mx-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
     >
-      {/* Outer container for glassmorphism and layout */}
-      <div className="flex flex-col h-full w-full flex-grow p-2 md:p-4 glassmorphism rounded-lg relative">
-        
-        {/* Header Section */}
-        <div className="flex-shrink-0">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 -left-1 md:top-4 md:-left-16 z-20 rounded-full"
-            onClick={onQuitRequest}
-            aria-label="Quit game"
-            disabled={isTimerPaused}
-          >
-            <ArrowLeft />
-          </Button>
-          
-          <div className="flex items-start gap-4 mb-2 md:mb-4">
-              <div className="flex-grow">
-                  <h3 className="font-headline text-base md:text-lg text-foreground mb-1">{trope}</h3>
-                  <TimerBar 
-                      durationInSeconds={duration} 
-                      onEndGame={onEndGame} 
-                      onPauseForAd={onPauseForAd} 
-                      isPaused={isTimerPaused}
-                  />
-              </div>
-              <Orb size="tiny" isInteractive={true} className="flex-shrink-0" />
-          </div>
+      {/* Header */}
+      <div className="flex-shrink-0 p-4 border-b border-border/20 flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+          onClick={onQuitRequest}
+          aria-label="Quit game"
+          disabled={isTimerPaused}
+        >
+          <ArrowLeft />
+        </Button>
+        <div className="flex-grow">
+          <h3 className="font-headline text-lg text-foreground">{trope}</h3>
+          <TimerBar 
+              durationInSeconds={duration} 
+              onEndGame={onEndGame} 
+              onPauseForAd={onPauseForAd} 
+              isPaused={isTimerPaused}
+          />
         </div>
-        
-        {/* Story/Chat Area Section */}
-        <ScrollArea className="flex-grow my-2 pr-2">
-          <div className="space-y-4">
+      </div>
+      
+      {/* Story/Chat Area */}
+      <ScrollArea className="flex-grow bg-background/50">
+        <div className="p-4 space-y-6">
             {story.map((part, index) => {
                 const isUserSpeaker = part.speaker === 'user';
                 let alignment, bubbleStyles;
 
                 if (gameMode === 'simulation') {
-                    // In simulation, 'user' is Persona 1 (right), 'ai' is Persona 2 (left)
                     alignment = isUserSpeaker ? 'items-end' : 'items-start';
                     bubbleStyles = isUserSpeaker
                         ? 'bg-primary/90 text-primary-foreground rounded-br-none'
                         : 'bg-secondary rounded-bl-none';
                 } else {
-                    // In interactive, 'ai' is AI (left), 'user' is the human player (right)
                     alignment = isUserSpeaker ? 'items-end' : 'items-start';
                     bubbleStyles = isUserSpeaker
                       ? 'bg-primary/90 text-primary-foreground rounded-br-none'
@@ -206,28 +196,27 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
               </div>
             )}
             <div ref={messagesEndRef} />
-          </div>
-        </ScrollArea>
-
-        {/* Footer/Input Section */}
-        <div className="flex-shrink-0 pt-2">
-          <form onSubmit={handleSubmit} className="flex items-center gap-2">
-            <Input
-              ref={inputRef}
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              placeholder={isAiTyping ? "AI is thinking..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
-              disabled={isTimerPaused || gameMode === 'simulation'}
-              className="flex-grow h-11 text-sm"
-            />
-            <Button type="submit" size="icon" className="h-11 w-11" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation'}>
-              {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
-            </Button>
-          </form>
-          <div className="text-center py-2">
-            <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused}>End Game</Button>
-          </div>
         </div>
+      </ScrollArea>
+
+      {/* Footer/Input */}
+      <div className="flex-shrink-0 p-4 border-t border-border/20">
+        <form onSubmit={handleSubmit} className="flex items-center gap-2">
+          <Input
+            ref={inputRef}
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+            placeholder={isAiTyping ? "AI is thinking..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
+            disabled={isTimerPaused || gameMode === 'simulation'}
+            className="flex-grow h-11 text-sm"
+          />
+          <Button type="submit" size="icon" className="h-11 w-11" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation'}>
+            {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
+          </Button>
+        </form>
+         <div className="text-center pt-3">
+            <Button onClick={onEndGame} variant="link" size="sm" className="text-muted-foreground" disabled={isTimerPaused}>End Game</Button>
+          </div>
       </div>
     </motion.div>
   );
