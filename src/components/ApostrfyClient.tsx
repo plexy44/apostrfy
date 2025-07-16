@@ -2,6 +2,7 @@
  * @fileoverview This is the main client-side component for Apostrfy.
  * It acts as the central state machine for the entire application, managing the
  * overall game state (loading, onboarding, menu, playing, gameover) for both
+
  * 'interactive' and 'simulation' modes. It handles user settings, story
  * progression, and interactions with all Genkit AI flows.
  */
@@ -47,6 +48,9 @@ import { saveStoryToFirestore, saveSubscriberToFirestore } from "@/lib/firestore
 const { inspirationalPersonas } = personasData as { inspirationalPersonas: InspirationalPersonas };
 const quotes = famousQuotesData as Record<string, string>;
 
+type AdTrigger = 'quit' | 'end_game' | 'reward' | 'mid_game' | null;
+
+
 const getPersonaKey = (trope: Trope): TropePersonaKey => {
   const map: Record<Trope, TropePersonaKey> = {
     'Noir Detective': 'noirDetective',
@@ -68,7 +72,8 @@ export default function ApostrfyClient() {
   const [comingFromOnboarding, setComingFromOnboarding] = useState(false);
   const [isQuitDialogOpen, setIsQuitDialogOpen] = useState(false);
   const [sessionPersonas, setSessionPersonas] = useState<[Persona, Persona] | null>(null);
-  const [isAdPaused, setIsAdPaused] = useState(false);
+  const [isAdVisible, setIsAdVisible] = useState(false);
+  const [adTrigger, setAdTrigger] = useState<AdTrigger>(null);
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const analyticsFired = useRef(new Set<string>());
@@ -119,10 +124,10 @@ export default function ApostrfyClient() {
   }, [isFirstVisit]);
 
   useEffect(() => {
-    if (!isAiTyping && gameMode === 'interactive' && gameState.status === 'playing' && !isAdPaused) {
+    if (!isAiTyping && gameMode === 'interactive' && gameState.status === 'playing' && !isAdVisible) {
       inputRef.current?.focus();
     }
-  }, [isAiTyping, gameMode, gameState.status, isAdPaused]);
+  }, [isAiTyping, gameMode, gameState.status, isAdVisible]);
 
 
   const handleOnboardingComplete = () => {
@@ -205,7 +210,7 @@ export default function ApostrfyClient() {
   };
 
   useEffect(() => {
-    if (gameMode !== 'simulation' || gameState.status !== 'playing' || !sessionPersonas || isAiTyping || isAdPaused) {
+    if (gameMode !== 'simulation' || gameState.status !== 'playing' || !sessionPersonas || isAiTyping || isAdVisible) {
       return;
     }
     
@@ -241,11 +246,11 @@ export default function ApostrfyClient() {
     const timeoutId = setTimeout(runSimulationTurn, 1500); 
     return () => clearTimeout(timeoutId);
 
-  }, [story, gameMode, gameState.status, sessionPersonas, settings.trope, isAiTyping, isAdPaused]);
+  }, [story, gameMode, gameState.status, sessionPersonas, settings.trope, isAiTyping, isAdVisible]);
 
 
   const handleUserSubmit = async (userInput: string, turnTime: number) => {
-    if (!settings.trope || !sessionPersonas || gameMode === 'simulation' || isAdPaused) return;
+    if (!settings.trope || !sessionPersonas || gameMode === 'simulation' || isAdVisible) return;
 
     logEvent('user_turn_taken', { turn_time_seconds: Math.round(turnTime), word_count: userInput.split(' ').length });
     
@@ -386,30 +391,21 @@ export default function ApostrfyClient() {
   };
 
 
-  const handleEndGame = async () => {
+  const handleEndGame = () => {
     if (gameState.status === 'generating_summary' || gameState.status === 'gameover') return;
 
-    const adUnitName = 'end_of_game_interstitial';
+    logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'end_of_game_interstitial' });
+    setAdTrigger('end_game');
+    setIsAdVisible(true);
     
-    try {
-      logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: adUnitName });
-      console.log("Ad impression logged, proceeding to analysis.");
-    } catch (error) {
-      console.error("Ad failed to load:", error);
-      logEvent('ad_load_failed', { ad_unit_name: adUnitName, error_message: (error as Error).message });
-      toast({
-        variant: "destructive",
-        title: "Ad failed to load",
-        description: "Continuing to your results.",
-      });
-    } finally {
-      await proceedToAnalysis();
-    }
+    // Start analysis in the background while ad is showing
+    proceedToAnalysis();
   };
 
   const handlePauseForAd = () => {
     logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'mid_game_interstitial' });
-    setIsAdPaused(true);
+    setAdTrigger('mid_game');
+    setIsAdVisible(true);
   };
 
   const handlePlayAgain = () => {
@@ -420,7 +416,8 @@ export default function ApostrfyClient() {
     setComingFromOnboarding(false);
     setAnalysis(null);
     setGameMode('interactive');
-    setIsAdPaused(false);
+    setIsAdVisible(false);
+    setAdTrigger(null);
   };
 
   const handleQuitRequest = () => {
@@ -432,12 +429,9 @@ export default function ApostrfyClient() {
     setIsQuitDialogOpen(false);
     logEvent('quit_game_confirmed', { story_length: story.length, game_mode: gameMode });
     
-    // Show ad on quit
     logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'quit_game_interstitial' });
-    setIsAdPaused(true);
-
-    // After ad is closed (simulated by onClose in AdOverlay), we go back to the menu
-    // The handlePlayAgain function already resets everything, so we'll call it from AdOverlay's onClose
+    setAdTrigger('quit');
+    setIsAdVisible(true);
   };
   
   const handleCancelQuit = () => {
@@ -455,7 +449,6 @@ export default function ApostrfyClient() {
         const sanitizedStory = analysis.story.map(part => ({
           speaker: part.speaker,
           line: part.line,
-          // Ensure personaName is null if it's undefined, which Firestore can handle.
           personaName: part.personaName || null, 
         }));
 
@@ -465,7 +458,6 @@ export default function ApostrfyClient() {
             famousQuote: analysis.famousQuote || null,
         };
 
-        // Step 1: Save the story to Firestore.
         const storyId = await saveStoryToFirestore({
             transcript: sanitizedAnalysis.story,
             analysis: sanitizedAnalysis, 
@@ -473,7 +465,6 @@ export default function ApostrfyClient() {
             title: sanitizedAnalysis.title,
         });
 
-        // Step 2: Save the subscriber info, which triggers the email.
         await saveSubscriberToFirestore({
             email: email,
             storyId: storyId,
@@ -484,7 +475,6 @@ export default function ApostrfyClient() {
             description: "Your story is on its way to your inbox.",
         });
 
-        // Optional: Update local analysis state with the new storyId
         setAnalysis(prev => prev ? { ...prev, storyId } : null);
 
         return true;
@@ -496,12 +486,29 @@ export default function ApostrfyClient() {
   };
 
   const handleAdClosed = () => {
-    setIsAdPaused(false);
-    // If the ad was triggered by quitting, now we reset the game.
-    if (gameState.status === 'playing') {
+    setIsAdVisible(false);
+    if (adTrigger === 'quit') {
       handlePlayAgain();
+    } else if (adTrigger === 'end_game') {
+      // The analysis is already running; the gameover state will be set when it's done.
+    } else if (adTrigger === 'reward') {
+      // The reward logic is handled in MainMenu now.
     }
+    // 'mid_game' and 'reward' ad triggers are self-contained and don't need further action here.
+    setAdTrigger(null);
   };
+
+  const handleRequestAd = (source: 'reward') => {
+    let adUnitName: 'unlock_secret_style_reward';
+    switch (source) {
+        case 'reward':
+            adUnitName = 'unlock_secret_style_reward';
+            break;
+    }
+    logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'rewarded', ad_unit_name: adUnitName });
+    setAdTrigger(source);
+    setIsAdVisible(true);
+  }
   
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -509,7 +516,15 @@ export default function ApostrfyClient() {
         <AnimatePresence mode="wait">
             {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}
             {gameState.status === "onboarding" && <OnboardingModal key="onboarding" onComplete={handleOnboardingComplete} />}
-            {gameState.status === "menu" && <MainMenu key="menu" onStartGame={handleStartGame} onStartSimulation={handleStartSimulation} comingFromOnboarding={comingFromOnboarding} />}
+            {gameState.status === "menu" && (
+              <MainMenu 
+                key="menu" 
+                onStartGame={handleStartGame} 
+                onStartSimulation={handleStartSimulation} 
+                comingFromOnboarding={comingFromOnboarding}
+                onRequestAd={() => handleRequestAd('reward')}
+              />
+            )}
             {gameState.status === "generating_initial_story" && settings.trope && (
               <LoadingScreen
                 key="generating_initial"
@@ -529,7 +544,7 @@ export default function ApostrfyClient() {
                 onQuitRequest={handleQuitRequest}
                 gameMode={gameMode}
                 onPauseForAd={handlePauseForAd}
-                isAdPaused={isAdPaused}
+                isAdPaused={isAdVisible && adTrigger === 'mid_game'}
                 inputRef={inputRef}
               />
             )}
@@ -543,7 +558,7 @@ export default function ApostrfyClient() {
               />
             )}
         </AnimatePresence>
-         <AdOverlay isVisible={isAdPaused} onClose={handleAdClosed} />
+         <AdOverlay isVisible={isAdVisible} onClose={handleAdClosed} />
       </main>
       {gameState.status !== "playing" && gameState.status !== 'generating_summary' && gameState.status !== 'generating_initial_story' && <AppFooter />}
 

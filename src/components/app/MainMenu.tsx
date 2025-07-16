@@ -32,9 +32,10 @@ interface MainMenuProps {
   onStartGame: (trope: Trope, duration: number, analyticsName: 'lightning' | 'minute' | 'twice_a_minute') => void;
   onStartSimulation: (trope: Trope) => void;
   comingFromOnboarding: boolean;
+  onRequestAd: () => void;
 }
 
-export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnboarding }: MainMenuProps) {
+export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnboarding, onRequestAd }: MainMenuProps) {
   const [selectedTrope, setSelectedTrope] = useState<Trope>("Cosmic Wanderer");
   const [selectedDuration, setSelectedDuration] = useState<number>(60);
   const [selectedAnalyticsName, setSelectedAnalyticsName] = useState<string>('minute');
@@ -108,19 +109,20 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
       toast({ title: "Already Unlocked!", description: "You can now select the Freeflow style." });
       return;
     }
+    
     logEvent('rewarded_ad_flow', { status: 'offered' });
+    onRequestAd(); // This will show the interstitial
     
-    // This simulates the ad watching process
-    logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'rewarded', ad_unit_name: 'unlock_secret_style_reward' });
-    
-    toast({ 
-      title: "Ad Finished!", 
-      description: "You've unlocked the secret 'Freeflow' style!" 
-    });
-
-    setIsFreeflowUnlocked(true);
-    setSelectedTrope("Freeflow"); // auto-select the new style
-    logEvent('rewarded_ad_flow', { status: 'completed' });
+    // Simulate ad reward after a delay
+    setTimeout(() => {
+        toast({ 
+            title: "Style Unlocked!", 
+            description: "You can now select the 'Freeflow' writing style." 
+        });
+        setIsFreeflowUnlocked(true);
+        setSelectedTrope("Freeflow");
+        logEvent('rewarded_ad_flow', { status: 'completed' });
+    }, 500); // Small delay to allow ad to show
   }
 
   const isTyping = startTyping && displayedMessage.length < orbMessage.length;
@@ -150,7 +152,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
     >
       <div className="flex flex-col items-center text-center mb-4 md:mb-6">
         <ApostrfyLogo className="w-36 h-auto mb-1 md:w-48 md:mb-2 text-foreground" />
-        <p className="font-headline text-muted-foreground tracking-widest text-sm">connect || co-create</p>
+        <p className="font-headline text-muted-foreground tracking-widest text-sm md:text-base">connect || co-create</p>
       </div>
 
       <div className="flex flex-col items-center gap-4 mb-4">
@@ -173,7 +175,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
           <CardTitle className="font-headline text-xl text-center text-foreground">Co-create a story</CardTitle>
           <CardDescription className="text-center text-xs">First, choose a style for your AI companion.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 p-4 md:p-6">
+        <CardContent className="space-y-6 p-4 md:p-6">
            <div className="grid grid-cols-2 gap-2 md:gap-4">
             <AnimatePresence>
                 <TropeButton key={initialTropes[0].name} trope={initialTropes[0]} />
@@ -250,7 +252,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
             className="mt-2 text-accent"
         >
             <Gift className="mr-2 h-4 w-4" />
-            Unlock a Secret Style (Ad)
+            Unlock a Secret Style
         </Button>
       </div>
     </motion.div>
