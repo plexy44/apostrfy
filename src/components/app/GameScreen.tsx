@@ -1,7 +1,6 @@
 /**
  * @fileoverview Renders the primary game interface. This component supports
  * both interactive user input and automated simulation modes. The layout
-
  * consists of a static header and footer with a central, internally scrollable
  * area for the story transcript.
  */
@@ -122,7 +121,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   return (
     <motion.div
-      className="h-full w-full flex flex-col pt-4 pb-4 md:items-center md:justify-center md:p-0"
+      className="h-full w-full flex flex-col md:items-center md:justify-center"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
