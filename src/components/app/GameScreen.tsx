@@ -151,9 +151,6 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                 isPaused={isTimerPaused}
             />
           </div>
-           <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused}>
-              End Game
-            </Button>
         </div>
         
         {/* Story/Chat Area */}
@@ -209,6 +206,11 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
               {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
             </Button>
           </form>
+          <div className="text-center mt-2">
+            <Button onClick={onEndGame} variant="link" size="sm" className="text-muted-foreground" disabled={isTimerPaused}>
+              End Game
+            </Button>
+          </div>
         </div>
       </div>
     </motion.div>
