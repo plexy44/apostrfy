@@ -16,8 +16,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Loader, ArrowLeft, Timer, Hourglass } from "lucide-react";
-import { cn } from "@/lib/utils";
-import Orb from "./Orb";
 
 interface GameScreenProps {
   trope: Trope;
@@ -153,7 +151,6 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                 isPaused={isTimerPaused}
             />
           </div>
-          <Orb size="tiny" isInteractive={false} />
         </div>
         
         {/* Story/Chat Area */}
