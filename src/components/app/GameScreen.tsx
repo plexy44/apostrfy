@@ -15,7 +15,7 @@ import type { StoryPart, Trope } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Loader, Timer, Hourglass } from "lucide-react";
+import { Send, Loader, Timer, Hourglass, X } from "lucide-react";
 import Orb from "./Orb";
 
 interface GameScreenProps {
@@ -124,7 +124,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   return (
     <motion.div
-      className="flex flex-col h-full w-full max-w-2xl mx-auto p-2"
+      className="h-full w-full max-w-2xl mx-auto"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -141,7 +141,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
             aria-label="Quit game"
             disabled={isTimerPaused}
           >
-             &larr;
+             <X className="h-4 w-4" />
           </Button>
           <div className="flex-grow">
             <h3 className="font-headline text-lg text-foreground">{trope}</h3>
@@ -152,6 +152,9 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                 isPaused={isTimerPaused}
             />
           </div>
+          <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused} className="hidden sm:inline-flex">
+              End Game
+          </Button>
           <Orb size="tiny" isInteractive={false} />
         </div>
         
@@ -209,7 +212,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                 {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
               </Button>
             </form>
-            <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused} className="w-full">
+            <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused} className="w-full sm:hidden">
                   End Game
             </Button>
           </div>
