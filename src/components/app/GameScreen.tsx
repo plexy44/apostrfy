@@ -121,7 +121,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
     }
   };
 
-  const isTimerPaused = isAdPaused || isAiTyping;
+  const isTimerPaused = isAdPaused || (isAiTyping && gameMode === 'interactive');
 
   return (
     <motion.div
