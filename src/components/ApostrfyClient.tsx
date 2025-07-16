@@ -525,14 +525,14 @@ export default function ApostrfyClient() {
                 onRequestAd={() => handleRequestAd('reward')}
               />
             )}
-            {gameState.status === "generating_initial_story" && settings.trope && (
+            {(gameState.status === "generating_initial_story" && settings.trope) && (
               <LoadingScreen
                 key="generating_initial"
                 trope={settings.trope}
                 duration={settings.duration}
               />
             )}
-            {gameState.status === "playing" && settings.trope && (
+            {(gameState.status === "playing" && settings.trope) && (
               <GameScreen
                 key="playing"
                 trope={settings.trope}

@@ -104,7 +104,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
           </AnalysisCard>
           {analysis.famousQuote && (
             <AnalysisCard title="A Word From...">
-              <blockquote className="text-sm md:text-lg italic border-l-4 border-accent pl-4 text-left">
+              <blockquote className="text-sm md:text-base italic border-l-4 border-accent pl-4 text-left leading-relaxed">
                 {analysis.famousQuote.quote}
                 <cite className="block text-right not-italic text-xs md:text-sm mt-2 text-muted-foreground">&ndash; {analysis.famousQuote.author}</cite>
               </blockquote>
