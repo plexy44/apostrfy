@@ -509,6 +509,11 @@ export default function ApostrfyClient() {
     setAdTrigger(source);
     setIsAdVisible(true);
   }
+
+  const showFooter = !(
+    gameState.status === 'playing' ||
+    gameState.status === 'generating_initial_story'
+  );
   
   return (
     <div className="flex flex-col h-full bg-background text-foreground">
@@ -561,7 +566,7 @@ export default function ApostrfyClient() {
          <AdOverlay isVisible={isAdVisible} onClose={handleAdClosed} />
       </main>
       
-      {gameState.status !== 'loading_screen' && gameState.status !== 'generating_initial_story' && <AppFooter />}
+      {showFooter && <AppFooter />}
 
       <AlertDialog open={isQuitDialogOpen} onOpenChange={setIsQuitDialogOpen}>
         <AlertDialogContent className="glassmorphism">
