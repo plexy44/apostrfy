@@ -23,6 +23,7 @@ import { motion } from "framer-motion";
 import MoodWheel from "./MoodWheel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { logEvent } from "@/lib/analytics";
+import { cn } from "@/lib/utils";
 
 interface GameOverScreenProps {
   analysis: GameAnalysis;
