@@ -287,16 +287,18 @@ export default function ApostrfyClient() {
     
     try {
         const fullStory = story.map(part => `${part.personaName || part.speaker.toUpperCase()}: ${part.line}`).join('\n');
-        const fullStoryRaw = story.map(p => p.line).join('\n');
+        let fullStoryRaw = story.map(p => p.line).join('\n');
         const analysisContent = story.filter(part => part.speaker === "user").map(part => part.line).join("\n");
 
         if (gameMode === 'interactive' && analysisContent.trim() === "") {
+            fullStoryRaw = "The story was left unwritten, a silent testament to a moment of quiet contemplation."
             logEvent('complete_game', { story_length: story.length, final_mood: 'N/A' });
+             const quoteResult = await generateQuoteBanner({ fullStory: fullStoryRaw });
             const finalAnalysis: GameAnalysis = {
                 storyId: "not_saved",
                 title: "An Unwritten Tale",
                 trope: settings.trope!,
-                quoteBanner: "The story concluded, its words echoing in the quiet.",
+                quoteBanner: quoteResult.quote,
                 mood: { primaryEmotion: "Serenity", confidenceScore: 0.8 },
                 style: { primaryMatch: "The Silent Observer", secondaryMatch: "The Patient Chronicler" },
                 famousQuote: null,
