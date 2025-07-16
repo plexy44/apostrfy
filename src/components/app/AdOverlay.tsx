@@ -22,6 +22,12 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
     // In a real app, this might navigate to the ad's destination URL
   }
 
+  const handleClose = () => {
+    // In a real ad SDK, you might get a callback for ad closed.
+    // Here we just call the parent's onClose handler.
+    onClose();
+  }
+
   return (
     <AnimatePresence>
       {isVisible && (
@@ -42,7 +48,7 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
               onClick={handleAdClick}
             >
               <p className="font-bold text-xl text-foreground">
-                Mid-Game Interstitial Ad
+                Interstitial Ad
                 <br />
                 <span className="text-sm font-normal text-muted-foreground">(Placeholder)</span>
               </p>
@@ -54,7 +60,7 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
               variant="ghost"
               size="icon"
               className="absolute top-4 right-4 rounded-full z-10 bg-background/50 hover:bg-background"
-              onClick={onClose}
+              onClick={handleClose}
               aria-label="Close ad"
             >
               <X />

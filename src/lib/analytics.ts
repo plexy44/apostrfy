@@ -24,7 +24,7 @@ type EventName =
 // Interface defining the parameters for each event
 interface EventParams {
     screen_view: {
-        screen_name: 'loading_screen' | 'onboarding' | 'main_menu' | 'game_screen' | 'analysis_screen' | 'about_us' | 'privacy_policy' | 'terms_of_service' | 'past_stories';
+        screen_name: 'loading_screen' | 'onboarding' | 'main_menu' | 'game_screen' | 'analysis_screen' | 'about_us' | 'privacy_policy' | 'terms_of_service';
     };
     onboarding_completed: {};
     start_game: {
@@ -72,7 +72,6 @@ interface EventParams {
         game_mode: 'interactive' | 'simulation';
     };
     quit_game_confirmed: {
-        saved_story: boolean;
         story_length: number;
         game_mode: 'interactive' | 'simulation';
     };

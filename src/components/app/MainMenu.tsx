@@ -109,6 +109,8 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
       return;
     }
     logEvent('rewarded_ad_flow', { status: 'offered' });
+    
+    // This simulates the ad watching process
     logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'rewarded', ad_unit_name: 'unlock_secret_style_reward' });
     
     toast({ 
@@ -167,12 +169,12 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
       </div>
       
       <Card className="w-full max-w-md glassmorphism">
-        <CardHeader className="p-4">
+        <CardHeader className="p-4 md:p-6">
           <CardTitle className="font-headline text-xl text-center text-foreground">Co-create a story</CardTitle>
           <CardDescription className="text-center text-xs">First, choose a style for your AI companion.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 p-4">
-           <div className="grid grid-cols-2 gap-2">
+        <CardContent className="space-y-4 p-4 md:p-6">
+           <div className="grid grid-cols-2 gap-2 md:gap-4">
             <AnimatePresence>
                 <TropeButton key={initialTropes[0].name} trope={initialTropes[0]} />
                 <TropeButton key={initialTropes[1].name} trope={initialTropes[1]} />

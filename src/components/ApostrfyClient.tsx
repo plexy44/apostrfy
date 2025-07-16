@@ -429,9 +429,15 @@ export default function ApostrfyClient() {
   };
   
   const handleConfirmQuit = () => {
-    logEvent('quit_game_confirmed', { saved_story: false, story_length: story.length, game_mode: gameMode });
-    handlePlayAgain();
     setIsQuitDialogOpen(false);
+    logEvent('quit_game_confirmed', { story_length: story.length, game_mode: gameMode });
+    
+    // Show ad on quit
+    logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'quit_game_interstitial' });
+    setIsAdPaused(true);
+
+    // After ad is closed (simulated by onClose in AdOverlay), we go back to the menu
+    // The handlePlayAgain function already resets everything, so we'll call it from AdOverlay's onClose
   };
   
   const handleCancelQuit = () => {
@@ -446,14 +452,16 @@ export default function ApostrfyClient() {
     logEvent('request_transcript', { email_provided: true });
 
     try {
-        // Sanitize the analysis object to prevent Firestore errors
+        const sanitizedStory = analysis.story.map(part => ({
+          speaker: part.speaker,
+          line: part.line,
+          // Ensure personaName is null if it's undefined, which Firestore can handle.
+          personaName: part.personaName || null, 
+        }));
+
         const sanitizedAnalysis = {
             ...analysis,
-            story: analysis.story.map(part => ({
-                speaker: part.speaker,
-                line: part.line,
-                personaName: part.personaName || null,
-            })),
+            story: sanitizedStory,
             famousQuote: analysis.famousQuote || null,
         };
 
@@ -486,10 +494,18 @@ export default function ApostrfyClient() {
         return false;
     }
   };
+
+  const handleAdClosed = () => {
+    setIsAdPaused(false);
+    // If the ad was triggered by quitting, now we reset the game.
+    if (gameState.status === 'playing') {
+      handlePlayAgain();
+    }
+  };
   
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <main className="flex-grow flex items-center justify-center p-0 md:p-4 relative">
+      <main className="flex-grow flex items-center justify-center p-2 md:p-0 relative">
         <AnimatePresence mode="wait">
             {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}
             {gameState.status === "onboarding" && <OnboardingModal key="onboarding" onComplete={handleOnboardingComplete} />}
@@ -527,7 +543,7 @@ export default function ApostrfyClient() {
               />
             )}
         </AnimatePresence>
-         <AdOverlay isVisible={isAdPaused} onClose={() => setIsAdPaused(false)} />
+         <AdOverlay isVisible={isAdPaused} onClose={handleAdClosed} />
       </main>
       {gameState.status !== "playing" && gameState.status !== 'generating_summary' && gameState.status !== 'generating_initial_story' && <AppFooter />}
 
