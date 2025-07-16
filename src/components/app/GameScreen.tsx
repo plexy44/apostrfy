@@ -15,7 +15,8 @@ import type { StoryPart, Trope } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Loader, ArrowLeft, Timer, Hourglass } from "lucide-react";
+import { Send, Loader, Timer, Hourglass, ArrowLeft } from "lucide-react";
+import Orb from "./Orb";
 
 interface GameScreenProps {
   trope: Trope;
@@ -123,7 +124,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   return (
     <motion.div
-      className="flex flex-col h-full w-full max-w-2xl mx-auto p-4"
+      className="flex flex-col h-full w-full max-w-2xl mx-auto p-2"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -151,6 +152,10 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                 isPaused={isTimerPaused}
             />
           </div>
+          <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused}>
+              End Game
+          </Button>
+          <Orb size="tiny" isInteractive={false} />
         </div>
         
         {/* Story/Chat Area */}
@@ -206,11 +211,6 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
               {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
             </Button>
           </form>
-          <div className="text-center mt-2">
-            <Button onClick={onEndGame} variant="link" size="sm" className="text-muted-foreground" disabled={isTimerPaused}>
-              End Game
-            </Button>
-          </div>
         </div>
       </div>
     </motion.div>
