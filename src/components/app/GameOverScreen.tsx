@@ -1,10 +1,8 @@
 /**
- * @fileoverview This component displays the sentiment analysis screen after a session.
- * It shows a mood wheel, style matches, and keywords. It also includes a toggle
- * between the final, AI-polished script and the raw chat transcript.
- *
- * - GameOverScreen - The component that renders the game over screen.
- * - GameOverScreenProps - The props for the GameOverScreen component.
+ * @fileoverview Displays the sentiment analysis screen after a session. It
+ * shows a mood wheel, style matches, keywords, and a toggle between the
+ * final, AI-polished script and the raw chat transcript. Optimized for both
+ * desktop and mobile views.
  */
 "use client";
 
@@ -58,17 +56,17 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
   }
 
   const AnalysisCard = ({ title, children, className }: { title: string, children: React.ReactNode, className?: string }) => (
-    <Card className={cn("bg-background/30 border-border/10 flex-1 min-w-0 md:min-w-[280px]", className)}>
-      <CardHeader className="p-4 md:p-6">
+    <Card className={cn("bg-background/30 border-border/10 flex-1 min-w-0", className)}>
+      <CardHeader className="p-4">
         <CardTitle className="font-headline text-base md:text-xl text-foreground">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="p-4 md:p-6 pt-0">{children}</CardContent>
+      <CardContent className="p-4 pt-0">{children}</CardContent>
     </Card>
   );
 
   return (
     <motion.div 
-      className="w-full max-w-6xl mx-auto flex flex-col items-center text-center p-2 md:p-4"
+      className="w-full max-w-6xl mx-auto flex flex-col items-center text-center p-2"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeInOut' }}
@@ -118,7 +116,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
       <div className="w-full mb-4">
         <Card className="bg-background/30 border-border/10 flex flex-col h-full">
           <CardHeader className="text-center p-4">
-            <CardTitle className="font-headline text-xl md:text-2xl text-foreground">{analysis.title}</CardTitle>
+            <CardTitle className="font-headline text-lg md:text-2xl text-foreground">{analysis.title}</CardTitle>
             <p className="text-sm text-muted-foreground font-sans">{analysis.trope}</p>
           </CardHeader>
           <CardContent className="flex-grow flex flex-col p-2 md:p-6 pt-0">
@@ -129,7 +127,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
               </TabsList>
               <TabsContent value="script" className="flex-grow mt-4">
                 <ScrollArea className="h-64 md:h-96 w-full rounded-md border bg-secondary/20">
-                  <div className="font-code text-sm md:text-base whitespace-pre-wrap p-4 md:p-8 lg:py-12 lg:pl-16 lg:pr-12 text-foreground text-left leading-relaxed">
+                  <div className="font-code text-sm md:text-base whitespace-pre-wrap p-4 text-foreground text-left leading-relaxed">
                     {analysis.finalScript}
                   </div>
                 </ScrollArea>
@@ -164,11 +162,11 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
       </div>
 
       <div className="flex flex-col sm:flex-row justify-center gap-4 mt-2 w-full max-w-md">
-        <Button onClick={onPlayAgain} size="lg" className="w-full">
+        <Button onClick={onPlayAgain} size="lg" className="w-full px-4 text-sm md:text-base">
           <RefreshCw />
           Play Again
         </Button>
-        <Button onClick={handleOpenEmailModal} variant="outline" size="lg" className="w-full">
+        <Button onClick={handleOpenEmailModal} variant="outline" size="lg" className="w-full px-4 text-sm md:text-base">
           <Mail />
           Email Story
         </Button>

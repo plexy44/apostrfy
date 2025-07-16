@@ -1,10 +1,8 @@
 /**
- * @fileoverview This component renders the main interface for story creation.
- * It is structured with a fixed header, a scrollable transcript area, and a fixed
- * footer with the user input form. It supports both interactive and simulation modes.
- *
- * - GameScreen - The component that renders the game interface.
- * - GameScreenProps - The props for the GameScreen component.
+ * @fileoverview Renders the primary interface for story creation, supporting
+ * both interactive user input and automated simulation modes. The layout consists
+ * of a static header and footer with a central, internally scrollable area for the
+ * story transcript. It is optimized for both desktop and mobile views.
  */
 "use client";
 
@@ -131,7 +129,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
     >
       <div className="h-full md:h-[85vh] w-full max-w-2xl flex flex-col bg-secondary/20 rounded-lg border border-border/20 shadow-2xl">
         {/* Header */}
-        <div className="flex-shrink-0 p-4 border-b border-border/20 flex items-center gap-4">
+        <div className="flex-shrink-0 p-2 md:p-4 border-b border-border/20 flex items-center gap-4">
            <Button
             variant="ghost"
             size="icon"
@@ -156,7 +154,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
         
         {/* Story/Chat Area */}
         <ScrollArea className="flex-grow min-h-0">
-          <div className="p-4 space-y-6">
+          <div className="p-2 md:p-4 space-y-6">
               {story.map((part, index) => {
                   const isUserSpeaker = part.speaker === 'user';
                   let alignment, bubbleStyles;
@@ -173,7 +171,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                           {part.personaName}
                         </p>
                       )}
-                      <div className={`p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
+                      <div className={`p-2 md:p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
                         <p className="text-sm">{part.line}</p>
                       </div>
                     </div>
@@ -193,7 +191,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
         </ScrollArea>
 
         {/* Footer/Input */}
-        <div className="flex-shrink-0 p-4 border-t border-border/20">
+        <div className="flex-shrink-0 p-2 md:p-4 border-t border-border/20">
           <div className="flex flex-col gap-2">
             <form onSubmit={handleSubmit} className="flex items-center gap-2">
               <Input
@@ -204,7 +202,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                 disabled={isTimerPaused || gameMode === 'simulation'}
                 className="flex-grow h-11 text-sm bg-background/50"
               />
-              <Button type="submit" size="icon" className="h-11 w-11" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation'}>
+              <Button type="submit" size="icon" className="h-11 w-11 flex-shrink-0" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation'}>
                 {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
               </Button>
             </form>

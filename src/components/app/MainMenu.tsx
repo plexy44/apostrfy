@@ -1,11 +1,8 @@
 /**
- * @fileoverview This component is the main menu of the application. It allows
- * users to select a story style (trope) and a session duration. It features
- * the central interactive AI orb and provides options to start an interactive
-or an automated 'simulation' session.
- *
- * - MainMenu - The component that renders the main menu.
- * - MainMenuProps - The props for the MainMenu component.
+ * @fileoverview The main menu of the application. Allows users to select a
+ * story style (trope) and session duration. Features the central interactive
+ * AI orb and provides options to start an interactive or automated 'simulation'
+ * session. Optimized for both desktop and mobile views.
  */
 "use client";
 
@@ -132,12 +129,12 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
     <button
       onClick={() => handleThemeSwitch(trope.name)}
       className={cn(
-        "p-3 rounded-lg border-2 text-left transition-all hover:border-accent w-full",
+        "p-2 md:p-3 rounded-lg border-2 text-left transition-all hover:border-accent w-full",
         selectedTrope === trope.name ? "border-accent bg-accent/20 shadow-lg shadow-accent/20" : "border-border"
       )}
       {...props}
     >
-      <h3 className="font-headline text-base text-foreground">{trope.name}</h3>
+      <h3 className="font-headline text-sm md:text-base text-foreground">{trope.name}</h3>
       <p className="text-xs text-muted-foreground">{trope.description}</p>
     </button>
   );
@@ -145,7 +142,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
 
   return (
     <motion.div
-      className="flex flex-col items-center justify-center w-full"
+      className="flex flex-col items-center justify-center w-full p-2"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -173,10 +170,10 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
       
       <Card className="w-full max-w-md glassmorphism">
         <CardHeader className="p-4 md:p-6">
-          <CardTitle className="font-headline text-xl text-center text-foreground">Co-create a story</CardTitle>
+          <CardTitle className="font-headline text-lg md:text-xl text-center text-foreground">Co-create a story</CardTitle>
           <CardDescription className="text-center text-xs">First, choose a style for your AI companion.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6 p-4 md:p-6">
+        <CardContent className="space-y-6 p-4 md:p-6 pt-0 md:pt-0">
            <div className="grid grid-cols-2 gap-2 md:gap-4">
             <AnimatePresence>
                 <TropeButton key={initialTropes[0].name} trope={initialTropes[0]} />
@@ -219,7 +216,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
                   key={duration.value}
                   variant={selectedDuration === duration.value ? "default" : "secondary"}
                   onClick={() => handleDurationSelect(duration)}
-                  className="w-24 md:w-32"
+                  className="w-24 md:w-32 text-xs md:text-sm"
                 >
                   {duration.label}
                 </Button>
@@ -234,7 +231,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
           onClick={handleStart}
           disabled={!selectedTrope}
           size="lg"
-          className="mt-4 w-full font-headline text-lg"
+          className="mt-4 w-full font-headline text-base md:text-lg"
         >
           Start Writing
         </Button>
@@ -243,7 +240,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
           disabled={!selectedTrope}
           variant="outline"
           size="lg"
-          className="mt-2 w-full font-headline text-lg"
+          className="mt-2 w-full font-headline text-base md:text-lg"
         >
           Simulate
         </Button>
