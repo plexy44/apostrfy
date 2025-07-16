@@ -149,7 +149,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                 isPaused={isTimerPaused}
             />
           </div>
-          <Orb size="tiny" isInteractive={false} />
+          <Orb size="tiny" isInteractive={true} />
         </header>
         
         {/* Story/Chat Area */}
