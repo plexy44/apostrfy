@@ -152,9 +152,6 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                 isPaused={isTimerPaused}
             />
           </div>
-          <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused}>
-              End Game
-          </Button>
           <Orb size="tiny" isInteractive={false} />
         </div>
         
@@ -199,6 +196,9 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
         {/* Footer/Input */}
         <div className="flex-shrink-0 p-4 border-t border-border/20">
           <form onSubmit={handleSubmit} className="flex items-center gap-2">
+            <Button onClick={onEndGame} variant="link" size="sm" disabled={isTimerPaused} className="text-muted-foreground">
+                End Game
+            </Button>
             <Input
               ref={inputRef}
               value={userInput}
