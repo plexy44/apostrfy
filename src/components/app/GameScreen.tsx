@@ -124,7 +124,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   return (
     <motion.div
-      className="h-full w-full max-w-2xl mx-auto"
+      className="h-full w-full max-w-2xl mx-auto flex flex-col"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -156,7 +156,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
         </div>
         
         {/* Story/Chat Area */}
-        <ScrollArea className="flex-grow bg-transparent min-h-0">
+        <ScrollArea className="flex-grow min-h-0">
           <div className="p-4 space-y-6">
               {story.map((part, index) => {
                   const isUserSpeaker = part.speaker === 'user';
