@@ -511,7 +511,7 @@ export default function ApostrfyClient() {
   }
   
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex flex-col h-full bg-background text-foreground">
       <main className="flex-grow flex items-center justify-center p-2 md:p-0 relative">
         <AnimatePresence mode="wait">
             {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}
