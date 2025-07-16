@@ -152,9 +152,6 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                 isPaused={isTimerPaused}
             />
           </div>
-          <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused} className="hidden sm:inline-flex">
-              End Game
-          </Button>
           <Orb size="tiny" isInteractive={false} />
         </div>
         
@@ -212,7 +209,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                 {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
               </Button>
             </form>
-            <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused} className="w-full sm:hidden">
+            <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused} className="w-full">
                   End Game
             </Button>
           </div>
