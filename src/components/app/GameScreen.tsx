@@ -2,7 +2,7 @@
  * @fileoverview Renders the primary interface for story creation, supporting
  * both interactive user input and automated simulation modes. The layout consists
  * of a static header and footer with a central, internally scrollable area for the
- * story transcript. It is optimized for both desktop and mobile views.
+ * story transcript. Optimized for both desktop and mobile views.
  */
 "use client";
 
@@ -121,13 +121,13 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   return (
     <motion.div
-      className="h-full w-full flex items-center justify-center"
+      className="h-full w-full flex flex-col md:items-center md:justify-center"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5, ease: 'easeInOut' }}
     >
-      <div className="h-full md:h-[85vh] w-full max-w-2xl flex flex-col bg-secondary/20 rounded-lg border border-border/20 shadow-2xl">
+      <div className="h-full md:h-[85vh] w-full max-w-2xl flex flex-col bg-secondary/20 md:rounded-lg border-border/20 md:shadow-2xl">
         {/* Header */}
         <div className="flex-shrink-0 p-2 md:p-4 border-b border-border/20 flex items-center gap-4">
            <Button

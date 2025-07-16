@@ -1,10 +1,9 @@
 /**
- * @fileoverview This is the main client-side component for Apostrfy.
- * It acts as the central state machine for the entire application, managing the
- * overall game state (loading, onboarding, menu, playing, gameover) for both
-
- * 'interactive' and 'simulation' modes. It handles user settings, story
- * progression, and interactions with all Genkit AI flows.
+ * @fileoverview Main client component for Apostrfy.
+ * Manages the application's state machine, handling transitions between game states
+ * like loading, menu, playing, and game over. It orchestrates user settings, story
+ * progression, and interactions with Genkit AI flows for both 'interactive' and
+ * 'simulation' modes.
  */
 
 "use client";
@@ -514,7 +513,7 @@ export default function ApostrfyClient() {
   
   return (
     <div className="flex flex-col h-full bg-background text-foreground">
-      <main className="flex-grow flex items-center justify-center p-2 md:p-0 relative">
+      <main className="flex-grow flex flex-col p-2 md:p-0 relative">
         <AnimatePresence mode="wait">
             {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}
             {gameState.status === "onboarding" && <OnboardingModal key="onboarding" onComplete={handleOnboardingComplete} />}
@@ -562,7 +561,8 @@ export default function ApostrfyClient() {
         </AnimatePresence>
          <AdOverlay isVisible={isAdVisible} onClose={handleAdClosed} />
       </main>
-      {gameState.status !== 'generating_summary' && gameState.status !== 'generating_initial_story' && <AppFooter />}
+      
+      {gameState.status !== 'loading_screen' && gameState.status !== 'generating_initial_story' && <AppFooter />}
 
       <AlertDialog open={isQuitDialogOpen} onOpenChange={setIsQuitDialogOpen}>
         <AlertDialogContent className="glassmorphism">
