@@ -121,15 +121,15 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   return (
     <motion.div
-      className="h-full w-full flex flex-col md:items-center md:justify-center"
+      className="h-full w-full flex items-center justify-center p-2"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5, ease: 'easeInOut' }}
     >
-      <div className="h-full w-full max-w-2xl flex flex-col bg-secondary/20 md:h-[85vh] md:rounded-lg md:border-border/20 md:shadow-2xl">
+      <div className="h-full w-full max-w-2xl flex flex-col bg-secondary/20 h-[85vh] rounded-lg border-border/20 shadow-2xl">
         {/* Header */}
-        <header className="flex-shrink-0 p-2 md:p-4 border-b border-border/20 flex items-center gap-4">
+        <header className="flex-shrink-0 p-4 border-b border-border/20 flex items-center gap-4">
            <Button
             variant="ghost"
             size="icon"
@@ -155,7 +155,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
         {/* Story/Chat Area */}
         <main className="flex-grow min-h-0 overflow-y-auto">
           <ScrollArea className="h-full">
-            <div className="p-2 md:p-4 space-y-6">
+            <div className="p-4 space-y-6">
                 {story.map((part, index) => {
                     const isUserSpeaker = part.speaker === 'user';
                     let alignment, bubbleStyles;
@@ -172,7 +172,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                             {part.personaName}
                           </p>
                         )}
-                        <div className={`p-2 md:p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
+                        <div className={`p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
                           <p className="text-sm">{part.line}</p>
                         </div>
                       </div>
@@ -192,7 +192,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           </ScrollArea>
         </main>
         {/* Footer/Input */}
-        <footer className="flex-shrink-0 p-2 md:p-4 border-t border-border/20">
+        <footer className="flex-shrink-0 p-4 border-t border-border/20">
           <div className="flex flex-col gap-2">
             <form onSubmit={handleSubmit} className="flex items-center gap-2">
               <Input
