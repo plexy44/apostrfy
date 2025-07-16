@@ -19,6 +19,21 @@ import { Send, Loader, ArrowLeft, Timer, Hourglass } from "lucide-react";
 import Orb from "./Orb";
 import { cn } from "@/lib/utils";
 
+interface GameScreenProps {
+  trope: Trope;
+  story: StoryPart[];
+  duration: number; // in seconds
+  isAiTyping: boolean;
+  onUserSubmit: (userInput: string, turnTime: number) => void;
+  onEndGame: () => void;
+  onQuitRequest: () => void;
+  gameMode: 'interactive' | 'simulation';
+  onPauseForAd: () => void;
+  isAdPaused: boolean;
+  inputRef: React.RefObject<HTMLInputElement>;
+}
+
+
 const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused, className }: { durationInSeconds: number; onEndGame: () => void, onPauseForAd: () => void; isPaused: boolean; className?: string }) => {
   const [timeLeft, setTimeLeft] = useState(durationInSeconds);
 
@@ -111,39 +126,44 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   return (
     <motion.div
-      className="flex flex-col items-center justify-center h-full w-full max-w-3xl mx-auto"
+      className="flex flex-col h-full w-full max-w-3xl mx-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
     >
-      {/* Game Panel */}
+      {/* Outer container for glassmorphism and layout */}
       <div className="flex flex-col h-full w-full flex-grow p-2 md:p-4 glassmorphism rounded-lg relative">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 -left-1 md:top-4 md:-left-16 z-20 rounded-full"
-          onClick={onQuitRequest}
-          aria-label="Quit game"
-          disabled={isTimerPaused}
-        >
-          <ArrowLeft />
-        </Button>
         
-        <div className="flex items-start gap-4 mb-2 md:mb-4">
-            <div className="flex-grow">
-                <h3 className="font-headline text-base md:text-lg text-foreground mb-1">{trope}</h3>
-                <TimerBar 
-                    durationInSeconds={duration} 
-                    onEndGame={onEndGame} 
-                    onPauseForAd={onPauseForAd} 
-                    isPaused={isTimerPaused}
-                />
-            </div>
-            <Orb size="tiny" isInteractive={true} className="flex-shrink-0" />
+        {/* Header Section */}
+        <div className="flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 -left-1 md:top-4 md:-left-16 z-20 rounded-full"
+            onClick={onQuitRequest}
+            aria-label="Quit game"
+            disabled={isTimerPaused}
+          >
+            <ArrowLeft />
+          </Button>
+          
+          <div className="flex items-start gap-4 mb-2 md:mb-4">
+              <div className="flex-grow">
+                  <h3 className="font-headline text-base md:text-lg text-foreground mb-1">{trope}</h3>
+                  <TimerBar 
+                      durationInSeconds={duration} 
+                      onEndGame={onEndGame} 
+                      onPauseForAd={onPauseForAd} 
+                      isPaused={isTimerPaused}
+                  />
+              </div>
+              <Orb size="tiny" isInteractive={true} className="flex-shrink-0" />
+          </div>
         </div>
         
-        <ScrollArea className="flex-grow pr-2">
+        {/* Story/Chat Area Section */}
+        <ScrollArea className="flex-grow my-2 pr-2">
           <div className="space-y-4">
             {story.map((part, index) => {
                 const isUserSpeaker = part.speaker === 'user';
@@ -189,24 +209,26 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           </div>
         </ScrollArea>
 
-        <form onSubmit={handleSubmit} className="flex items-center gap-2 pt-2">
-          <Input
-            ref={inputRef}
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            placeholder={isAiTyping ? "AI is thinking..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
-            disabled={isTimerPaused || gameMode === 'simulation'}
-            className="flex-grow h-11 text-sm"
-          />
-          <Button type="submit" size="icon" className="h-11 w-11" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation'}>
-            {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
-          </Button>
-        </form>
-        <div className="text-center py-2">
-          <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused}>End Game</Button>
+        {/* Footer/Input Section */}
+        <div className="flex-shrink-0 pt-2">
+          <form onSubmit={handleSubmit} className="flex items-center gap-2">
+            <Input
+              ref={inputRef}
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              placeholder={isAiTyping ? "AI is thinking..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
+              disabled={isTimerPaused || gameMode === 'simulation'}
+              className="flex-grow h-11 text-sm"
+            />
+            <Button type="submit" size="icon" className="h-11 w-11" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation'}>
+              {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
+            </Button>
+          </form>
+          <div className="text-center py-2">
+            <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused}>End Game</Button>
+          </div>
         </div>
       </div>
-
     </motion.div>
   );
 }
