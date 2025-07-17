@@ -180,7 +180,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
         <DialogContent className="glassmorphism md:max-w-xl md:p-8">
           <DialogHeader className="text-left">
             <DialogTitle className="font-headline text-2xl md:text-4xl">Receive Your Story</DialogTitle>
-            <DialogDescription className="md:text-lg">
+            <DialogDescription>
               Enter your details below to receive a copy of your co-created story.
             </DialogDescription>
           </DialogHeader>
@@ -194,13 +194,13 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
                 <Label htmlFor="email" className="md:text-base">Email</Label>
                 <Input id="email" name="email" type="email" placeholder="you@example.com" className="h-10 md:h-12 md:text-base" required disabled={isSubmitting} />
               </div>
-               <p className="text-[0.6rem] text-muted-foreground col-span-1 px-1 pt-2">
+               <p className="text-xs text-muted-foreground col-span-1 px-1 pt-2">
                 By submitting, you agree to our terms and may receive future communications.
                </p>
             </div>
             <DialogFooter className="md:justify-center md:gap-4">
               <DialogClose asChild>
-                <Button type="button" variant="outline" disabled={isSubmitting} className="md:h-12 md:px-8 md:text-lg md:flex-1">Cancel</Button>
+                <Button type="button" variant="outline" disabled={isSubmitting} className="md:h-12 md:px-8 md:text-lg md:flex-1 mt-2 sm:mt-0">Cancel</Button>
               </DialogClose>
               <Button type="submit" disabled={isSubmitting} className="md:h-12 md:px-8 md:text-lg md:flex-1">
                 {isSubmitting ? <Loader2 className="animate-spin" /> : <Send />}
