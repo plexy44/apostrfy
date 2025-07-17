@@ -134,7 +134,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
               </TabsContent>
               <TabsContent value="transcript" className="flex-grow mt-4">
                  <ScrollArea className="h-64 md:h-96 w-full rounded-md border bg-secondary/20 p-4">
-                  <div className="space-y-4">
+                  <div className="space-y-4 text-left">
                     {analysis.story.map((part, index) => (
                       <div key={index} className={`flex flex-col animate-fade-in-up ${part.speaker === 'ai' ? 'items-start' : 'items-end'}`}>
                         <div className={`p-3 rounded-xl max-w-[85%] ${part.speaker === 'ai' ? 'bg-secondary rounded-bl-none' : 'bg-primary/90 text-primary-foreground rounded-br-none'}`}>
