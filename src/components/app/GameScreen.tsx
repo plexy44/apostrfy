@@ -11,7 +11,6 @@ import { motion } from "framer-motion";
 import type { StoryPart, Trope } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Loader, Timer, Hourglass, X } from "lucide-react";
 import Orb from "./Orb";
 
@@ -153,42 +152,40 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
         
         {/* Story/Chat Area */}
         <main className="flex-grow min-h-0 overflow-y-auto">
-          <ScrollArea className="h-full">
-            <div className="p-4 space-y-6 max-w-2xl mx-auto">
-                {story.map((part, index) => {
-                    const isUserSpeaker = part.speaker === 'user';
-                    let alignment, bubbleStyles;
+          <div className="p-4 space-y-6 max-w-2xl mx-auto">
+              {story.map((part, index) => {
+                  const isUserSpeaker = part.speaker === 'user';
+                  let alignment, bubbleStyles;
 
-                    alignment = isUserSpeaker ? 'items-end' : 'items-start';
-                    bubbleStyles = isUserSpeaker
-                      ? 'bg-primary text-primary-foreground rounded-br-none'
-                      : 'bg-secondary rounded-bl-none';
+                  alignment = isUserSpeaker ? 'items-end' : 'items-start';
+                  bubbleStyles = isUserSpeaker
+                    ? 'bg-primary text-primary-foreground rounded-br-none'
+                    : 'bg-secondary rounded-bl-none';
 
-                    return (
-                      <div key={index} className={`flex flex-col animate-fade-in-up ${alignment}`}>
-                        {part.personaName && (
-                          <p className={`text-xs text-muted-foreground mb-1 px-2 ${alignment === 'items-end' ? 'self-end' : 'self-start'}`}>
-                            {part.personaName}
-                          </p>
-                        )}
-                        <div className={`p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
-                          <p className="text-sm">{part.line}</p>
-                        </div>
+                  return (
+                    <div key={index} className={`flex flex-col animate-fade-in-up ${alignment}`}>
+                      {part.personaName && (
+                        <p className={`text-xs text-muted-foreground mb-1 px-2 ${alignment === 'items-end' ? 'self-end' : 'self-start'}`}>
+                          {part.personaName}
+                        </p>
+                      )}
+                      <div className={`p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
+                        <p className="text-sm">{part.line}</p>
                       </div>
-                    );
-                })}
-                {isAiTyping && (
-                  <div className="flex items-start">
-                     <div className="p-3 rounded-lg max-w-[85%] bg-secondary rounded-bl-none flex items-center space-x-2 shadow-md">
-                       <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.3s]"></div>
-                       <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.15s]"></div>
-                       <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
-                     </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-            </div>
-          </ScrollArea>
+                    </div>
+                  );
+              })}
+              {isAiTyping && (
+                <div className="flex items-start">
+                   <div className="p-3 rounded-lg max-w-[85%] bg-secondary rounded-bl-none flex items-center space-x-2 shadow-md">
+                     <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.3s]"></div>
+                     <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.15s]"></div>
+                     <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
+                   </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+          </div>
         </main>
         {/* Footer/Input */}
         <footer className="flex-shrink-0 p-4 border-t border-border/20">
