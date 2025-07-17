@@ -185,7 +185,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEmailFormSubmit}>
-            <div className="grid grid-cols-1 gap-4 py-4">
+            <div className="grid grid-cols-1 gap-4 py-2">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
                 <Input id="name" name="name" placeholder="Your Name" className="h-9" disabled={isSubmitting} />
