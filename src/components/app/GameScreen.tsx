@@ -66,17 +66,17 @@ const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused }: { du
 
   return (
     <div className="w-full space-y-2">
-      <div className="flex justify-between items-center text-xs font-mono text-muted-foreground">
+      <div className="flex justify-between items-center text-xs md:text-sm font-mono text-muted-foreground">
         <div className="flex items-center gap-1.5">
-          <Hourglass className="h-3 w-3" />
+          <Hourglass className="h-3 w-3 md:h-4 md:w-4" />
           <span>{formatTime(timeLeft)}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <Timer className="h-3 w-3" />
+          <Timer className="h-3 w-3 md:h-4 md:w-4" />
           <span>{formatTime(durationInSeconds)}</span>
         </div>
       </div>
-      <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+      <div className="w-full h-1.5 md:h-2 bg-secondary rounded-full overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-1000 ease-linear"
           style={{
@@ -139,7 +139,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
              <X className="h-4 w-4" />
           </Button>
           <div className="flex-grow">
-            <h3 className="font-headline text-lg text-foreground">{trope}</h3>
+            <h3 className="font-headline text-lg md:text-xl text-foreground">{trope}</h3>
             <TimerBar 
                 durationInSeconds={duration} 
                 onEndGame={onEndGame} 
@@ -165,12 +165,12 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                   return (
                     <div key={index} className={`flex flex-col animate-fade-in-up ${alignment}`}>
                       {part.personaName && (
-                        <p className={`text-xs text-muted-foreground mb-1 px-2 ${alignment === 'items-end' ? 'self-end' : 'self-start'}`}>
+                        <p className={`text-xs md:text-sm text-muted-foreground mb-1 px-2 ${alignment === 'items-end' ? 'self-end' : 'self-start'}`}>
                           {part.personaName}
                         </p>
                       )}
                       <div className={`p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
-                        <p className="text-sm">{part.line}</p>
+                        <p className="text-sm md:text-base">{part.line}</p>
                       </div>
                     </div>
                   );
@@ -197,13 +197,13 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                 onChange={(e) => setUserInput(e.target.value)}
                 placeholder={isAiTyping ? "AI is thinking..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
                 disabled={isTimerPaused || gameMode === 'simulation'}
-                className="flex-grow h-11 text-sm bg-background/50"
+                className="flex-grow h-11 md:h-12 text-sm md:text-base bg-background/50"
               />
-              <Button type="submit" size="icon" className="h-11 w-11 flex-shrink-0" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation'}>
+              <Button type="submit" size="icon" className="h-11 w-11 md:h-12 md:w-12 flex-shrink-0" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation'}>
                 {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
               </Button>
             </form>
-            <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused} className="w-full mt-1">
+            <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused} className="w-full mt-1 md:h-10 md:text-base">
                   End Game
             </Button>
           </div>

@@ -62,7 +62,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
   const AnalysisCard = ({ title, children, className }: { title: string, children: React.ReactNode, className?: string }) => (
     <Card className={cn("bg-background/30 border-border/10 flex-1 min-w-0", className)}>
       <CardHeader className="p-4">
-        <CardTitle className="font-headline text-base md:text-xl text-foreground">{title}</CardTitle>
+        <CardTitle className="font-headline text-xl md:text-2xl text-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0">{children}</CardContent>
     </Card>
@@ -75,7 +75,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeInOut' }}
     >
-      <h2 className="font-script text-xl md:text-4xl text-foreground mb-4 text-center">
+      <h2 className="font-script text-2xl md:text-5xl text-foreground mb-4 text-center">
         &ldquo;{analysis.quoteBanner}&rdquo;
       </h2>
       
@@ -88,7 +88,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
           <AnalysisCard title="Sentiment">
             <div className="flex flex-wrap items-center justify-center gap-2">
               {analysis.keywords.map((keyword) => (
-                <Badge key={keyword} variant="secondary" className="text-xs md:text-sm px-2 py-1 md:px-3">
+                <Badge key={keyword} variant="secondary" className="text-sm md:text-base px-3 py-1 md:px-4">
                   {keyword}
                 </Badge>
               ))}
@@ -99,17 +99,17 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
         <div className="flex flex-col gap-4">
           <AnalysisCard title="Style">
             <div className="text-center">
-              <p className="text-muted-foreground text-xs md:text-sm mb-1">Primary Match</p>
-              <p className="text-lg md:text-2xl font-bold font-headline text-foreground">{analysis.style.primaryMatch}</p>
-              <p className="text-muted-foreground text-xs md:text-sm mt-3 mb-1">Secondary Match</p>
-              <p className="text-sm md:text-lg text-foreground/80">{analysis.style.secondaryMatch}</p>
+              <p className="text-muted-foreground text-sm md:text-base mb-1">Primary Match</p>
+              <p className="text-lg md:text-3xl font-bold font-headline text-foreground">{analysis.style.primaryMatch}</p>
+              <p className="text-muted-foreground text-sm md:text-base mt-3 mb-1">Secondary Match</p>
+              <p className="text-base md:text-xl text-foreground/80">{analysis.style.secondaryMatch}</p>
             </div>
           </AnalysisCard>
           {analysis.famousQuote && (
             <AnalysisCard title="A Word From...">
-              <blockquote className="text-sm md:text-base italic border-l-4 border-accent pl-4 text-left leading-relaxed">
+              <blockquote className="text-base md:text-lg italic border-l-4 border-accent pl-4 text-left leading-relaxed">
                 {analysis.famousQuote.quote}
-                <cite className="block text-right not-italic text-xs md:text-sm mt-2 text-muted-foreground">&ndash; {analysis.famousQuote.author}</cite>
+                <cite className="block text-right not-italic text-sm md:text-base mt-2 text-muted-foreground">&ndash; {analysis.famousQuote.author}</cite>
               </blockquote>
             </AnalysisCard>
           )}
@@ -120,8 +120,8 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
       <div className="w-full mb-4">
         <Card className="bg-background/30 border-border/10 flex flex-col h-full">
           <CardHeader className="text-center p-4">
-            <CardTitle className="font-headline text-lg md:text-2xl text-foreground">{analysis.title}</CardTitle>
-            <p className="text-sm text-muted-foreground font-sans">{analysis.trope}</p>
+            <CardTitle className="font-headline text-xl md:text-3xl text-foreground">{analysis.title}</CardTitle>
+            <p className="text-base text-muted-foreground font-sans">{analysis.trope}</p>
           </CardHeader>
           <CardContent className="flex-grow flex flex-col p-2 md:p-6 pt-0">
             <Tabs defaultValue="script" className="flex-grow flex flex-col">
@@ -166,46 +166,46 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
       </div>
 
       <div className="flex flex-col sm:flex-row justify-center gap-4 mt-2 w-full max-w-md">
-        <Button onClick={onPlayAgain} size="lg" className="w-full px-4 text-sm md:text-base">
+        <Button onClick={onPlayAgain} size="lg" className="w-full px-4 text-base md:text-lg">
           <RefreshCw />
           Play Again
         </Button>
-        <Button onClick={handleOpenEmailModal} variant="outline" size="lg" className="w-full px-4 text-sm md:text-base">
+        <Button onClick={handleOpenEmailModal} variant="outline" size="lg" className="w-full px-4 text-base md:text-lg">
           <Mail />
           Email Story
         </Button>
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="glassmorphism">
+        <DialogContent className="glassmorphism md:max-w-xl md:p-8">
           <DialogHeader className="text-left">
-            <DialogTitle className="font-headline text-2xl">Receive Your Story</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="font-headline text-2xl md:text-4xl">Receive Your Story</DialogTitle>
+            <DialogDescription className="md:text-lg">
               Enter your details below to receive a copy of your co-created story.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEmailFormSubmit}>
-            <div className="grid grid-cols-1 gap-4 py-2">
+            <div className="grid grid-cols-1 gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" name="name" placeholder="Your Name" className="h-9" disabled={isSubmitting} />
+                <Label htmlFor="name" className="md:text-base">Name</Label>
+                <Input id="name" name="name" placeholder="Your Name" className="h-10 md:h-12 md:text-base" disabled={isSubmitting} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" placeholder="you@example.com" className="h-9" required disabled={isSubmitting} />
+                <Label htmlFor="email" className="md:text-base">Email</Label>
+                <Input id="email" name="email" type="email" placeholder="you@example.com" className="h-10 md:h-12 md:text-base" required disabled={isSubmitting} />
               </div>
-               <p className="text-[0.6rem] text-muted-foreground col-span-1 px-1 pt-2">
+               <p className="text-xs text-muted-foreground col-span-1 px-1 pt-2">
                 By submitting, you agree to our terms and may receive future communications.
                </p>
             </div>
-            <DialogFooter className="flex-col gap-2">
-              <Button type="submit" disabled={isSubmitting} className="w-full h-9">
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline" disabled={isSubmitting} className="md:h-12 md:px-8 md:text-lg">Cancel</Button>
+              </DialogClose>
+              <Button type="submit" disabled={isSubmitting} className="md:h-12 md:px-8 md:text-lg">
                 {isSubmitting ? <Loader2 className="animate-spin" /> : <Send />}
                 {isSubmitting ? "Sending..." : "Send"}
               </Button>
-              <DialogClose asChild>
-                <Button type="button" variant="outline" disabled={isSubmitting} className="w-full h-9">Cancel</Button>
-              </DialogClose>
             </DialogFooter>
           </form>
         </DialogContent>

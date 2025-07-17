@@ -17,12 +17,12 @@ export default function AboutUsPage() {
   }, []);
 
   return (
-    <div className="container mx-auto max-w-3xl py-8 md:py-12 px-4">
+    <div className="container mx-auto max-w-3xl md:max-w-4xl py-8 md:py-12 px-4">
       <Card className="glassmorphism">
         <CardHeader>
-          <CardTitle className="text-2xl md:text-3xl font-headline text-center">About Apostrfy</CardTitle>
+          <CardTitle className="text-2xl md:text-4xl font-headline text-center">About Apostrfy</CardTitle>
         </CardHeader>
-        <CardContent className="prose prose-invert max-w-none text-foreground/80 space-y-4 text-sm md:text-base">
+        <CardContent className="prose prose-invert max-w-none text-foreground/80 space-y-4 text-base md:text-lg">
           <p>
             Welcome to Apostrfy, a unique space for creative exploration and collaborative writing. Our mission is to provide a tool that acts as a mirror to your own imagination, a partner in the dance of storytelling.
           </p>

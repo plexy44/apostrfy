@@ -129,13 +129,13 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
     <button
       onClick={() => handleThemeSwitch(trope.name)}
       className={cn(
-        "p-2 md:p-3 rounded-lg border-2 text-left transition-all hover:border-accent w-full",
+        "p-3 md:p-4 rounded-lg border-2 text-left transition-all hover:border-accent w-full",
         selectedTrope === trope.name ? "border-accent bg-accent/20 shadow-lg shadow-accent/20" : "border-border"
       )}
       {...props}
     >
-      <h3 className="font-headline text-sm md:text-base text-foreground">{trope.name}</h3>
-      <p className="text-xs text-muted-foreground">{trope.description}</p>
+      <h3 className="font-headline text-base md:text-lg text-foreground">{trope.name}</h3>
+      <p className="text-xs md:text-sm text-muted-foreground">{trope.description}</p>
     </button>
   );
 
@@ -149,8 +149,8 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
       transition={{ duration: 0.4 }}
     >
       <div className="flex flex-col items-center text-center mb-4 md:mb-6">
-        <ApostrfyLogo className="w-36 h-auto mb-1 md:w-48 md:mb-2 text-foreground" />
-        <p className="font-headline text-muted-foreground tracking-widest text-sm md:text-base">connect || co-create</p>
+        <ApostrfyLogo className="w-36 h-auto mb-1 md:w-56 md:mb-2 text-foreground" />
+        <p className="font-headline text-muted-foreground tracking-widest text-sm md:text-lg">connect || co-create</p>
       </div>
 
       <div className="flex flex-col items-center gap-4 mb-4">
@@ -160,18 +160,18 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
           isInteractive 
           onTransitionComplete={handleTransitionComplete} 
         />
-        <div className="w-full max-w-xs p-3 text-center rounded-lg glassmorphism">
-            <p className="text-sm text-foreground/90 font-sans min-h-[3em] flex items-center justify-center">
+        <div className="w-full max-w-xs md:max-w-md p-3 text-center rounded-lg glassmorphism">
+            <p className="text-sm md:text-base text-foreground/90 font-sans min-h-[3em] flex items-center justify-center">
               {displayedMessage}
               {isTyping && <span className="animate-pulse ml-1">|</span>}
             </p>
         </div>
       </div>
       
-      <Card className="w-full max-w-md glassmorphism">
+      <Card className="w-full max-w-md md:max-w-xl glassmorphism">
         <CardHeader className="p-4 md:p-6">
-          <CardTitle className="font-headline text-lg md:text-xl text-center text-foreground">Co-create a story</CardTitle>
-          <CardDescription className="text-center text-xs">First, choose a style for your AI companion.</CardDescription>
+          <CardTitle className="font-headline text-lg md:text-2xl text-center text-foreground">Co-create a story</CardTitle>
+          <CardDescription className="text-center text-xs md:text-sm">First, choose a style for your AI companion.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 p-4 md:p-6 pt-0 md:pt-0">
            <div className="grid grid-cols-2 gap-2 md:gap-4">
@@ -209,14 +209,14 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
           </div>
 
           <div className="space-y-2 pt-2">
-            <h4 className="text-center font-headline text-foreground text-sm">Select Mode</h4>
+            <h4 className="text-center font-headline text-foreground text-sm md:text-base">Select Mode</h4>
             <div className="flex justify-center gap-2">
               {DURATIONS.map((duration) => (
                 <Button
                   key={duration.value}
                   variant={selectedDuration === duration.value ? "default" : "secondary"}
                   onClick={() => handleDurationSelect(duration)}
-                  className="w-24 md:w-32 text-xs md:text-sm"
+                  className="w-24 md:w-32 text-xs md:text-base md:h-11"
                 >
                   {duration.label}
                 </Button>
@@ -226,12 +226,12 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
         </CardContent>
       </Card>
       
-      <div className="w-full max-w-md flex flex-col items-center">
+      <div className="w-full max-w-md md:max-w-xl flex flex-col items-center">
         <Button
           onClick={handleStart}
           disabled={!selectedTrope}
           size="lg"
-          className="mt-4 w-full font-headline text-base md:text-lg"
+          className="mt-4 w-full font-headline text-base md:text-xl md:h-14"
         >
           Start Writing
         </Button>
@@ -240,14 +240,14 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
           disabled={!selectedTrope}
           variant="outline"
           size="lg"
-          className="mt-2 w-full font-headline text-base md:text-lg"
+          className="mt-2 w-full font-headline text-base md:text-xl md:h-14"
         >
           Simulate
         </Button>
         <Button
             onClick={handleRewardedAd}
             variant="link"
-            className="mt-2 text-accent"
+            className="mt-2 text-accent md:text-base"
         >
             <Gift className="mr-2 h-4 w-4" />
             Unlock a Secret Style
