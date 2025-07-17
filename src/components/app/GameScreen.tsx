@@ -121,7 +121,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   return (
     <motion.div
-      className="h-full w-full flex items-center justify-center p-2"
+      className="h-full w-full flex items-end justify-center p-2"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
