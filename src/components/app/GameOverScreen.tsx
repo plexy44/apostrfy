@@ -1,6 +1,7 @@
 /**
  * @fileoverview Displays the sentiment analysis screen after a session. It
  * shows a mood wheel, style matches, keywords, and a toggle between the
+
  * final, AI-polished script and the raw chat transcript. Optimized for both
  * desktop and mobile views.
  */
@@ -203,7 +204,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
                 {isSubmitting ? "Sending..." : "Send"}
               </Button>
               <DialogClose asChild>
-                <Button type="button" variant="ghost" disabled={isSubmitting} className="w-full h-9">Cancel</Button>
+                <Button type="button" variant="outline" disabled={isSubmitting} className="w-full h-9">Cancel</Button>
               </DialogClose>
             </DialogFooter>
           </form>
