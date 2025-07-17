@@ -62,7 +62,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
   const AnalysisCard = ({ title, children, className }: { title: string, children: React.ReactNode, className?: string }) => (
     <Card className={cn("bg-background/30 border-border/10 flex-1 min-w-0", className)}>
       <CardHeader className="p-4">
-        <CardTitle className="font-headline text-xl md:text-2xl text-foreground">{title}</CardTitle>
+        <CardTitle className="font-headline text-xl text-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0">{children}</CardContent>
     </Card>
@@ -70,7 +70,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
 
   return (
     <motion.div 
-      className="w-full max-w-6xl mx-auto flex flex-col items-center text-center p-2"
+      className="w-full max-w-4xl mx-auto flex flex-col items-center text-center p-2"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeInOut' }}
@@ -88,7 +88,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
           <AnalysisCard title="Sentiment">
             <div className="flex flex-wrap items-center justify-center gap-2">
               {analysis.keywords.map((keyword) => (
-                <Badge key={keyword} variant="secondary" className="text-sm md:text-base px-3 py-1 md:px-4">
+                <Badge key={keyword} variant="secondary" className="text-sm px-3 py-1">
                   {keyword}
                 </Badge>
               ))}
@@ -99,17 +99,17 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
         <div className="flex flex-col gap-4">
           <AnalysisCard title="Style">
             <div className="text-center">
-              <p className="text-muted-foreground text-sm md:text-base mb-1">Primary Match</p>
+              <p className="text-muted-foreground text-sm mb-1">Primary Match</p>
               <p className="text-lg md:text-3xl font-bold font-headline text-foreground">{analysis.style.primaryMatch}</p>
-              <p className="text-muted-foreground text-sm md:text-base mt-3 mb-1">Secondary Match</p>
+              <p className="text-muted-foreground text-sm mt-3 mb-1">Secondary Match</p>
               <p className="text-base md:text-xl text-foreground/80">{analysis.style.secondaryMatch}</p>
             </div>
           </AnalysisCard>
           {analysis.famousQuote && (
             <AnalysisCard title="A Word From...">
-              <blockquote className="text-base md:text-lg italic border-l-4 border-accent pl-4 text-left leading-relaxed">
+              <blockquote className="text-base italic border-l-4 border-accent pl-4 text-left leading-relaxed">
                 {analysis.famousQuote.quote}
-                <cite className="block text-right not-italic text-sm md:text-base mt-2 text-muted-foreground">&ndash; {analysis.famousQuote.author}</cite>
+                <cite className="block text-right not-italic text-sm mt-2 text-muted-foreground">&ndash; {analysis.famousQuote.author}</cite>
               </blockquote>
             </AnalysisCard>
           )}
@@ -131,7 +131,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
               </TabsList>
               <TabsContent value="script" className="flex-grow mt-4">
                 <ScrollArea className="h-64 md:h-96 w-full rounded-md border bg-secondary/20">
-                  <div className="font-code text-sm md:text-base whitespace-pre-wrap p-4 text-foreground text-left leading-relaxed">
+                  <div className="font-code text-sm whitespace-pre-wrap p-4 text-foreground text-left leading-relaxed">
                     {analysis.finalScript}
                   </div>
                 </ScrollArea>
@@ -166,11 +166,11 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
       </div>
 
       <div className="flex flex-col sm:flex-row justify-center gap-4 mt-2 w-full max-w-md">
-        <Button onClick={onPlayAgain} size="lg" className="w-full px-4 text-base md:text-lg">
+        <Button onClick={onPlayAgain} size="lg" className="w-full px-4 text-base">
           <RefreshCw />
           Play Again
         </Button>
-        <Button onClick={handleOpenEmailModal} variant="outline" size="lg" className="w-full px-4 text-base md:text-lg">
+        <Button onClick={handleOpenEmailModal} variant="outline" size="lg" className="w-full px-4 text-base">
           <Mail />
           Email Story
         </Button>
