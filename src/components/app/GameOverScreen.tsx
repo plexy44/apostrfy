@@ -138,7 +138,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
               </TabsContent>
               <TabsContent value="transcript" className="flex-grow mt-4">
                  <ScrollArea className="h-64 md:h-96 w-full rounded-md border bg-secondary/20 p-4">
-                  <div className="space-y-4 text-left">
+                  <div className="space-y-4">
                     {analysis.story.map((part, index) => (
                       <div key={index} className={`flex flex-col animate-fade-in-up ${part.speaker === 'ai' ? 'items-start' : 'items-end'}`}>
                         <div className={`p-3 rounded-xl max-w-[85%] ${part.speaker === 'ai' ? 'bg-secondary rounded-bl-none' : 'bg-primary/90 text-primary-foreground rounded-br-none'}`}>
@@ -185,7 +185,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEmailFormSubmit}>
-            <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-1 gap-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
                 <Input id="name" name="name" placeholder="Your Name" className="h-9" disabled={isSubmitting} />
@@ -194,7 +194,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" name="email" type="email" placeholder="you@example.com" className="h-9" required disabled={isSubmitting} />
               </div>
-               <p className="text-xs text-muted-foreground col-span-4 px-1 pt-2">
+               <p className="text-[0.6rem] text-muted-foreground col-span-1 px-1 pt-2">
                 By submitting, you agree to our terms and may receive future communications.
                </p>
             </div>
