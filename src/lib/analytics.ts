@@ -11,6 +11,7 @@ type EventName =
   | 'start_game'
   | 'complete_game'
   | 'request_transcript'
+  | 'email_story_submitted'
   | 'user_turn_taken'
   | 'ai_turn_generated'
   | 'theme_switched'
@@ -36,7 +37,11 @@ interface EventParams {
         final_mood: string;
     };
     request_transcript: {
-        email_provided: boolean;
+        email_provided: boolean; // false when modal is opened, true on submit
+    };
+    email_story_submitted: {
+        has_name: boolean;
+        has_email: boolean;
     };
     user_turn_taken: {
         turn_time_seconds: number;

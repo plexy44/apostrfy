@@ -438,12 +438,11 @@ export default function ApostrfyClient() {
     setIsQuitDialogOpen(false);
   };
 
-  const handleEmailSubmit = async (email: string) => {
+  const handleEmailSubmit = async (name: string, email: string) => {
     if (!analysis) {
         toast({ variant: "destructive", title: "Error", description: "No analysis data available to email." });
         return false;
     }
-    logEvent('request_transcript', { email_provided: true });
 
     try {
         const sanitizedStory = analysis.story.map(part => ({
@@ -466,6 +465,7 @@ export default function ApostrfyClient() {
         });
 
         await saveSubscriberToFirestore({
+            name: name,
             email: email,
             storyId: storyId,
         });

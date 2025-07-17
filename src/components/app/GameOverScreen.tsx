@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 interface GameOverScreenProps {
   analysis: GameAnalysis;
   onPlayAgain: () => void;
-  onEmailSubmit: (email: string) => Promise<boolean>;
+  onEmailSubmit: (name: string, email: string) => Promise<boolean>;
 }
 
 export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }: GameOverScreenProps) {
@@ -39,9 +39,11 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
     setIsSubmitting(true);
     
     const formData = new FormData(e.currentTarget);
+    const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     
-    const success = await onEmailSubmit(email);
+    logEvent('email_story_submitted', { has_name: !!name.trim(), has_email: !!email.trim() });
+    const success = await onEmailSubmit(name, email);
 
     if (success) {
       setIsModalOpen(false);
@@ -52,6 +54,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
 
 
   const handleOpenEmailModal = () => {
+    logEvent('request_transcript', { email_provided: false });
     setIsModalOpen(true);
   }
 
@@ -138,7 +141,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
                     {analysis.story.map((part, index) => (
                       <div key={index} className={`flex flex-col animate-fade-in-up ${part.speaker === 'ai' ? 'items-start' : 'items-end'}`}>
                         <div className={`p-3 rounded-xl max-w-[85%] ${part.speaker === 'ai' ? 'bg-secondary rounded-bl-none' : 'bg-primary/90 text-primary-foreground rounded-br-none'}`}>
-                          <p className="text-sm">{part.line}</p>
+                          <p className="text-sm text-left">{part.line}</p>
                         </div>
                       </div>
                     ))}
@@ -174,30 +177,34 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="glassmorphism">
-          <DialogHeader>
+          <DialogHeader className="text-left">
             <DialogTitle className="font-headline text-2xl">Receive Your Story</DialogTitle>
             <DialogDescription>
-              Enter your email below to receive a copy of your co-created story.
+              Enter your details below to receive a copy of your co-created story.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEmailFormSubmit}>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right">Email</Label>
-                <Input id="email" name="email" type="email" placeholder="you@example.com" className="col-span-3" required disabled={isSubmitting} />
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" name="name" placeholder="Your Name" className="h-9" disabled={isSubmitting} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" name="email" type="email" placeholder="you@example.com" className="h-9" required disabled={isSubmitting} />
               </div>
                <p className="text-xs text-muted-foreground col-span-4 px-1 pt-2">
                 By submitting, you agree to our terms and may receive future communications.
                </p>
             </div>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="secondary" disabled={isSubmitting}>Cancel</Button>
-              </DialogClose>
-              <Button type="submit" disabled={isSubmitting}>
+            <DialogFooter className="flex-col gap-2">
+              <Button type="submit" disabled={isSubmitting} className="w-full h-9">
                 {isSubmitting ? <Loader2 className="animate-spin" /> : <Send />}
                 {isSubmitting ? "Sending..." : "Send"}
               </Button>
+              <DialogClose asChild>
+                <Button type="button" variant="ghost" disabled={isSubmitting} className="w-full h-9">Cancel</Button>
+              </DialogClose>
             </DialogFooter>
           </form>
         </DialogContent>

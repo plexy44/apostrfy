@@ -73,6 +73,7 @@ export const saveStoryToFirestore = async (storyData: StoryToSave): Promise<stri
 };
 
 interface SubscriberData {
+    name: string;
     email: string;
     storyId: string;
 }
