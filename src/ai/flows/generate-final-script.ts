@@ -36,7 +36,7 @@ export async function generateFinalScript(input: GenerateFinalScriptInput): Prom
 
 const prompt = ai.definePrompt({
   name: 'generateFinalScriptPrompt',
-  input: {schema: GenerateFinalScriptInputSchema},
+  input: {schema: z.object({ storyText: z.string() })},
   output: {schema: GenerateFinalScriptOutputSchema},
   prompt: `You are a proofreader and text formatter. Your task is to take the following raw story transcript, which consists of alternating lines from authors, and perform the following actions:
 
@@ -48,15 +48,7 @@ const prompt = ai.definePrompt({
 Do not interpret the story, add scene headings, or change the meaning. Simply combine, correct, and format.
 
 Raw Story Transcript:
-{{{formatStory fullStory}}}`,
-  templateHelpers: {
-    formatStory: (story: StoryPart[]) => {
-      return story.map(part => {
-        const speaker = part.personaName ? `${part.personaName}:` : part.speaker === 'user' ? 'USER:' : 'APOSTRFY:';
-        return `${speaker} ${part.line}`;
-      }).join('\n');
-    }
-  },
+{{{storyText}}}`,
 });
 
 
@@ -66,14 +58,20 @@ const generateFinalScriptFlow = ai.defineFlow(
     inputSchema: GenerateFinalScriptInputSchema,
     outputSchema: GenerateFinalScriptOutputSchema,
   },
-  async input => {
+  async ({ fullStory }) => {
+    // Convert the story array to a simple string for the AI
+    const storyText = fullStory.map(part => {
+      const speaker = part.personaName ? `${part.personaName}:` : part.speaker === 'user' ? 'USER:' : 'APOSTRFY:';
+      return `${speaker} ${part.line}`;
+    }).join('\n');
+
     const maxRetries = 3;
     let attempt = 0;
     let lastError: any = null;
 
     while (attempt < maxRetries) {
       try {
-        const {output} = await prompt(input);
+        const {output} = await prompt({ storyText });
         return output!;
       } catch (e: any) {
         lastError = e;

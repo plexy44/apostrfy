@@ -141,13 +141,13 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
                   <div className="space-y-4">
                     {analysis.story.map((part, index) => {
                       const isUserSpeaker = part.speaker === 'user';
-                      const alignment = isUserSpeaker ? 'items-end' : 'items-start';
                       
                       const speakerLabel = part.personaName
                         ? part.personaName
                         : isUserSpeaker ? 'You' : 'Apostrfy';
                       
                       if (part.isPaste) {
+                        const alignment = isUserSpeaker ? 'items-end' : 'items-start';
                          return (
                             <div key={index} className={`flex flex-col animate-fade-in-up ${alignment}`}>
                                 <p className={`text-xs text-muted-foreground mb-1 px-2 ${alignment === 'items-end' ? 'self-end' : 'self-start'}`}>
@@ -159,7 +159,8 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
                             </div>
                          );
                       }
-
+                      
+                      const alignment = isUserSpeaker ? 'items-end' : 'items-start';
                       const bubbleStyles = isUserSpeaker
                           ? 'bg-primary/90 text-primary-foreground rounded-br-none'
                           : 'bg-secondary rounded-bl-none';
