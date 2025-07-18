@@ -50,7 +50,7 @@ const prompt = ai.definePrompt({
       }).join('\n');
     }
   },
-  system: `You are a proofreader and text formatter. Your task is to take the following raw story transcript, which consists of alternating lines from authors, and perform the following actions:
+  prompt: `You are a proofreader and text formatter. Your task is to take the following raw story transcript, which consists of alternating lines from authors, and perform the following actions:
 
 1.  **Correct Spelling and Grammar**: Fix any spelling mistakes and grammatical errors in the text, except for content inside the special \`\`\`paste blocks. Content inside these blocks must be preserved exactly as is.
 2.  **Combine into Paragraphs**: Merge the alternating lines into a single, cohesive narrative. Form logical paragraphs where appropriate. Do not add any new content, ideas, or descriptions. Your role is only to format and correct.
