@@ -245,15 +245,9 @@ export default function GameScreen({
                           {part.personaName}
                         </p>
                       )}
-                       {part.isPaste ? (
-                            <pre className="bg-black text-white p-3 my-2 rounded-md font-mono text-xs whitespace-pre-wrap overflow-x-auto max-w-[85%] text-left">
-                                {part.line}
-                            </pre>
-                        ) : (
-                             <div className={`p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
-                                <p className="text-sm md:text-base">{part.line}</p>
-                            </div>
-                        )}
+                      <div className={`p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
+                          <p className="text-sm md:text-base">{part.line}</p>
+                      </div>
                     </div>
                   );
               })}
