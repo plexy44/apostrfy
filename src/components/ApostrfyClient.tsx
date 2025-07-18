@@ -8,22 +8,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import dynamic from 'next/dynamic';
 import { AnimatePresence } from "framer-motion";
 import type { GameState, StoryPart, Trope, Persona, TropePersonaKey, InspirationalPersonas, GameAnalysis, Speaker } from "@/lib/types";
-import { generateStoryContent, GenerateStoryContentInput } from "@/ai/flows/generate-story-content";
-import { generateSimulationContent, GenerateSimulationContentInput } from "@/ai/flows/generate-simulation-content";
-import { generateQuoteBanner } from "@/ai/flows/generate-quote-banner";
-import { generateMoodAnalysis } from "@/ai/flows/generate-mood-analysis";
-import { generateStyleMatch } from "@/ai/flows/generate-style-match";
-import { generateStoryKeywords } from "@/ai/flows/generate-story-keywords";
-import { generateFinalScript } from "@/ai/flows/generate-final-script";
-import { generateStoryTitle } from "@/ai/flows/generate-story-title";
+import type { GenerateStoryContentInput } from '@/ai/flows/generate-story-content';
+import type { GenerateSimulationContentInput } from '@/ai/flows/generate-simulation-content';
 
 import LoadingScreen from "@/components/app/LoadingScreen";
 import OnboardingModal from "@/components/app/OnboardingModal";
-import MainMenu from "@/components/app/MainMenu";
-import GameScreen from "@/components/app/GameScreen";
-import GameOverScreen from "@/components/app/GameOverScreen";
 import AppFooter from "@/components/app/AppFooter";
 import AdOverlay from "@/components/app/AdOverlay";
 import {
@@ -42,6 +34,21 @@ import personasData from "@/lib/personas.json";
 import famousQuotesData from "@/lib/famousQuotes.json";
 import { logEvent } from "@/lib/analytics";
 import { saveStoryToFirestore, saveSubscriberToFirestore } from "@/lib/firestore";
+
+// Dynamically import heavy components
+const MainMenu = dynamic(() => import('@/components/app/MainMenu'), { 
+  loading: () => <LoadingScreen />,
+  ssr: false 
+});
+const GameScreen = dynamic(() => import('@/components/app/GameScreen'), { 
+  loading: () => <LoadingScreen />,
+  ssr: false 
+});
+const GameOverScreen = dynamic(() => import('@/components/app/GameOverScreen'), { 
+  loading: () => <LoadingScreen />,
+  ssr: false 
+});
+
 
 const { inspirationalPersonas } = personasData as { inspirationalPersonas: InspirationalPersonas };
 const quotes = famousQuotesData as Record<string, string>;
@@ -157,6 +164,7 @@ export default function ApostrfyClient() {
     setGameState({ status: "generating_initial_story" });
 
     try {
+      const { generateStoryContent } = await import('@/ai/flows/generate-story-content');
       const aiStartTime = Date.now();
       const input: GenerateStoryContentInput = {
         trope,
@@ -196,6 +204,7 @@ export default function ApostrfyClient() {
     setGameState({ status: "generating_initial_story" });
 
     try {
+      const { generateSimulationContent } = await import('@/ai/flows/generate-simulation-content');
       const aiStartTime = Date.now();
       const input: GenerateSimulationContentInput = {
         trope,
@@ -231,6 +240,7 @@ export default function ApostrfyClient() {
       setNextSpeaker(nextSpeakerLabel);
       setIsAiTyping(true);
       try {
+        const { generateSimulationContent } = await import('@/ai/flows/generate-simulation-content');
         const aiStartTime = Date.now();
         const input: GenerateSimulationContentInput = {
           trope: settings.trope!,
@@ -268,6 +278,7 @@ export default function ApostrfyClient() {
     setIsAiTyping(true);
 
     try {
+      const { generateStoryContent } = await import('@/ai/flows/generate-story-content');
       const aiStartTime = Date.now();
       const input: GenerateStoryContentInput = {
         trope: settings.trope,
@@ -296,6 +307,14 @@ export default function ApostrfyClient() {
     setGameState({ status: "generating_summary" });
     
     try {
+        // Dynamically import analysis flows only when needed
+        const { generateQuoteBanner } = await import('@/ai/flows/generate-quote-banner');
+        const { generateMoodAnalysis } = await import('@/ai/flows/generate-mood-analysis');
+        const { generateStyleMatch } = await import('@/ai/flows/generate-style-match');
+        const { generateStoryKeywords } = await import('@/ai/flows/generate-story-keywords');
+        const { generateFinalScript } = await import('@/ai/flows/generate-final-script');
+        const { generateStoryTitle } = await import('@/ai/flows/generate-story-title');
+
         const fullStory = story.map(part => `${part.personaName || part.speaker.toUpperCase()}: ${part.line}`).join('\n');
         const userContent = story
             .filter(part => part.speaker === 'user' && !part.isPaste)
@@ -305,7 +324,7 @@ export default function ApostrfyClient() {
         if (gameMode === 'interactive' && userContent.trim() === "") {
             const emptyStoryText = "The story was left unwritten, a silent testament to a moment of quiet contemplation."
             logEvent('complete_game', { story_length: story.length, final_mood: 'Serenity' });
-             const quoteResult = await generateQuoteBanner({ fullStory: emptyStoryText });
+            const quoteResult = await generateQuoteBanner({ fullStory: emptyStoryText });
             const finalAnalysis: GameAnalysis = {
                 storyId: "not_saved",
                 title: "An Unwritten Tale",
@@ -333,11 +352,11 @@ export default function ApostrfyClient() {
         ] = await Promise.allSettled([
             generateStoryTitle({ fullStory: fullStory }),
             generateQuoteBanner({ fullStory: fullStory }),
-            generateMoodAnalysis({ userContent }),
+            (gameMode === 'interactive' && userContent.trim() !== "") ? generateMoodAnalysis({ userContent }) : Promise.resolve({ primaryEmotion: "Serenity" as const, confidenceScore: 0.5 }),
             (gameMode === 'simulation' && sessionPersonas)
                 ? Promise.resolve({ styleMatches: [sessionPersonas[0].name, sessionPersonas[1].name] })
-                : generateStyleMatch({ userContent: userContent, personas: JSON.stringify(inspirationalPersonas) }),
-            generateStoryKeywords({ userContent }),
+                : (gameMode === 'interactive' && userContent.trim() !== "") ? generateStyleMatch({ userContent: userContent, personas: JSON.stringify(inspirationalPersonas) }) : Promise.resolve({ styleMatches: ["The Storyteller", "The Dreamer"] }),
+            (gameMode === 'interactive' && userContent.trim() !== "") ? generateStoryKeywords({ userContent }) : Promise.resolve({ keywords: ['Mystery', 'Suspense', 'Hope', 'Wonder', 'Resolve'] }),
             generateFinalScript({ fullStory: story })
         ]);
 
