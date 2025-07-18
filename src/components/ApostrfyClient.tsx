@@ -77,6 +77,7 @@ export default function ApostrfyClient() {
   const [areAllStylesUnlocked, setAreAllStylesUnlocked] = useState(false);
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
+  const turnTimerRef = useRef<number>(Date.now());
   const analyticsFired = useRef(new Set<string>());
 
   useEffect(() => {
@@ -145,6 +146,7 @@ export default function ApostrfyClient() {
     setStory([]);
     setComingFromOnboarding(false);
     setNextSpeaker('ai');
+    turnTimerRef.current = Date.now();
 
     const personaKey = getPersonaKey(trope);
     const personaList = inspirationalPersonas[personaKey];
@@ -169,6 +171,7 @@ export default function ApostrfyClient() {
       logEvent('ai_turn_generated', { generation_time_ms: aiEndTime - aiStartTime, persona_1: uniquePersonas[0].name, persona_2: uniquePersonas[1].name });
       setStory([{ speaker: "ai", line: result.aiResponse }]);
       setGameState({ status: "playing" });
+      turnTimerRef.current = Date.now();
     } catch (error) {
       console.error("Failed to start story:", error);
       toast({ variant: "destructive", title: "Error", description: "Could not start the story. Please try again." });
@@ -253,9 +256,10 @@ export default function ApostrfyClient() {
   }, [story, gameMode, gameState.status, sessionPersonas, settings.trope, isAiTyping, isAdVisible]);
 
 
-  const handleUserSubmit = async (userInput: string, turnTime: number, isPaste: boolean) => {
+  const handleUserSubmit = async (userInput: string, isPaste: boolean) => {
     if (!settings.trope || !sessionPersonas || gameMode === 'simulation' || isAdVisible) return;
 
+    const turnTime = (Date.now() - turnTimerRef.current) / 1000;
     logEvent('user_turn_taken', { turn_time_seconds: Math.round(turnTime), word_count: userInput.split(' ').length });
     
     const newStory = [...story, { speaker: "user", line: userInput, isPaste }] as StoryPart[];
@@ -277,6 +281,7 @@ export default function ApostrfyClient() {
       const aiEndTime = Date.now();
       logEvent('ai_turn_generated', { generation_time_ms: aiEndTime - aiStartTime, persona_1: sessionPersonas[0].name, persona_2: sessionPersonas[1].name });
       setStory(prev => [...prev, { speaker: "ai", line: result.aiResponse }]);
+      turnTimerRef.current = Date.now();
     } catch (error) {
       console.error("Failed to get AI response:", error);
       toast({ variant: "destructive", title: "Error", description: "Could not get AI response. Please continue the story." });
@@ -556,7 +561,7 @@ export default function ApostrfyClient() {
     <div className="flex flex-col h-screen bg-background text-foreground">
       <main className="flex-grow flex flex-col relative">
         <AnimatePresence mode="wait">
-            {gameState.status === "loading_screen" && <LoadingScreen key="loading" isInteractive={true} />}
+            {gameState.status === "loading_screen" && <LoadingScreen key="loading" />}
             {gameState.status === "onboarding" && <OnboardingModal key="onboarding" onComplete={handleOnboardingComplete} />}
             {gameState.status === "menu" && (
               <MainMenu 
@@ -574,7 +579,6 @@ export default function ApostrfyClient() {
                 key="generating_initial"
                 trope={settings.trope}
                 duration={settings.duration}
-                isInteractive={true}
               />
             )}
             {(gameState.status === "playing" && settings.trope) && (
@@ -592,9 +596,10 @@ export default function ApostrfyClient() {
                 onPauseForAd={handlePauseForAd}
                 isAdPaused={isAdVisible && adTrigger === 'mid_game'}
                 inputRef={inputRef}
+                turnTimer={turnTimerRef.current}
               />
             )}
-            {gameState.status === "generating_summary" && <LoadingScreen key="generating" isInteractive={true} />}
+            {gameState.status === "generating_summary" && <LoadingScreen key="generating" />}
             {gameState.status === "gameover" && analysis && (
               <GameOverScreen 
                 key="gameover" 

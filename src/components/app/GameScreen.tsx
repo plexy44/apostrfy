@@ -7,21 +7,23 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import type { StoryPart, Trope, Speaker } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Loader, Timer, Hourglass, X } from "lucide-react";
+import { Send, Loader, X } from "lucide-react";
 import Orb from "./Orb";
+import TimerBar from "./TimerBar";
 import { useToast } from "@/hooks/use-toast";
 import { logEvent } from "@/lib/analytics";
+
 
 interface GameScreenProps {
   trope: Trope;
   story: StoryPart[];
   duration: number; // in seconds
   isAiTyping: boolean;
-  onUserSubmit: (userInput: string, turnTime: number, isPaste: boolean) => void;
+  onUserSubmit: (userInput: string, isPaste: boolean) => void;
   onEndGame: () => void;
   onQuitRequest: () => void;
   gameMode: 'interactive' | 'simulation';
@@ -29,77 +31,35 @@ interface GameScreenProps {
   onPauseForAd: () => void;
   isAdPaused: boolean;
   inputRef: React.RefObject<HTMLInputElement>;
+  turnTimer: number;
 }
 
 
-const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused }: { durationInSeconds: number; onEndGame: () => void, onPauseForAd: () => void; isPaused: boolean; }) => {
-  const [timeLeft, setTimeLeft] = useState(durationInSeconds);
-
-  useEffect(() => {
-    if (isPaused) {
-      return;
-    }
-
-    if (timeLeft <= 0) {
-      onEndGame();
-      return;
-    }
-    
-    // Mid-game ad logic for "Dragon Chasing" (120s) mode
-    if (durationInSeconds === 120 && timeLeft === 60) {
-        onPauseForAd();
-        return; // Pause the timer until the ad is closed
-    }
-
-    const timer = setInterval(() => {
-      setTimeLeft((prevTime) => prevTime - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timeLeft, onEndGame, isPaused, durationInSeconds, onPauseForAd]);
-
-  const formatTime = (totalSeconds: number) => {
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  };
-
-  const percentage = (timeLeft / durationInSeconds) * 100;
-  const isUrgent = timeLeft <= 20;
-
-  return (
-    <div className="w-full space-y-2">
-      <div className="flex justify-between items-center text-xs md:text-sm font-mono text-muted-foreground">
-        <div className="flex items-center gap-1.5">
-          <Hourglass className="h-3 w-3 md:h-4 md:w-4" />
-          <span>{formatTime(timeLeft)}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Timer className="h-3 w-3 md:h-4 md:w-4" />
-          <span>{formatTime(durationInSeconds)}</span>
-        </div>
-      </div>
-      <div className="w-full h-1.5 md:h-2 bg-secondary rounded-full overflow-hidden">
-        <div
-          className="h-full rounded-full transition-all duration-1000 ease-linear"
-          style={{
-            width: `${percentage}%`,
-            background: isUrgent
-              ? 'hsl(var(--destructive))'
-              : `hsl(var(--accent))`,
-          }}
-        />
-      </div>
-    </div>
-  );
-};
-
-export default function GameScreen({ trope, story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest, gameMode, nextSpeakerInSim, onPauseForAd, isAdPaused, inputRef }: GameScreenProps) {
+export default function GameScreen({ 
+  trope, 
+  story, 
+  duration, 
+  isAiTyping, 
+  onUserSubmit, 
+  onEndGame, 
+  onQuitRequest, 
+  gameMode, 
+  nextSpeakerInSim, 
+  onPauseForAd, 
+  isAdPaused, 
+  inputRef,
+  turnTimer,
+}: GameScreenProps) {
   const [userInput, setUserInput] = useState("");
   const [isPasted, setIsPasted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const turnTimerRef = useRef<number>(Date.now());
   const { toast } = useToast();
+
+  const [lastHealAmount, setLastHealAmount] = useState<number | null>(null);
+  const [validTurnCount, setValidTurnCount] = useState(0);
+  const [isFlowRestoreActive, setIsFlowRestoreActive] = useState(false);
+  const healTimerRef = useRef<NodeJS.Timeout>();
+  const isDragonChasingMode = duration === 90;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -111,14 +71,57 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
     }
   }, [isAiTyping, gameMode, isAdPaused, inputRef]);
 
+  const calculateFlowRestore = (turnTime: number, wordCount: number, isPasted: boolean): number => {
+    if (!isDragonChasingMode || isPasted || wordCount < 4 || !isFlowRestoreActive) {
+      return 0;
+    }
+
+    // Time Bonus
+    let timeBonus = 0;
+    if (turnTime >= 2.0 && turnTime < 4.0) timeBonus = 1.0;
+    else if (turnTime >= 4.0 && turnTime <= 12.0) timeBonus = 2.0;
+    else if (turnTime > 12.0) timeBonus = 1.0;
+
+    // Word Bonus
+    let wordBonus = 0;
+    if (wordCount >= 4 && wordCount <= 7) wordBonus = 0.5;
+    else if (wordCount >= 8 && wordCount <= 15) wordBonus = 1.5;
+    else if (wordCount >= 16) wordBonus = 2.5;
+
+    return timeBonus + wordBonus;
+  }
+
+  const handleHeal = (amount: number) => {
+    if (amount > 0) {
+      setLastHealAmount(amount);
+      if (healTimerRef.current) clearTimeout(healTimerRef.current);
+      healTimerRef.current = setTimeout(() => setLastHealAmount(null), 1500);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (userInput.trim() && !isAiTyping) {
-      const turnTime = (Date.now() - turnTimerRef.current) / 1000;
-      onUserSubmit(userInput.trim(), turnTime, isPasted);
+      const turnTime = (Date.now() - turnTimer) / 1000;
+      const wordCount = userInput.trim().split(/\s+/).length;
+      const isInputValid = wordCount >= 4 && !isPasted;
+
+      if (isDragonChasingMode) {
+        if (isInputValid) {
+          const newValidTurnCount = validTurnCount + 1;
+          setValidTurnCount(newValidTurnCount);
+          if (newValidTurnCount >= 2 && !isFlowRestoreActive) {
+            setIsFlowRestoreActive(true);
+          }
+        }
+        
+        const healAmount = calculateFlowRestore(turnTime, wordCount, isPasted);
+        handleHeal(healAmount);
+      }
+      
+      onUserSubmit(userInput.trim(), isPasted);
       setUserInput("");
       setIsPasted(false);
-      turnTimerRef.current = Date.now();
     }
   };
 
@@ -150,8 +153,6 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
     let alignment, bubbleStyles;
     
-    // In simulation mode, the side of the indicator depends on the next speaker.
-    // In interactive mode, it's always the AI (left side).
     const isNextSpeakerUser = gameMode === 'simulation' && nextSpeakerInSim === 'user';
     
     alignment = isNextSpeakerUser ? 'items-end' : 'items-start';
@@ -179,7 +180,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
       transition={{ duration: 0.5, ease: 'easeInOut' }}
     >
         {/* Header */}
-        <header className="flex-shrink-0 p-4 border-b border-border/20 flex items-center gap-4">
+        <header className="flex-shrink-0 p-4 border-b border-border/20 flex items-center gap-4 relative">
            <Button
             variant="ghost"
             size="icon"
@@ -192,14 +193,31 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
           </Button>
           <div className="flex-grow">
             <h3 className="font-headline text-lg md:text-xl text-foreground">{trope}</h3>
-            <TimerBar 
+            <TimerBar
                 durationInSeconds={duration} 
+                isPaused={isTimerPaused}
+                isDragonChasingMode={isDragonChasingMode}
+                isFlowRestoreActive={isFlowRestoreActive}
                 onEndGame={onEndGame} 
                 onPauseForAd={onPauseForAd} 
-                isPaused={isTimerPaused}
+                onHeal={handleHeal}
             />
           </div>
           <Orb size="tiny" isInteractive={true} />
+           <AnimatePresence>
+            {lastHealAmount && (
+                <motion.div
+                    className="absolute top-10 left-1/2 -translate-x-1/2 text-lg font-bold text-green-400"
+                    style={{ textShadow: '0 0 8px rgba(74, 222, 128, 0.7)'}}
+                    initial={{ y: 0, opacity: 1 }}
+                    animate={{ y: -30, opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                >
+                    +{lastHealAmount.toFixed(1)}s
+                </motion.div>
+            )}
+           </AnimatePresence>
         </header>
         
         {/* Story/Chat Area */}
