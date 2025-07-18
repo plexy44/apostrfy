@@ -45,7 +45,8 @@ export default function MainMenu({
   
   const initialTropes = TROPES_DATA.filter(t => t.isInitiallyVisible);
   const unlockableTropes = TROPES_DATA.filter(t => !t.isInitiallyVisible);
-  const initialDurations = DURATIONS.filter(d => d.label !== 'Dragon Chasing');
+  const lightningDuration = DURATIONS.find(d => d.label === 'Lightning')!;
+  const minuteDuration = DURATIONS.find(d => d.label === 'Minute')!;
   const dragonChasingDuration = DURATIONS.find(d => d.label === 'Dragon Chasing')!;
 
 
@@ -191,16 +192,15 @@ export default function MainMenu({
           <div className="space-y-2 pt-2">
             <h4 className="text-center font-headline text-foreground text-sm md:text-base">Select Mode</h4>
              <div className="flex justify-center gap-2 flex-wrap">
-              {initialDurations.map((duration) => (
                 <Button
-                  key={duration.value}
-                  variant={selectedDuration === duration.value ? "default" : "secondary"}
-                  onClick={() => handleDurationSelect(duration)}
+                  key={lightningDuration.value}
+                  variant={selectedDuration === lightningDuration.value ? "default" : "secondary"}
+                  onClick={() => handleDurationSelect(lightningDuration)}
                   className="w-28 md:w-32 text-xs md:text-base md:h-11"
                 >
-                  {duration.label}
+                  {lightningDuration.label}
                 </Button>
-              ))}
+
                <AnimatePresence>
                {isDragonChasingUnlocked && (
                     <motion.div
@@ -219,6 +219,15 @@ export default function MainMenu({
                     </motion.div>
                )}
                </AnimatePresence>
+              
+               <Button
+                  key={minuteDuration.value}
+                  variant={selectedDuration === minuteDuration.value ? "default" : "secondary"}
+                  onClick={() => handleDurationSelect(minuteDuration)}
+                  className="w-28 md:w-32 text-xs md:text-base md:h-11"
+                >
+                  {minuteDuration.label}
+                </Button>
             </div>
           </div>
         </CardContent>
