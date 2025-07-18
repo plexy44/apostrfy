@@ -33,7 +33,7 @@ interface GameOverScreenProps {
 
 const FinalScriptRenderer = ({ story }: { story: StoryPart[] }) => {
   return (
-    <p className="font-code text-sm md:text-base whitespace-pre-wrap p-4 text-foreground text-left leading-relaxed">
+    <div className="font-code text-sm md:text-base whitespace-pre-wrap p-4 text-foreground text-left leading-relaxed">
       {story.map((part, index) => {
         if (part.isPaste) {
           return (
@@ -42,10 +42,9 @@ const FinalScriptRenderer = ({ story }: { story: StoryPart[] }) => {
             </pre>
           );
         }
-        // Add a space after each non-pasted line to form paragraphs
         return <span key={index}>{part.line + ' '}</span>;
       })}
-    </p>
+    </div>
   );
 };
 
