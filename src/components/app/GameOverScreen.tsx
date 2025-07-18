@@ -170,8 +170,8 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
                       
                       if (part.isPaste) {
                          return (
-                            <div key={index} className={`flex flex-col animate-fade-in-up items-start`}>
-                                <p className={`text-xs text-muted-foreground mb-1 px-2 self-start`}>
+                            <div key={index} className={`flex flex-col animate-fade-in-up items-end`}>
+                                <p className={`text-xs text-muted-foreground mb-1 px-2 self-end`}>
                                     You (Pasted)
                                 </p>
                                 <pre className="bg-black text-white p-3 my-2 rounded-md font-mono text-xs whitespace-pre-wrap overflow-x-auto max-w-[85%] text-left">
