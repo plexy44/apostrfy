@@ -54,12 +54,13 @@ export default function GameScreen({
   const [isPasted, setIsPasted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const timerBarRef = useRef<{ heal: (amount: number) => void }>(null);
 
   const [lastHealAmount, setLastHealAmount] = useState<number | null>(null);
   const [validTurnCount, setValidTurnCount] = useState(0);
   const [isFlowRestoreActive, setIsFlowRestoreActive] = useState(false);
   const healTimerRef = useRef<NodeJS.Timeout>();
-  const isDragonChasingMode = duration === 90;
+  const isDragonChasingMode = duration === 120;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -94,6 +95,9 @@ export default function GameScreen({
   const handleHeal = (amount: number) => {
     if (amount > 0) {
       setLastHealAmount(amount);
+      if (timerBarRef.current) {
+        timerBarRef.current.heal(amount);
+      }
       if (healTimerRef.current) clearTimeout(healTimerRef.current);
       healTimerRef.current = setTimeout(() => setLastHealAmount(null), 1500);
     }
@@ -194,13 +198,13 @@ export default function GameScreen({
           <div className="flex-grow">
             <h3 className="font-headline text-lg md:text-xl text-foreground">{trope}</h3>
             <TimerBar
+                ref={timerBarRef}
                 durationInSeconds={duration} 
                 isPaused={isTimerPaused}
                 isDragonChasingMode={isDragonChasingMode}
                 isFlowRestoreActive={isFlowRestoreActive}
                 onEndGame={onEndGame} 
                 onPauseForAd={onPauseForAd} 
-                onHeal={handleHeal}
             />
           </div>
           <Orb size="tiny" isInteractive={true} />

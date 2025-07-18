@@ -6,7 +6,7 @@
  */
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { Hourglass, Timer as TimerIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -18,29 +18,33 @@ interface TimerBarProps {
   isFlowRestoreActive: boolean;
   onEndGame: () => void;
   onPauseForAd: () => void;
-  onHeal: (amount: number) => void;
 }
 
-export default function TimerBar({ 
+interface TimerBarRef {
+  heal: (amount: number) => void;
+}
+
+const TimerBar = forwardRef<TimerBarRef, TimerBarProps>(({ 
   durationInSeconds, 
   isPaused,
   isDragonChasingMode,
   isFlowRestoreActive,
   onEndGame, 
   onPauseForAd,
-  onHeal
-}: TimerBarProps) {
+}, ref) => {
   const [timeLeft, setTimeLeft] = useState(durationInSeconds);
   const [showActivationGlow, setShowActivationGlow] = useState(false);
   const [isHealing, setIsHealing] = useState(false);
 
-  const healTimer = useCallback((amount: number) => {
-    if (amount > 0) {
-      setTimeLeft(prev => Math.min(durationInSeconds, prev + amount));
-      setIsHealing(true);
-      setTimeout(() => setIsHealing(false), 500); // Reset heal flash
+  useImperativeHandle(ref, () => ({
+    heal: (amount) => {
+      if (amount > 0) {
+        setTimeLeft(prev => Math.min(durationInSeconds, prev + amount));
+        setIsHealing(true);
+        setTimeout(() => setIsHealing(false), 500); // Reset heal flash
+      }
     }
-  }, [durationInSeconds]);
+  }));
 
   // Effect to handle the main timer countdown
   useEffect(() => {
@@ -64,15 +68,6 @@ export default function TimerBar({
     return () => clearInterval(timer);
   }, [timeLeft, isPaused, onEndGame, durationInSeconds, isDragonChasingMode, onPauseForAd]);
 
-  // Effect to handle healing the timer
-  useEffect(() => {
-    onHeal(0); // This is a bit of a hack to get the stable function from the parent
-    // The parent passes a new function identity each time for onHeal.
-    // We re-assign the prop to a stable function we can use in our dependency array.
-    // This stops the effect from running on every render.
-    // @ts-ignore
-    onHeal = healTimer;
-  }, [onHeal, healTimer]);
 
   // Effect to trigger the one-time activation glow
   useEffect(() => {
@@ -124,4 +119,8 @@ export default function TimerBar({
       </div>
     </div>
   );
-};
+});
+
+TimerBar.displayName = 'TimerBar';
+
+export default TimerBar;
