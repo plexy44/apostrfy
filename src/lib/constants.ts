@@ -40,7 +40,7 @@ export const ORB_MESSAGES: string[] = [
 export const DURATIONS: { label: string; value: number, analyticsName: 'lightning' | 'minute' | 'dragon_chasing' }[] = [
   { label: "Lightning", value: 30, analyticsName: 'lightning' },
   { label: "Minute", value: 60, analyticsName: 'minute' },
-  { label: "Dragon Chasing", value: 120, analyticsName: 'dragon_chasing' },
+  { label: "Dragon Chasing", value: 90, analyticsName: 'dragon_chasing' },
 ];
 
 export const TROPES_DATA: { name: Trope; description: string; isInitiallyVisible: boolean; }[] = [
