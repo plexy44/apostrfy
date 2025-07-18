@@ -38,18 +38,6 @@ const prompt = ai.definePrompt({
   name: 'generateFinalScriptPrompt',
   input: {schema: GenerateFinalScriptInputSchema},
   output: {schema: GenerateFinalScriptOutputSchema},
-  templateHelpers: {
-    formatStory: (story: StoryPart[]) => {
-      return story.map(part => {
-        const speaker = part.personaName ? `${part.personaName}:` : part.speaker === 'user' ? 'USER:' : 'APOSTRFY:';
-        if (part.isPaste) {
-            // Embed pasted content in a special markdown block
-            return `\n\`\`\`paste\n${part.line}\n\`\`\`\n`;
-        }
-        return `${speaker} ${part.line}`;
-      }).join('\n');
-    }
-  },
   prompt: `You are a proofreader and text formatter. Your task is to take the following raw story transcript, which consists of alternating lines from authors, and perform the following actions:
 
 1.  **Correct Spelling and Grammar**: Fix any spelling mistakes and grammatical errors in the text, except for content inside the special \`\`\`paste blocks. Content inside these blocks must be preserved exactly as is.
@@ -62,6 +50,18 @@ Do not interpret the story, add scene headings, or change the meaning. Simply co
 
 Raw Story Transcript:
 {{{formatStory fullStory}}}`,
+  templateHelpers: {
+    formatStory: (story: StoryPart[]) => {
+      return story.map(part => {
+        const speaker = part.personaName ? `${part.personaName}:` : part.speaker === 'user' ? 'USER:' : 'APOSTRFY:';
+        if (part.isPaste) {
+            // Embed pasted content in a special markdown block
+            return `\n\`\`\`paste\n${part.line}\n\`\`\`\n`;
+        }
+        return `${speaker} ${part.line}`;
+      }).join('\n');
+    }
+  },
 });
 
 
