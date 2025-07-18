@@ -37,7 +37,7 @@ const FinalScriptRenderer = ({ story }: { story: StoryPart[] }) => {
       {story.map((part, index) => {
         if (part.isPaste) {
           return (
-            <pre key={index} className="bg-black text-white p-3 my-2 rounded-md font-mono text-xs overflow-x-auto">
+            <pre key={index} className="bg-black text-white p-3 my-2 rounded-md font-mono text-xs whitespace-pre-wrap overflow-x-auto">
               {part.line}
             </pre>
           );
@@ -167,6 +167,19 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
                       const bubbleStyles = isUserSpeaker
                           ? 'bg-primary/90 text-primary-foreground rounded-br-none'
                           : 'bg-secondary rounded-bl-none';
+                      
+                      if (part.isPaste) {
+                         return (
+                            <div key={index} className={`flex flex-col animate-fade-in-up ${alignment}`}>
+                                <p className={`text-xs text-muted-foreground mb-1 px-2 ${alignment === 'items-end' ? 'self-end' : 'self-start'}`}>
+                                    You (Pasted)
+                                </p>
+                                <pre className="bg-black text-white p-3 my-2 rounded-md font-mono text-xs whitespace-pre-wrap overflow-x-auto max-w-[85%]">
+                                  {part.line}
+                                </pre>
+                            </div>
+                         )
+                      }
 
                       return (
                         <div key={index} className={`flex flex-col animate-fade-in-up ${alignment}`}>
