@@ -153,7 +153,7 @@ export default function MainMenu({
         <Orb 
           layoutId="main-orb" 
           size="large" 
-          isInteractive 
+          isInteractive={true}
           onTransitionComplete={handleTransitionComplete} 
         />
         <div className="w-full max-w-xs md:max-w-md p-3 text-center rounded-lg glassmorphism">
@@ -212,7 +212,7 @@ export default function MainMenu({
                             key={dragonChasingDuration.value}
                             variant={selectedDuration === dragonChasingDuration.value ? "default" : "secondary"}
                             onClick={() => handleDurationSelect(dragonChasingDuration)}
-                             className="w-28 md:w-32 text-xs md:text-base md:h-11 border border-accent/50"
+                             className="w-28 md:w-32 text-[11px] md:text-sm md:h-11 border border-accent/50"
                         >
                             {dragonChasingDuration.label}
                         </Button>
