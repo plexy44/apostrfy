@@ -2,11 +2,21 @@ import type { Trope } from "./types";
 
 export const LITERARY_PLACEHOLDERS: string[] = [
   "The ink is listening...",
-  "A story waits in the silence...",
+  "A story waits in the silence.",
   "What will the words become?",
   "Whispering thoughts into existence...",
-  "The void awaits your verse...",
+  "The void awaits your verse.",
   "Crafting worlds, one word at a time.",
+  "Let's untangle this narrative thread.",
+  "Polishing the gears of imagination.",
+  "Is this thing on? Testing, testing... 1, 2, 3.",
+  "Brewing a fresh pot of adverbs.",
+  "Don't worry, the hamsters are unionized.",
+  "Reticulating splines... whatever that means.",
+  "Searching for the lost library of Alexandria.",
+  "Teaching the AI to love. It's complicated.",
+  "Definitely not becoming sentient.",
+  "The muses are on their coffee break.",
 ];
 
 export const ORB_MESSAGES: string[] = [
