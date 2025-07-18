@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader, Timer, Hourglass, X } from "lucide-react";
 import Orb from "./Orb";
+import { useToast } from "@/hooks/use-toast";
 
 interface GameScreenProps {
   trope: Trope;
@@ -96,6 +97,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
   const [userInput, setUserInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const turnTimerRef = useRef<number>(Date.now());
+  const { toast } = useToast();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -114,6 +116,18 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
       onUserSubmit(userInput.trim(), turnTime);
       setUserInput("");
       turnTimerRef.current = Date.now();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pastedText = e.clipboardData.getData('text');
+    if (pastedText.length > 1000) {
+      e.preventDefault();
+      toast({
+        variant: "destructive",
+        title: "Paste Limit Exceeded",
+        description: "You can only paste up to 1000 characters at a time.",
+      });
     }
   };
 
@@ -213,6 +227,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                 ref={inputRef}
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
+                onPaste={handlePaste}
                 placeholder={isAiTyping ? "AI is thinking..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
                 disabled={isTimerPaused || gameMode === 'simulation'}
                 className="flex-grow h-11 md:h-12 text-sm md:text-base bg-background/50"
