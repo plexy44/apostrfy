@@ -61,10 +61,10 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
 
   const AnalysisCard = ({ title, children, className }: { title: string, children: React.ReactNode, className?: string }) => (
     <Card className={cn("bg-background/30 border-border/10 flex-1 min-w-0", className)}>
-      <CardHeader className="p-4">
-        <CardTitle className="font-headline text-xl text-foreground">{title}</CardTitle>
+      <CardHeader className="p-4 md:p-6">
+        <CardTitle className="font-headline text-xl md:text-2xl text-foreground">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="p-4 pt-0">{children}</CardContent>
+      <CardContent className="p-4 md:p-6 pt-0">{children}</CardContent>
     </Card>
   );
 
@@ -75,11 +75,11 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeInOut' }}
     >
-      <h2 className="font-script text-2xl md:text-5xl text-foreground mb-4 text-center">
+      <h2 className="font-script text-2xl md:text-5xl text-foreground mb-4 md:mb-8 text-center">
         &ldquo;{analysis.quoteBanner}&rdquo;
       </h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-4 md:mb-6">
         {/* Left Column */}
         <div className="flex flex-col gap-4">
           <AnalysisCard title="Mood">
@@ -88,7 +88,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
           <AnalysisCard title="Sentiment">
             <div className="flex flex-wrap items-center justify-center gap-2">
               {analysis.keywords.map((keyword) => (
-                <Badge key={keyword} variant="secondary" className="text-sm px-3 py-1">
+                <Badge key={keyword} variant="secondary" className="text-sm md:text-base px-3 py-1">
                   {keyword}
                 </Badge>
               ))}
@@ -99,17 +99,17 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
         <div className="flex flex-col gap-4">
           <AnalysisCard title="Style">
             <div className="text-center">
-              <p className="text-muted-foreground text-sm mb-1">Primary Match</p>
+              <p className="text-muted-foreground text-sm md:text-base mb-1">Primary Match</p>
               <p className="text-lg md:text-3xl font-bold font-headline text-foreground">{analysis.style.primaryMatch}</p>
-              <p className="text-muted-foreground text-sm mt-3 mb-1">Secondary Match</p>
+              <p className="text-muted-foreground text-sm md:text-base mt-3 mb-1">Secondary Match</p>
               <p className="text-base md:text-xl text-foreground/80">{analysis.style.secondaryMatch}</p>
             </div>
           </AnalysisCard>
           {analysis.famousQuote && (
             <AnalysisCard title="A Word From...">
-              <blockquote className="text-base italic border-l-4 border-accent pl-4 text-left leading-relaxed">
+              <blockquote className="text-base md:text-lg italic border-l-4 border-accent pl-4 text-left leading-relaxed">
                 {analysis.famousQuote.quote}
-                <cite className="block text-right not-italic text-sm mt-2 text-muted-foreground">&ndash; {analysis.famousQuote.author}</cite>
+                <cite className="block text-right not-italic text-sm md:text-base mt-2 text-muted-foreground">&ndash; {analysis.famousQuote.author}</cite>
               </blockquote>
             </AnalysisCard>
           )}
@@ -119,9 +119,9 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
       {/* Script/Transcript Section */}
       <div className="w-full mb-4">
         <Card className="bg-background/30 border-border/10 flex flex-col h-full">
-          <CardHeader className="text-center p-4">
+          <CardHeader className="text-center p-4 md:p-6">
             <CardTitle className="font-headline text-xl md:text-3xl text-foreground">{analysis.title}</CardTitle>
-            <p className="text-base text-muted-foreground font-sans">{analysis.trope}</p>
+            <p className="text-base md:text-lg text-muted-foreground font-sans">{analysis.trope}</p>
           </CardHeader>
           <CardContent className="flex-grow flex flex-col p-2 md:p-6 pt-0">
             <Tabs defaultValue="script" className="flex-grow flex flex-col">
@@ -131,7 +131,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
               </TabsList>
               <TabsContent value="script" className="flex-grow mt-4">
                 <ScrollArea className="h-64 md:h-96 w-full rounded-md border bg-secondary/20">
-                  <div className="font-code text-sm whitespace-pre-wrap p-4 text-foreground text-left leading-relaxed">
+                  <div className="font-code text-sm md:text-base whitespace-pre-wrap p-4 text-foreground text-left leading-relaxed">
                     {analysis.finalScript}
                   </div>
                 </ScrollArea>
@@ -139,13 +139,28 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
               <TabsContent value="transcript" className="flex-grow mt-4">
                  <ScrollArea className="h-64 md:h-96 w-full rounded-md border bg-secondary/20 p-4">
                   <div className="space-y-4">
-                    {analysis.story.map((part, index) => (
-                      <div key={index} className={`flex flex-col animate-fade-in-up ${part.speaker === 'ai' ? 'items-start' : 'items-end'}`}>
-                        <div className={`p-3 rounded-xl max-w-[85%] ${part.speaker === 'ai' ? 'bg-secondary rounded-bl-none' : 'bg-primary/90 text-primary-foreground rounded-br-none'}`}>
-                          <p className="text-sm text-left">{part.line}</p>
+                    {analysis.story.map((part, index) => {
+                      const isUserSpeaker = part.speaker === 'user';
+                      const alignment = isUserSpeaker ? 'items-end' : 'items-start';
+                      const bubbleStyles = isUserSpeaker
+                          ? 'bg-primary/90 text-primary-foreground rounded-br-none'
+                          : 'bg-secondary rounded-bl-none';
+                      
+                      const speakerLabel = part.personaName
+                        ? part.personaName
+                        : isUserSpeaker ? 'You' : 'Apostrfy';
+
+                      return (
+                        <div key={index} className={`flex flex-col animate-fade-in-up ${alignment}`}>
+                          <p className={`text-xs text-muted-foreground mb-1 px-2 ${alignment === 'items-end' ? 'self-end' : 'self-start'}`}>
+                            {speakerLabel}
+                          </p>
+                          <div className={`p-3 rounded-xl max-w-[85%] text-left ${bubbleStyles}`}>
+                            <p className="text-sm md:text-base">{part.line}</p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </ScrollArea>
               </TabsContent>
@@ -166,11 +181,11 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
       </div>
 
       <div className="flex flex-col sm:flex-row justify-center gap-4 mt-2 w-full max-w-md">
-        <Button onClick={onPlayAgain} size="lg" className="w-full px-4 text-base">
+        <Button onClick={onPlayAgain} size="lg" className="w-full px-4 text-base md:text-lg">
           <RefreshCw />
           Play Again
         </Button>
-        <Button onClick={handleOpenEmailModal} variant="outline" size="lg" className="w-full px-4 text-base">
+        <Button onClick={handleOpenEmailModal} variant="outline" size="lg" className="w-full px-4 text-base md:text-lg">
           <Mail />
           Email Story
         </Button>
@@ -180,7 +195,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
         <DialogContent className="glassmorphism md:max-w-xl md:p-8">
           <DialogHeader className="text-left">
             <DialogTitle className="font-headline text-2xl md:text-4xl">Receive Your Story</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-foreground/80">
               Enter your details below to receive a copy of your co-created story.
             </DialogDescription>
           </DialogHeader>
@@ -198,9 +213,9 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
                 By submitting, you agree to our terms and may receive future communications.
                </p>
             </div>
-            <DialogFooter className="md:justify-center md:gap-4">
+            <DialogFooter className="flex-col-reverse sm:flex-row md:justify-center md:gap-4">
               <DialogClose asChild>
-                <Button type="button" variant="outline" disabled={isSubmitting} className="md:h-12 md:px-8 md:text-lg md:flex-1 mt-2 sm:mt-0">Cancel</Button>
+                <Button type="button" variant="outline" disabled={isSubmitting} className="mt-2 sm:mt-0 md:h-12 md:px-8 md:text-lg md:flex-1">Cancel</Button>
               </DialogClose>
               <Button type="submit" disabled={isSubmitting} className="md:h-12 md:px-8 md:text-lg md:flex-1">
                 {isSubmitting ? <Loader2 className="animate-spin" /> : <Send />}
