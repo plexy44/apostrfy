@@ -17,7 +17,6 @@ interface TimerBarProps {
   isDragonChasingMode: boolean;
   isFlowRestoreActive: boolean;
   onEndGame: () => void;
-  onPauseForAd: () => void;
 }
 
 interface TimerBarRef {
@@ -30,7 +29,6 @@ const TimerBar = forwardRef<TimerBarRef, TimerBarProps>(({
   isDragonChasingMode,
   isFlowRestoreActive,
   onEndGame, 
-  onPauseForAd,
 }, ref) => {
   const [timeLeft, setTimeLeft] = useState(durationInSeconds);
   const [showActivationGlow, setShowActivationGlow] = useState(false);
@@ -54,19 +52,13 @@ const TimerBar = forwardRef<TimerBarRef, TimerBarProps>(({
       onEndGame();
       return;
     }
-    
-    // Mid-game ad logic for "Dragon Chasing" mode
-    if (isDragonChasingMode && durationInSeconds === 120 && Math.floor(timeLeft) === 60) {
-        onPauseForAd();
-        return;
-    }
 
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => Math.max(0, prevTime - 1));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, isPaused, onEndGame, durationInSeconds, isDragonChasingMode, onPauseForAd]);
+  }, [timeLeft, isPaused, onEndGame]);
 
 
   // Effect to trigger the one-time activation glow

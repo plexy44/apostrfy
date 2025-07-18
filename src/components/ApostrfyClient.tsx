@@ -593,7 +593,6 @@ export default function ApostrfyClient() {
                 onQuitRequest={handleQuitRequest}
                 gameMode={gameMode}
                 nextSpeakerInSim={nextSpeaker}
-                onPauseForAd={handlePauseForAd}
                 isAdPaused={isAdVisible && adTrigger === 'mid_game'}
                 inputRef={inputRef}
                 turnTimer={turnTimerRef.current}

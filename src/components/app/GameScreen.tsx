@@ -28,7 +28,6 @@ interface GameScreenProps {
   onQuitRequest: () => void;
   gameMode: 'interactive' | 'simulation';
   nextSpeakerInSim: Speaker;
-  onPauseForAd: () => void;
   isAdPaused: boolean;
   inputRef: React.RefObject<HTMLInputElement>;
   turnTimer: number;
@@ -45,7 +44,6 @@ export default function GameScreen({
   onQuitRequest, 
   gameMode, 
   nextSpeakerInSim, 
-  onPauseForAd, 
   isAdPaused, 
   inputRef,
   turnTimer,
@@ -73,13 +71,18 @@ export default function GameScreen({
   }, [isAiTyping, gameMode, isAdPaused, inputRef]);
 
   const calculateFlowRestore = (turnTime: number, wordCount: number, isPasted: boolean): number => {
-    if (!isDragonChasingMode || isPasted || wordCount < 4 || !isFlowRestoreActive) {
+    if (!isDragonChasingMode || isPasted || wordCount < 4) {
+      return 0;
+    }
+    
+    if (!isFlowRestoreActive) {
       return 0;
     }
 
     // Time Bonus
     let timeBonus = 0;
-    if (turnTime >= 2.0 && turnTime < 4.0) timeBonus = 1.0;
+    if (turnTime < 2.0) timeBonus = 0;
+    else if (turnTime >= 2.0 && turnTime < 4.0) timeBonus = 1.0;
     else if (turnTime >= 4.0 && turnTime <= 12.0) timeBonus = 2.0;
     else if (turnTime > 12.0) timeBonus = 1.0;
 
@@ -204,7 +207,6 @@ export default function GameScreen({
                 isDragonChasingMode={isDragonChasingMode}
                 isFlowRestoreActive={isFlowRestoreActive}
                 onEndGame={onEndGame} 
-                onPauseForAd={onPauseForAd} 
             />
           </div>
           <Orb size="tiny" isInteractive={true} />
@@ -243,9 +245,15 @@ export default function GameScreen({
                           {part.personaName}
                         </p>
                       )}
-                      <div className={`p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
-                        <p className="text-sm md:text-base">{part.line}</p>
-                      </div>
+                       {part.isPaste ? (
+                            <pre className="bg-black text-white p-3 my-2 rounded-md font-mono text-xs whitespace-pre-wrap overflow-x-auto max-w-[85%] text-left">
+                                {part.line}
+                            </pre>
+                        ) : (
+                             <div className={`p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
+                                <p className="text-sm md:text-base">{part.line}</p>
+                            </div>
+                        )}
                     </div>
                   );
               })}
