@@ -59,11 +59,17 @@ const generateFinalScriptFlow = ai.defineFlow(
     outputSchema: GenerateFinalScriptOutputSchema,
   },
   async ({ fullStory }) => {
-    // Convert the story array to a simple string for the AI, ignoring pasted content for AI processing.
+    // Convert the story array to a simple string for the AI.
     const storyText = fullStory
-        .filter(part => !part.isPaste)
         .map(part => {
-            const speaker = part.personaName ? `${part.personaName}:` : part.speaker === 'user' ? 'USER:' : 'APOSTRFY:';
+            let speaker;
+            if (part.personaName) {
+                speaker = `${part.personaName}:`;
+            } else if (part.isPaste) {
+                speaker = 'USER (Pasted):';
+            } else {
+                speaker = part.speaker === 'user' ? 'USER:' : 'APOSTRFY:';
+            }
             return `${speaker} ${part.line}`;
         }).join('\n');
 
