@@ -20,7 +20,8 @@ type EventName =
   | 'ad_load_failed'
   | 'rewarded_ad_flow'
   | 'quit_game_prompted'
-  | 'quit_game_confirmed';
+  | 'quit_game_confirmed'
+  | 'text_pasted';
 
 // Interface defining the parameters for each event
 interface EventParams {
@@ -79,6 +80,10 @@ interface EventParams {
     quit_game_confirmed: {
         story_length: number;
         game_mode: 'interactive' | 'simulation';
+    };
+    text_pasted: {
+        pasted_length: number;
+        was_blocked: boolean;
     };
 }
 

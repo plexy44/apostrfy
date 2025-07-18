@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Send, Loader, Timer, Hourglass, X } from "lucide-react";
 import Orb from "./Orb";
 import { useToast } from "@/hooks/use-toast";
+import { logEvent } from "@/lib/analytics";
 
 interface GameScreenProps {
   trope: Trope;
@@ -121,7 +122,14 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     const pastedText = e.clipboardData.getData('text');
-    if (pastedText.length > 1000) {
+    const isBlocked = pastedText.length > 1000;
+
+    logEvent('text_pasted', {
+        pasted_length: pastedText.length,
+        was_blocked: isBlocked
+    });
+
+    if (isBlocked) {
       e.preventDefault();
       toast({
         variant: "destructive",
