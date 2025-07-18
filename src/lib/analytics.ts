@@ -17,6 +17,7 @@ type EventName =
   | 'theme_switched'
   | 'ad_impression'
   | 'ad_click'
+  | 'ad_closed'
   | 'ad_load_failed'
   | 'rewarded_ad_flow'
   | 'quit_game_prompted'
@@ -64,6 +65,10 @@ interface EventParams {
     };
     ad_click: {
         ad_format: 'interstitial' | 'banner' | 'rewarded';
+        ad_unit_name: string;
+    };
+    ad_closed: {
+        ad_format: 'interstitial' | 'rewarded';
         ad_unit_name: string;
     };
     ad_load_failed: {

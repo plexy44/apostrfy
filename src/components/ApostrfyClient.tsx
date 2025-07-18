@@ -46,7 +46,7 @@ import { saveStoryToFirestore, saveSubscriberToFirestore } from "@/lib/firestore
 const { inspirationalPersonas } = personasData as { inspirationalPersonas: InspirationalPersonas };
 const quotes = famousQuotesData as Record<string, string>;
 
-type AdTrigger = 'quit' | 'end_game' | 'reward' | 'mid_game' | null;
+type AdTrigger = 'quit' | 'end_game' | 'reward' | null;
 
 
 const getPersonaKey = (trope: Trope): TropePersonaKey => {
@@ -496,14 +496,28 @@ export default function ApostrfyClient() {
 
   const handleAdClosed = () => {
     setIsAdVisible(false);
+
+    let adUnitName = '';
+    let adFormat: 'interstitial' | 'rewarded' = 'interstitial';
+
     if (adTrigger === 'quit') {
+      adUnitName = 'quit_game_interstitial';
       handlePlayAgain();
     } else if (adTrigger === 'end_game') {
+      adUnitName = 'end_of_game_interstitial';
       // The analysis is already running; the gameover state will be set when it's done.
     } else if (adTrigger === 'reward') {
-      // The reward logic is handled in handleUnlockSecret now.
+      adUnitName = 'reward_unlock_ad';
+      adFormat = 'rewarded';
     }
-    // 'mid_game' ad trigger is self-contained and doesn't need further action here.
+
+    if (adUnitName) {
+      logEvent('ad_closed', {
+        ad_format: adFormat,
+        ad_unit_name: adUnitName,
+      });
+    }
+
     setAdTrigger(null);
   };
 
