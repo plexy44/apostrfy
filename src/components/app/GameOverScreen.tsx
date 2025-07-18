@@ -30,6 +30,29 @@ interface GameOverScreenProps {
   onEmailSubmit: (name: string, email: string) => Promise<boolean>;
 }
 
+const FinalScriptRenderer = ({ script }: { script: string }) => {
+  const parts = script.split(/(\n\`\`\`paste\n.*?\n\`\`\`\n)/gs).filter(Boolean);
+
+  return (
+    <div className="font-code text-sm md:text-base whitespace-pre-wrap p-4 text-foreground text-left leading-relaxed">
+      {parts.map((part, index) => {
+        if (part.startsWith('\n```paste\n')) {
+          const content = part.replace(/^\n\`\`\`paste\n/, '').replace(/\n\`\`\`\n$/, '');
+          return (
+            <pre
+              key={index}
+              className="bg-black text-white p-3 my-4 rounded-md font-mono text-xs overflow-x-auto"
+            >
+              {content}
+            </pre>
+          );
+        }
+        return <span key={index}>{part}</span>;
+      })}
+    </div>
+  );
+};
+
 export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }: GameOverScreenProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -131,9 +154,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
               </TabsList>
               <TabsContent value="script" className="flex-grow mt-4">
                 <ScrollArea className="h-64 md:h-96 w-full rounded-md border bg-secondary/20">
-                  <div className="font-code text-sm md:text-base whitespace-pre-wrap p-4 text-foreground text-left leading-relaxed">
-                    {analysis.finalScript}
-                  </div>
+                  <FinalScriptRenderer script={analysis.finalScript} />
                 </ScrollArea>
               </TabsContent>
               <TabsContent value="transcript" className="flex-grow mt-4">

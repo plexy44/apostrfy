@@ -21,7 +21,7 @@ interface GameScreenProps {
   story: StoryPart[];
   duration: number; // in seconds
   isAiTyping: boolean;
-  onUserSubmit: (userInput: string, turnTime: number) => void;
+  onUserSubmit: (userInput: string, turnTime: number, isPaste: boolean) => void;
   onEndGame: () => void;
   onQuitRequest: () => void;
   gameMode: 'interactive' | 'simulation';
@@ -96,6 +96,7 @@ const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused }: { du
 
 export default function GameScreen({ trope, story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest, gameMode, nextSpeakerInSim, onPauseForAd, isAdPaused, inputRef }: GameScreenProps) {
   const [userInput, setUserInput] = useState("");
+  const [isPasted, setIsPasted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const turnTimerRef = useRef<number>(Date.now());
   const { toast } = useToast();
@@ -114,8 +115,9 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
     e.preventDefault();
     if (userInput.trim() && !isAiTyping) {
       const turnTime = (Date.now() - turnTimerRef.current) / 1000;
-      onUserSubmit(userInput.trim(), turnTime);
+      onUserSubmit(userInput.trim(), turnTime, isPasted);
       setUserInput("");
+      setIsPasted(false);
       turnTimerRef.current = Date.now();
     }
   };
@@ -136,6 +138,8 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
         title: "Paste Limit Exceeded",
         description: "You can only paste up to 1000 characters at a time.",
       });
+    } else {
+        setIsPasted(true);
     }
   };
 

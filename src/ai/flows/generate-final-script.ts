@@ -11,9 +11,17 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import type { StoryPart } from '@/lib/types';
+
+const StoryPartSchema = z.object({
+  speaker: z.enum(['user', 'ai']),
+  line: z.string(),
+  personaName: z.string().optional(),
+  isPaste: z.boolean().optional(),
+});
 
 const GenerateFinalScriptInputSchema = z.object({
-  fullStory: z.string().describe("The full raw story transcript, with each line prefixed by its speaker (e.g., 'USER:' or 'APOSTRFY:')."),
+  fullStory: z.array(StoryPartSchema).describe("The full raw story transcript, as an array of objects."),
 });
 export type GenerateFinalScriptInput = z.infer<typeof GenerateFinalScriptInputSchema>;
 
@@ -30,17 +38,30 @@ const prompt = ai.definePrompt({
   name: 'generateFinalScriptPrompt',
   input: {schema: GenerateFinalScriptInputSchema},
   output: {schema: GenerateFinalScriptOutputSchema},
-  prompt: `You are a proofreader and text formatter. Your task is to take the following raw story transcript, which consists of alternating lines from two authors, and perform the following actions:
+  templateHelpers: {
+    formatStory: (story: StoryPart[]) => {
+      return story.map(part => {
+        const speaker = part.personaName ? `${part.personaName}:` : part.speaker === 'user' ? 'USER:' : 'APOSTRFY:';
+        if (part.isPaste) {
+            // Embed pasted content in a special markdown block
+            return `\n\`\`\`paste\n${part.line}\n\`\`\`\n`;
+        }
+        return `${speaker} ${part.line}`;
+      }).join('\n');
+    }
+  },
+  prompt: `You are a proofreader and text formatter. Your task is to take the following raw story transcript, which consists of alternating lines from authors, and perform the following actions:
 
-1.  **Correct Spelling and Grammar**: Fix any spelling mistakes and grammatical errors in the text.
+1.  **Correct Spelling and Grammar**: Fix any spelling mistakes and grammatical errors in the text, except for content inside the special \`\`\`paste blocks. Content inside these blocks must be preserved exactly as is.
 2.  **Combine into Paragraphs**: Merge the alternating lines into a single, cohesive narrative. Form logical paragraphs where appropriate. Do not add any new content, ideas, or descriptions. Your role is only to format and correct.
-3.  **Preserve Original Intent**: The original voice and style of the authors should be preserved. Do not rephrase sentences unless it's for grammatical correctness.
-4.  **Output**: The final output should be a single block of text with standard paragraph breaks.
+3.  **Handle Pasted Content**: If you see a block that starts with \`\`\`paste, you MUST include that entire block, with its contents, verbatim in your output. It represents a "paste" action by the user and should disrupt the flow of the narrative. Do not format or alter it. Ensure it is separated from the surrounding text by newlines.
+4.  **Preserve Original Intent**: The original voice and style of the authors should be preserved. Do not rephrase sentences unless it's for grammatical correctness.
+5.  **Output**: The final output should be a single block of text with standard paragraph breaks, including any pasted content blocks.
 
 Do not interpret the story, add scene headings, or change the meaning. Simply combine, correct, and format.
 
 Raw Story Transcript:
-{{{fullStory}}}`,
+{{{formatStory fullStory}}}`,
 });
 
 

@@ -251,12 +251,12 @@ export default function ApostrfyClient() {
   }, [story, gameMode, gameState.status, sessionPersonas, settings.trope, isAiTyping, isAdVisible]);
 
 
-  const handleUserSubmit = async (userInput: string, turnTime: number) => {
+  const handleUserSubmit = async (userInput: string, turnTime: number, isPaste: boolean) => {
     if (!settings.trope || !sessionPersonas || gameMode === 'simulation' || isAdVisible) return;
 
     logEvent('user_turn_taken', { turn_time_seconds: Math.round(turnTime), word_count: userInput.split(' ').length });
     
-    const newStory = [...story, { speaker: "user", line: userInput }] as StoryPart[];
+    const newStory = [...story, { speaker: "user", line: userInput, isPaste }] as StoryPart[];
     setStory(newStory);
     setNextSpeaker('ai');
     setIsAiTyping(true);
@@ -329,7 +329,7 @@ export default function ApostrfyClient() {
                 ? Promise.resolve({ styleMatches: [sessionPersonas[0].name, sessionPersonas[1].name] })
                 : generateStyleMatch({ userContent: analysisContent, personas: JSON.stringify(inspirationalPersonas) }),
             generateStoryKeywords({ userContent: analysisContent }),
-            generateFinalScript({ fullStory })
+            generateFinalScript({ fullStory: story })
         ]);
 
         const getResult = <T, >(result: PromiseSettledResult<T>, defaultValue: T, name: string): T => {
@@ -453,7 +453,8 @@ export default function ApostrfyClient() {
         const sanitizedStory = analysis.story.map(part => ({
           speaker: part.speaker,
           line: part.line,
-          personaName: part.personaName || null, 
+          personaName: part.personaName || null,
+          isPaste: part.isPaste || false,
         }));
 
         const sanitizedAnalysis = {
@@ -521,7 +522,7 @@ export default function ApostrfyClient() {
   );
   
   return (
-    <div className="flex flex-col h-full bg-background text-foreground">
+    <div className="flex flex-col h-screen bg-background text-foreground">
       <main className="flex-grow flex flex-col relative">
         <AnimatePresence mode="wait">
             {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}

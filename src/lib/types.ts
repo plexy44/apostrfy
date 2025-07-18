@@ -13,6 +13,7 @@ export type StoryPart = {
   speaker: Speaker;
   line: string;
   personaName?: string;
+  isPaste?: boolean;
 };
 
 export type GameState = 
