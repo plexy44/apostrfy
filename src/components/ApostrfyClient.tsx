@@ -73,6 +73,7 @@ export default function ApostrfyClient() {
   const [sessionPersonas, setSessionPersonas] = useState<[Persona, Persona] | null>(null);
   const [isAdVisible, setIsAdVisible] = useState(false);
   const [adTrigger, setAdTrigger] = useState<AdTrigger>(null);
+  const [isFreeflowUnlocked, setIsFreeflowUnlocked] = useState(false);
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const analyticsFired = useRef(new Set<string>());
@@ -290,13 +291,15 @@ export default function ApostrfyClient() {
     
     try {
         const fullStory = story.map(part => `${part.personaName || part.speaker.toUpperCase()}: ${part.line}`).join('\n');
-        let fullStoryRaw = story.map(p => p.line).join('\n');
-        const analysisContent = story.filter(part => part.speaker === "user").map(part => part.line).join("\n");
+        const userContent = story
+            .filter(part => part.speaker === 'user' && !part.isPaste)
+            .map(part => part.line)
+            .join('\n');
 
-        if (gameMode === 'interactive' && analysisContent.trim() === "") {
-            fullStoryRaw = "The story was left unwritten, a silent testament to a moment of quiet contemplation."
+        if (gameMode === 'interactive' && userContent.trim() === "") {
+            const emptyStoryText = "The story was left unwritten, a silent testament to a moment of quiet contemplation."
             logEvent('complete_game', { story_length: story.length, final_mood: 'N/A' });
-             const quoteResult = await generateQuoteBanner({ fullStory: fullStoryRaw });
+             const quoteResult = await generateQuoteBanner({ fullStory: emptyStoryText });
             const finalAnalysis: GameAnalysis = {
                 storyId: "not_saved",
                 title: "An Unwritten Tale",
@@ -306,7 +309,6 @@ export default function ApostrfyClient() {
                 style: { primaryMatch: "The Silent Observer", secondaryMatch: "The Patient Chronicler" },
                 famousQuote: null,
                 keywords: ['Reflection', 'Silence', 'Stillness', 'Pause', 'Contemplation', 'End'],
-                finalScript: "The page is blank. The story was not written.",
                 story: story,
             };
             setAnalysis(finalAnalysis);
@@ -322,13 +324,13 @@ export default function ApostrfyClient() {
             keywordsResult,
             scriptResult
         ] = await Promise.allSettled([
-            generateStoryTitle({ fullStory: fullStoryRaw }),
-            generateQuoteBanner({ fullStory: fullStoryRaw }),
-            generateMoodAnalysis({ userContent: analysisContent }),
+            generateStoryTitle({ fullStory: fullStory }),
+            generateQuoteBanner({ fullStory: fullStory }),
+            generateMoodAnalysis({ userContent }),
             (gameMode === 'simulation' && sessionPersonas)
                 ? Promise.resolve({ styleMatches: [sessionPersonas[0].name, sessionPersonas[1].name] })
-                : generateStyleMatch({ userContent: analysisContent, personas: JSON.stringify(inspirationalPersonas) }),
-            generateStoryKeywords({ userContent: analysisContent }),
+                : generateStyleMatch({ userContent: userContent, personas: JSON.stringify(inspirationalPersonas) }),
+            generateStoryKeywords({ userContent }),
             generateFinalScript({ fullStory: story })
         ]);
 
@@ -346,7 +348,6 @@ export default function ApostrfyClient() {
         const mood = getResult(moodResult, { primaryEmotion: "Melancholy" as const, confidenceScore: 0.5 }, "Mood");
         const style = getResult(styleResult, { styleMatches: ["The Storyteller", "The Dreamer"] }, "Style");
         const keywords = getResult(keywordsResult, { keywords: ['Mystery', 'Suspense', 'Hope', 'Wonder', 'Resolve'] }, "Keywords").keywords;
-        const finalScript = getResult(scriptResult, { finalScript: fullStoryRaw }, "Script").finalScript;
 
         const winner = style.styleMatches[0];
         const famousQuote = quotes[winner] ? { author: winner, quote: quotes[winner] } : null;
@@ -368,7 +369,6 @@ export default function ApostrfyClient() {
             },
             famousQuote,
             keywords,
-            finalScript,
             story: story,
         };
 
@@ -388,7 +388,6 @@ export default function ApostrfyClient() {
             style: { primaryMatch: "The Storyteller", secondaryMatch: "The Dreamer" },
             famousQuote: null,
             keywords: ['Mystery', 'Suspense', 'Hope', 'Wonder', 'Resolve'],
-            finalScript: story.map(part => part.line).join('\n\n'),
             story: story,
         });
         setGameState({ status: "gameover" });
@@ -504,16 +503,25 @@ export default function ApostrfyClient() {
     setAdTrigger(null);
   };
 
-  const handleRequestAd = (source: 'reward') => {
-    let adUnitName: 'unlock_secret_style_reward';
-    switch (source) {
-        case 'reward':
-            adUnitName = 'unlock_secret_style_reward';
-            break;
+  const handleUnlockFreeflow = () => {
+    if (isFreeflowUnlocked) {
+      toast({ title: "Already Unlocked!", description: "You can now select the Freeflow style." });
+      return;
     }
-    logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'rewarded', ad_unit_name: adUnitName });
-    setAdTrigger(source);
+    
+    logEvent('rewarded_ad_flow', { status: 'offered' });
+    setAdTrigger('reward');
     setIsAdVisible(true);
+    
+    // Simulate ad reward after a delay
+    setTimeout(() => {
+        toast({ 
+            title: "Style Unlocked!", 
+            description: "You can now select the 'Freeflow' writing style." 
+        });
+        setIsFreeflowUnlocked(true);
+        logEvent('rewarded_ad_flow', { status: 'completed' });
+    }, 500); // Small delay to allow ad to show
   }
 
   const showFooter = !(
@@ -533,7 +541,8 @@ export default function ApostrfyClient() {
                 onStartGame={handleStartGame} 
                 onStartSimulation={handleStartSimulation} 
                 comingFromOnboarding={comingFromOnboarding}
-                onRequestAd={() => handleRequestAd('reward')}
+                isFreeflowUnlocked={isFreeflowUnlocked}
+                onUnlockFreeflow={handleUnlockFreeflow}
               />
             )}
             {(gameState.status === "generating_initial_story" && settings.trope) && (

@@ -17,7 +17,6 @@ import ApostrfyLogo from "../icons/ApostrfyLogo";
 import Orb from "./Orb";
 import { logEvent } from "@/lib/analytics";
 import { Gift } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 const TROPES_DATA: { name: Trope; description: string }[] = [
   { name: "Noir Detective", description: "Rain-slicked streets and whispered secrets." },
@@ -30,18 +29,17 @@ interface MainMenuProps {
   onStartGame: (trope: Trope, duration: number, analyticsName: 'lightning' | 'minute' | 'twice_a_minute') => void;
   onStartSimulation: (trope: Trope) => void;
   comingFromOnboarding: boolean;
-  onRequestAd: () => void;
+  isFreeflowUnlocked: boolean;
+  onUnlockFreeflow: () => void;
 }
 
-export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnboarding, onRequestAd }: MainMenuProps) {
+export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnboarding, isFreeflowUnlocked, onUnlockFreeflow }: MainMenuProps) {
   const [selectedTrope, setSelectedTrope] = useState<Trope>("Cosmic Wanderer");
   const [selectedDuration, setSelectedDuration] = useState<number>(60);
   const [selectedAnalyticsName, setSelectedAnalyticsName] = useState<string>('minute');
   const [orbMessage, setOrbMessage] = useState("");
   const [displayedMessage, setDisplayedMessage] = useState("");
   const [startTyping, setStartTyping] = useState(false);
-  const [isFreeflowUnlocked, setIsFreeflowUnlocked] = useState(false);
-  const { toast } = useToast();
   
   const initialTropes = TROPES_DATA.filter(t => t.name !== 'Freeflow');
   const freeflowTrope = TROPES_DATA.find(t => t.name === 'Freeflow')!;
@@ -102,25 +100,12 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
     setSelectedTrope(trope);
   }
   
-  const handleRewardedAd = () => {
-    if (isFreeflowUnlocked) {
-      toast({ title: "Already Unlocked!", description: "You can now select the Freeflow style." });
-      return;
+  const handleUnlockClick = () => {
+    onUnlockFreeflow();
+    // Also switch to the trope if it's just been unlocked
+    if (!isFreeflowUnlocked) {
+        setTimeout(() => setSelectedTrope("Freeflow"), 600);
     }
-    
-    logEvent('rewarded_ad_flow', { status: 'offered' });
-    onRequestAd(); // This will show the interstitial
-    
-    // Simulate ad reward after a delay
-    setTimeout(() => {
-        toast({ 
-            title: "Style Unlocked!", 
-            description: "You can now select the 'Freeflow' writing style." 
-        });
-        setIsFreeflowUnlocked(true);
-        setSelectedTrope("Freeflow");
-        logEvent('rewarded_ad_flow', { status: 'completed' });
-    }, 500); // Small delay to allow ad to show
   }
 
   const isTyping = startTyping && displayedMessage.length < orbMessage.length;
@@ -245,12 +230,12 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
           Simulate
         </Button>
         <Button
-            onClick={handleRewardedAd}
+            onClick={handleUnlockClick}
             variant="link"
             className="mt-2 text-accent md:text-base"
         >
             <Gift className="mr-2 h-4 w-4" />
-            Unlock a Secret Style
+            {isFreeflowUnlocked ? 'Freeflow Style Unlocked' : 'Unlock a Secret Style'}
         </Button>
       </div>
     </motion.div>
