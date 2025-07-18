@@ -6,7 +6,7 @@
  */
 "use client";
 
-import { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
+import { useState, useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Hourglass, Timer as TimerIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -20,7 +20,7 @@ interface TimerBarProps {
 }
 
 interface TimerBarRef {
-  heal: (amount: number) => void;
+  heal: (amountInSeconds: number) => void;
 }
 
 const TimerBar = forwardRef<TimerBarRef, TimerBarProps>(({ 
@@ -30,14 +30,16 @@ const TimerBar = forwardRef<TimerBarRef, TimerBarProps>(({
   isFlowRestoreActive,
   onEndGame, 
 }, ref) => {
-  const [timeLeft, setTimeLeft] = useState(durationInSeconds);
+  const [timeLeft, setTimeLeft] = useState(durationInSeconds * 1000);
   const [showActivationGlow, setShowActivationGlow] = useState(false);
   const [isHealing, setIsHealing] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout>();
+  const lastTickRef = useRef<number>(Date.now());
 
   useImperativeHandle(ref, () => ({
-    heal: (amount) => {
-      if (amount > 0) {
-        setTimeLeft(prev => Math.min(durationInSeconds, prev + amount));
+    heal: (amountInSeconds) => {
+      if (amountInSeconds > 0) {
+        setTimeLeft(prev => Math.min(durationInSeconds * 1000, prev + (amountInSeconds * 1000)));
         setIsHealing(true);
         setTimeout(() => setIsHealing(false), 500); // Reset heal flash
       }
@@ -46,19 +48,34 @@ const TimerBar = forwardRef<TimerBarRef, TimerBarProps>(({
 
   // Effect to handle the main timer countdown
   useEffect(() => {
-    if (isPaused) return;
-
-    if (timeLeft <= 0) {
-      onEndGame();
-      return;
+    if (isPaused) {
+        if(intervalRef.current) clearInterval(intervalRef.current);
+        return;
     }
 
-    const timer = setInterval(() => {
-      setTimeLeft((prevTime) => Math.max(0, prevTime - 1));
-    }, 1000);
+    if (timeLeft <= 0) {
+        if(intervalRef.current) clearInterval(intervalRef.current);
+        onEndGame();
+        return;
+    }
+    
+    lastTickRef.current = Date.now();
+    intervalRef.current = setInterval(() => {
+        const now = Date.now();
+        const delta = now - lastTickRef.current;
+        lastTickRef.current = now;
+        setTimeLeft(prevTime => Math.max(0, prevTime - delta));
+    }, 50); // Update every 50ms for smooth millisecond display
 
-    return () => clearInterval(timer);
-  }, [timeLeft, isPaused, onEndGame]);
+    return () => clearInterval(intervalRef.current);
+  }, [isPaused, onEndGame]); // Rerun only when pause state changes
+
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      if(intervalRef.current) clearInterval(intervalRef.current);
+      onEndGame();
+    }
+  }, [timeLeft, onEndGame]);
 
 
   // Effect to trigger the one-time activation glow
@@ -71,14 +88,16 @@ const TimerBar = forwardRef<TimerBarRef, TimerBarProps>(({
   }, [isFlowRestoreActive, showActivationGlow]);
 
 
-  const formatTime = (totalSeconds: number) => {
+  const formatTime = (totalMilliseconds: number) => {
+    const totalSeconds = Math.max(0, totalMilliseconds / 1000);
     const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    const seconds = Math.floor(totalSeconds % 60);
+    const milliseconds = Math.floor((totalSeconds * 100) % 100);
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(2, '0')}`;
   };
 
-  const percentage = (timeLeft / durationInSeconds) * 100;
-  const isUrgent = timeLeft <= 20;
+  const percentage = (timeLeft / (durationInSeconds * 1000)) * 100;
+  const isUrgent = timeLeft <= 20000;
 
   return (
     <div className={cn(
@@ -92,7 +111,7 @@ const TimerBar = forwardRef<TimerBarRef, TimerBarProps>(({
         </div>
         <div className="flex items-center gap-1.5">
           <TimerIcon className="h-3 w-3 md:h-4 md:w-4" />
-          <span>{formatTime(durationInSeconds)}</span>
+          <span>{formatTime(durationInSeconds * 1000)}</span>
         </div>
       </div>
       <div className="w-full h-1.5 md:h-2 bg-secondary rounded-full overflow-hidden">
@@ -106,7 +125,7 @@ const TimerBar = forwardRef<TimerBarRef, TimerBarProps>(({
                 ? 'hsl(var(--destructive))'
                 : 'hsl(var(--accent))',
           }}
-          transition={{ duration: isHealing ? 0.1 : 1, ease: 'linear' }}
+          transition={{ duration: isHealing ? 0.1 : 0.05, ease: 'linear' }}
         />
       </div>
     </div>
