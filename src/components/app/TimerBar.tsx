@@ -6,8 +6,8 @@
  */
 "use client";
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { Hourglass, Timer as TimerIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -34,6 +34,14 @@ export default function TimerBar({
   const [showActivationGlow, setShowActivationGlow] = useState(false);
   const [isHealing, setIsHealing] = useState(false);
 
+  const healTimer = useCallback((amount: number) => {
+    if (amount > 0) {
+      setTimeLeft(prev => Math.min(durationInSeconds, prev + amount));
+      setIsHealing(true);
+      setTimeout(() => setIsHealing(false), 500); // Reset heal flash
+    }
+  }, [durationInSeconds]);
+
   // Effect to handle the main timer countdown
   useEffect(() => {
     if (isPaused) return;
@@ -58,29 +66,22 @@ export default function TimerBar({
 
   // Effect to handle healing the timer
   useEffect(() => {
-    const healTimer = (amount: number) => {
-      setTimeLeft(prev => Math.min(durationInSeconds, prev + amount));
-      setIsHealing(true);
-      setTimeout(() => setIsHealing(false), 500); // Reset heal flash
-    };
-
-    onHeal(0); // Clear any initial heal amount
-    // A bit of a hack: we re-assign onHeal to a stable function
-    // to avoid this effect re-running on every parent render.
-    // The parent passes a new function identity each time.
+    onHeal(0); // This is a bit of a hack to get the stable function from the parent
+    // The parent passes a new function identity each time for onHeal.
+    // We re-assign the prop to a stable function we can use in our dependency array.
+    // This stops the effect from running on every render.
     // @ts-ignore
     onHeal = healTimer;
-
-  }, [durationInSeconds, onHeal]);
+  }, [onHeal, healTimer]);
 
   // Effect to trigger the one-time activation glow
   useEffect(() => {
-    if (isFlowRestoreActive) {
+    if (isFlowRestoreActive && !showActivationGlow) {
       setShowActivationGlow(true);
       const timer = setTimeout(() => setShowActivationGlow(false), 2000);
       return () => clearTimeout(timer);
     }
-  }, [isFlowRestoreActive]);
+  }, [isFlowRestoreActive, showActivationGlow]);
 
 
   const formatTime = (totalSeconds: number) => {
@@ -108,16 +109,17 @@ export default function TimerBar({
         </div>
       </div>
       <div className="w-full h-1.5 md:h-2 bg-secondary rounded-full overflow-hidden">
-        <div
-          className="h-full rounded-full transition-all duration-1000 ease-linear"
-          style={{
+        <motion.div
+          className="h-full rounded-full"
+          animate={{
             width: `${percentage}%`,
-            background: isHealing
+            backgroundColor: isHealing
               ? 'hsl(145, 63%, 49%)' // vibrant green
               : isUrgent
                 ? 'hsl(var(--destructive))'
                 : 'hsl(var(--accent))',
           }}
+          transition={{ duration: isHealing ? 0.1 : 1, ease: 'linear' }}
         />
       </div>
     </div>
