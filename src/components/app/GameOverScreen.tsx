@@ -31,19 +31,10 @@ interface GameOverScreenProps {
 }
 
 
-const FinalScriptRenderer = ({ story }: { story: StoryPart[] }) => {
+const FinalScriptRenderer = ({ script }: { script: string }) => {
   return (
     <div className="font-code text-sm md:text-base whitespace-pre-wrap p-4 text-foreground text-left leading-relaxed" style={{ overflowWrap: 'break-word' }}>
-      {story.map((part, index) => {
-        if (part.isPaste) {
-          return (
-            <pre key={index} className="bg-black text-white p-3 my-2 rounded-md font-mono text-xs whitespace-pre-wrap overflow-x-auto">
-              {part.line}
-            </pre>
-          );
-        }
-        return <span key={index}>{part.line + ' '}</span>;
-      })}
+      {script}
     </div>
   );
 };
@@ -150,7 +141,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
               </TabsList>
               <TabsContent value="script" className="flex-grow mt-4">
                 <ScrollArea className="h-64 md:h-96 w-full rounded-md border bg-secondary/20">
-                    <FinalScriptRenderer story={analysis.story} />
+                    <FinalScriptRenderer script={analysis.finalScript} />
                 </ScrollArea>
               </TabsContent>
               <TabsContent value="transcript" className="flex-grow mt-4">

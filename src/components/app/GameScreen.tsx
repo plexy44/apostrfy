@@ -28,7 +28,6 @@ interface GameScreenProps {
   onQuitRequest: () => void;
   gameMode: 'interactive' | 'simulation';
   nextSpeakerInSim: Speaker;
-  isAdPaused: boolean;
   inputRef: React.RefObject<HTMLInputElement>;
   turnTimer: number;
 }
@@ -44,7 +43,6 @@ export default function GameScreen({
   onQuitRequest, 
   gameMode, 
   nextSpeakerInSim, 
-  isAdPaused, 
   inputRef,
   turnTimer,
 }: GameScreenProps) {
@@ -59,6 +57,7 @@ export default function GameScreen({
   const [isFlowRestoreActive, setIsFlowRestoreActive] = useState(false);
   const healTimerRef = useRef<NodeJS.Timeout>();
   const isDragonChasingMode = duration === 120;
+  const isAdPaused = false; // This can be removed or set to false as it's no longer used
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -231,23 +230,24 @@ export default function GameScreen({
           <div className="p-4 space-y-6 max-w-2xl mx-auto">
               {story.map((part, index) => {
                   const isUserSpeaker = part.speaker === 'user';
-                  let alignment, bubbleStyles;
-
-                  alignment = isUserSpeaker ? 'items-end' : 'items-start';
-                  bubbleStyles = isUserSpeaker
+                  
+                  const alignment = isUserSpeaker ? 'items-end' : 'items-start';
+                  const bubbleStyles = isUserSpeaker
                     ? 'bg-primary text-primary-foreground rounded-br-none'
                     : 'bg-secondary rounded-bl-none';
 
+                  const speakerLabel = part.personaName
+                        ? part.personaName
+                        : isUserSpeaker ? 'You' : 'Apostrfy';
+
                   return (
                     <div key={index} className={`flex flex-col animate-fade-in-up ${alignment}`}>
-                      {part.personaName && (
-                        <p className={`text-xs md:text-sm text-muted-foreground mb-1 px-2 ${alignment === 'items-end' ? 'self-end' : 'self-start'}`}>
-                          {part.personaName}
+                        <p className={`text-xs text-muted-foreground mb-1 px-2 ${alignment === 'items-end' ? 'self-end' : 'self-start'}`}>
+                            {speakerLabel}
                         </p>
-                      )}
-                      <div className={`p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
-                          <p className="text-sm md:text-base">{part.line}</p>
-                      </div>
+                        <div className={`p-3 rounded-lg max-w-[85%] shadow-md ${bubbleStyles}`}>
+                            <p className="text-sm md:text-base">{part.line}</p>
+                        </div>
                     </div>
                   );
               })}

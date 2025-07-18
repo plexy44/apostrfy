@@ -304,7 +304,7 @@ export default function ApostrfyClient() {
 
         if (gameMode === 'interactive' && userContent.trim() === "") {
             const emptyStoryText = "The story was left unwritten, a silent testament to a moment of quiet contemplation."
-            logEvent('complete_game', { story_length: story.length, final_mood: 'N/A' });
+            logEvent('complete_game', { story_length: story.length, final_mood: 'Serenity' });
              const quoteResult = await generateQuoteBanner({ fullStory: emptyStoryText });
             const finalAnalysis: GameAnalysis = {
                 storyId: "not_saved",
@@ -414,12 +414,6 @@ export default function ApostrfyClient() {
     
     // Start analysis in the background while ad is showing
     proceedToAnalysis();
-  };
-
-  const handlePauseForAd = () => {
-    logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'mid_game_interstitial' });
-    setAdTrigger('mid_game');
-    setIsAdVisible(true);
   };
 
   const handlePlayAgain = () => {
@@ -593,7 +587,6 @@ export default function ApostrfyClient() {
                 onQuitRequest={handleQuitRequest}
                 gameMode={gameMode}
                 nextSpeakerInSim={nextSpeaker}
-                isAdPaused={isAdVisible && adTrigger === 'mid_game'}
                 inputRef={inputRef}
                 turnTimer={turnTimerRef.current}
               />
