@@ -46,8 +46,31 @@ const generateStoryKeywordsFlow = ai.defineFlow(
     inputSchema: GenerateStoryKeywordsInputSchema,
     outputSchema: GenerateStoryKeywordsOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  async (input) => {
+    const maxRetries = 3;
+    let attempt = 0;
+    let lastError: any = null;
+
+    while (attempt < maxRetries) {
+      try {
+        const { output } = await prompt(input);
+        return output!;
+      } catch (e: any) {
+        lastError = e;
+        const isServiceUnavailable = e.message?.includes('503') || e.status === 503;
+
+        if (isServiceUnavailable) {
+          attempt++;
+          if (attempt < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt))); // Exponential backoff
+          }
+        } else {
+          // It's not a retriable error, so throw immediately
+          throw e;
+        }
+      }
+    }
+    // If we've exhausted all retries, throw the last error
+    throw lastError;
   }
 );
