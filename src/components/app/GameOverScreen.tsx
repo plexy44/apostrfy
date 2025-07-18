@@ -33,7 +33,7 @@ interface GameOverScreenProps {
 
 const FinalScriptRenderer = ({ story }: { story: StoryPart[] }) => {
   return (
-    <div className="font-code text-sm md:text-base whitespace-pre-wrap p-4 text-foreground text-left leading-relaxed">
+    <div className="font-code text-sm md:text-base whitespace-pre-wrap p-4 text-foreground text-left leading-relaxed" style={{ overflowWrap: 'break-word' }}>
       {story.map((part, index) => {
         if (part.isPaste) {
           return (
