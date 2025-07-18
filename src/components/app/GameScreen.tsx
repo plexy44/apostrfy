@@ -8,7 +8,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import type { StoryPart, Trope } from "@/lib/types";
+import type { StoryPart, Trope, Speaker } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader, Timer, Hourglass, X } from "lucide-react";
@@ -23,6 +23,7 @@ interface GameScreenProps {
   onEndGame: () => void;
   onQuitRequest: () => void;
   gameMode: 'interactive' | 'simulation';
+  nextSpeakerInSim: Speaker;
   onPauseForAd: () => void;
   isAdPaused: boolean;
   inputRef: React.RefObject<HTMLInputElement>;
@@ -91,7 +92,7 @@ const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused }: { du
   );
 };
 
-export default function GameScreen({ trope, story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest, gameMode, onPauseForAd, isAdPaused, inputRef }: GameScreenProps) {
+export default function GameScreen({ trope, story, duration, isAiTyping, onUserSubmit, onEndGame, onQuitRequest, gameMode, nextSpeakerInSim, onPauseForAd, isAdPaused, inputRef }: GameScreenProps) {
   const [userInput, setUserInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const turnTimerRef = useRef<number>(Date.now());
@@ -117,6 +118,31 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
   };
 
   const isTimerPaused = isAdPaused || (isAiTyping && gameMode === 'interactive');
+
+  const renderTypingIndicator = () => {
+    if (!isAiTyping) return null;
+
+    let alignment, bubbleStyles;
+    
+    // In simulation mode, the side of the indicator depends on the next speaker.
+    // In interactive mode, it's always the AI (left side).
+    const isNextSpeakerUser = gameMode === 'simulation' && nextSpeakerInSim === 'user';
+    
+    alignment = isNextSpeakerUser ? 'items-end' : 'items-start';
+    bubbleStyles = isNextSpeakerUser
+      ? 'bg-primary text-primary-foreground rounded-br-none'
+      : 'bg-secondary rounded-bl-none';
+
+    return (
+      <div className={`flex ${alignment}`}>
+        <div className={`p-3 rounded-lg max-w-[85%] ${bubbleStyles} flex items-center space-x-2 shadow-md`}>
+          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.3s]"></div>
+          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.15s]"></div>
+          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <motion.div
@@ -175,15 +201,7 @@ export default function GameScreen({ trope, story, duration, isAiTyping, onUserS
                     </div>
                   );
               })}
-              {isAiTyping && (
-                <div className="flex items-start">
-                   <div className="p-3 rounded-lg max-w-[85%] bg-secondary rounded-bl-none flex items-center space-x-2 shadow-md">
-                     <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.3s]"></div>
-                     <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse [animation-delay:-0.15s]"></div>
-                     <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
-                   </div>
-                </div>
-              )}
+              {renderTypingIndicator()}
               <div ref={messagesEndRef} />
           </div>
         </main>

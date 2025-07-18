@@ -9,7 +9,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence } from "framer-motion";
-import type { GameState, StoryPart, Trope, Persona, TropePersonaKey, InspirationalPersonas, GameAnalysis } from "@/lib/types";
+import type { GameState, StoryPart, Trope, Persona, TropePersonaKey, InspirationalPersonas, GameAnalysis, Speaker } from "@/lib/types";
 import { generateStoryContent, GenerateStoryContentInput } from "@/ai/flows/generate-story-content";
 import { generateSimulationContent, GenerateSimulationContentInput } from "@/ai/flows/generate-simulation-content";
 import { generateQuoteBanner } from "@/ai/flows/generate-quote-banner";
@@ -67,6 +67,7 @@ export default function ApostrfyClient() {
   const [story, setStory] = useState<StoryPart[]>([]);
   const [analysis, setAnalysis] = useState<GameAnalysis | null>(null);
   const [isAiTyping, setIsAiTyping] = useState(false);
+  const [nextSpeaker, setNextSpeaker] = useState<Speaker>('ai');
   const [comingFromOnboarding, setComingFromOnboarding] = useState(false);
   const [isQuitDialogOpen, setIsQuitDialogOpen] = useState(false);
   const [sessionPersonas, setSessionPersonas] = useState<[Persona, Persona] | null>(null);
@@ -141,6 +142,7 @@ export default function ApostrfyClient() {
     setSettings({ trope, duration });
     setStory([]);
     setComingFromOnboarding(false);
+    setNextSpeaker('ai');
 
     const personaKey = getPersonaKey(trope);
     const personaList = inspirationalPersonas[personaKey];
@@ -178,6 +180,7 @@ export default function ApostrfyClient() {
     setStory([]);
     setComingFromOnboarding(false);
     setGameMode('simulation');
+    setNextSpeaker('user');
 
     const personaKey = getPersonaKey(trope);
     const personaList = inspirationalPersonas[personaKey];
@@ -220,6 +223,7 @@ export default function ApostrfyClient() {
       const otherPersona = nextSpeakerIsPersona2 ? sessionPersonas[0] : sessionPersonas[1];
       const nextSpeakerLabel = nextSpeakerIsPersona2 ? 'ai' : 'user';
 
+      setNextSpeaker(nextSpeakerLabel);
       setIsAiTyping(true);
       try {
         const aiStartTime = Date.now();
@@ -254,6 +258,7 @@ export default function ApostrfyClient() {
     
     const newStory = [...story, { speaker: "user", line: userInput }] as StoryPart[];
     setStory(newStory);
+    setNextSpeaker('ai');
     setIsAiTyping(true);
 
     try {
@@ -548,6 +553,7 @@ export default function ApostrfyClient() {
                 onEndGame={handleEndGame}
                 onQuitRequest={handleQuitRequest}
                 gameMode={gameMode}
+                nextSpeakerInSim={nextSpeaker}
                 onPauseForAd={handlePauseForAd}
                 isAdPaused={isAdVisible && adTrigger === 'mid_game'}
                 inputRef={inputRef}
