@@ -59,11 +59,13 @@ const generateFinalScriptFlow = ai.defineFlow(
     outputSchema: GenerateFinalScriptOutputSchema,
   },
   async ({ fullStory }) => {
-    // Convert the story array to a simple string for the AI
-    const storyText = fullStory.map(part => {
-      const speaker = part.personaName ? `${part.personaName}:` : part.speaker === 'user' ? 'USER:' : 'APOSTRFY:';
-      return `${speaker} ${part.line}`;
-    }).join('\n');
+    // Convert the story array to a simple string for the AI, ignoring pasted content for AI processing.
+    const storyText = fullStory
+        .filter(part => !part.isPaste)
+        .map(part => {
+            const speaker = part.personaName ? `${part.personaName}:` : part.speaker === 'user' ? 'USER:' : 'APOSTRFY:';
+            return `${speaker} ${part.line}`;
+        }).join('\n');
 
     const maxRetries = 3;
     let attempt = 0;

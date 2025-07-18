@@ -30,6 +30,26 @@ interface GameOverScreenProps {
   onEmailSubmit: (name: string, email: string) => Promise<boolean>;
 }
 
+
+const FinalScriptRenderer = ({ story }: { story: StoryPart[] }) => {
+  return (
+    <p className="font-code text-sm md:text-base whitespace-pre-wrap p-4 text-foreground text-left leading-relaxed">
+      {story.map((part, index) => {
+        if (part.isPaste) {
+          return (
+            <pre key={index} className="bg-black text-white p-3 my-2 rounded-md font-mono text-xs overflow-x-auto">
+              {part.line}
+            </pre>
+          );
+        }
+        // Add a space after each non-pasted line to form paragraphs
+        return <span key={index}>{part.line + ' '}</span>;
+      })}
+    </p>
+  );
+};
+
+
 export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }: GameOverScreenProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -131,9 +151,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
               </TabsList>
               <TabsContent value="script" className="flex-grow mt-4">
                 <ScrollArea className="h-64 md:h-96 w-full rounded-md border bg-secondary/20">
-                    <p className="font-code text-sm md:text-base whitespace-pre-wrap p-4 text-foreground text-left leading-relaxed">
-                        {analysis.finalScript}
-                    </p>
+                    <FinalScriptRenderer story={analysis.story} />
                 </ScrollArea>
               </TabsContent>
               <TabsContent value="transcript" className="flex-grow mt-4">
@@ -145,20 +163,6 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
                       const speakerLabel = part.personaName
                         ? part.personaName
                         : isUserSpeaker ? 'You' : 'Apostrfy';
-                      
-                      if (part.isPaste) {
-                        const alignment = isUserSpeaker ? 'items-end' : 'items-start';
-                         return (
-                            <div key={index} className={`flex flex-col animate-fade-in-up ${alignment}`}>
-                                <p className={`text-xs text-muted-foreground mb-1 px-2 ${alignment === 'items-end' ? 'self-end' : 'self-start'}`}>
-                                    {speakerLabel} (Pasted)
-                                </p>
-                                <pre className="bg-black text-white p-3 my-2 rounded-md font-mono text-xs overflow-x-auto max-w-[85%] self-end">
-                                    {part.line}
-                                </pre>
-                            </div>
-                         );
-                      }
                       
                       const alignment = isUserSpeaker ? 'items-end' : 'items-start';
                       const bubbleStyles = isUserSpeaker
