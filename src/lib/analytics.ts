@@ -31,7 +31,7 @@ interface EventParams {
     onboarding_completed: {};
     start_game: {
         game_mode: 'interactive' | 'simulation';
-        game_duration: 'lightning' | 'minute' | 'twice_a_minute';
+        game_duration: 'lightning' | 'minute' | 'dragon_chasing';
     };
     complete_game: {
         story_length: number;
@@ -72,6 +72,7 @@ interface EventParams {
     };
     rewarded_ad_flow: {
         status: 'offered' | 'completed' | 'declined';
+        unlock_target: 'dragon_chasing_mode' | 'final_styles';
     };
     quit_game_prompted: {
         story_length: number;

@@ -45,7 +45,7 @@ const TimerBar = ({ durationInSeconds, onEndGame, onPauseForAd, isPaused }: { du
       return;
     }
     
-    // Mid-game ad logic for "Twice a minute" (120s) mode
+    // Mid-game ad logic for "Dragon Chasing" (120s) mode
     if (durationInSeconds === 120 && timeLeft === 60) {
         onPauseForAd();
         return; // Pause the timer until the ad is closed

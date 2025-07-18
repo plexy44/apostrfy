@@ -11,38 +11,43 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { Trope } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DURATIONS, ORB_MESSAGES } from "@/lib/constants";
+import { DURATIONS, ORB_MESSAGES, TROPES_DATA } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import ApostrfyLogo from "../icons/ApostrfyLogo";
 import Orb from "./Orb";
 import { logEvent } from "@/lib/analytics";
 import { Gift } from "lucide-react";
 
-const TROPES_DATA: { name: Trope; description: string }[] = [
-  { name: "Noir Detective", description: "Rain-slicked streets and whispered secrets." },
-  { name: "Cosmic Wanderer", description: "Lost constellations and alien whispers." },
-  { name: "Gothic Romance", description: "Crumbling manors and timeless heartbreak." },
-  { name: "Freeflow", description: "Your voice, your story. I'll follow your lead." },
-];
 
 interface MainMenuProps {
-  onStartGame: (trope: Trope, duration: number, analyticsName: 'lightning' | 'minute' | 'twice_a_minute') => void;
+  onStartGame: (trope: Trope, duration: number, analyticsName: 'lightning' | 'minute' | 'dragon_chasing') => void;
   onStartSimulation: (trope: Trope) => void;
   comingFromOnboarding: boolean;
-  isFreeflowUnlocked: boolean;
-  onUnlockFreeflow: () => void;
+  isDragonChasingUnlocked: boolean;
+  areAllStylesUnlocked: boolean;
+  onUnlockSecret: () => void;
 }
 
-export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnboarding, isFreeflowUnlocked, onUnlockFreeflow }: MainMenuProps) {
+export default function MainMenu({ 
+    onStartGame, 
+    onStartSimulation, 
+    comingFromOnboarding, 
+    isDragonChasingUnlocked, 
+    areAllStylesUnlocked, 
+    onUnlockSecret 
+}: MainMenuProps) {
   const [selectedTrope, setSelectedTrope] = useState<Trope>("Cosmic Wanderer");
-  const [selectedDuration, setSelectedDuration] = useState<number>(60);
-  const [selectedAnalyticsName, setSelectedAnalyticsName] = useState<string>('minute');
+  const [selectedDuration, setSelectedDuration] = useState<number>(30);
+  const [selectedAnalyticsName, setSelectedAnalyticsName] = useState<string>('lightning');
   const [orbMessage, setOrbMessage] = useState("");
   const [displayedMessage, setDisplayedMessage] = useState("");
   const [startTyping, setStartTyping] = useState(false);
   
-  const initialTropes = TROPES_DATA.filter(t => t.name !== 'Freeflow');
-  const freeflowTrope = TROPES_DATA.find(t => t.name === 'Freeflow')!;
+  const initialTropes = TROPES_DATA.filter(t => t.isInitiallyVisible);
+  const unlockableTropes = TROPES_DATA.filter(t => !t.isInitiallyVisible);
+  const initialDurations = DURATIONS.filter(d => d.label !== 'Dragon Chasing');
+  const dragonChasingDuration = DURATIONS.find(d => d.label === 'Dragon Chasing')!;
+
 
   useEffect(() => {
     const message = ORB_MESSAGES[Math.floor(Math.random() * ORB_MESSAGES.length)];
@@ -101,11 +106,17 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
   }
   
   const handleUnlockClick = () => {
-    onUnlockFreeflow();
+    onUnlockSecret();
     // Also switch to the trope if it's just been unlocked
-    if (!isFreeflowUnlocked) {
-        setTimeout(() => setSelectedTrope("Freeflow"), 600);
+    if (!areAllStylesUnlocked && isDragonChasingUnlocked) {
+        setTimeout(() => setSelectedTrope("Gothic Romance"), 600);
     }
+  }
+
+  const getUnlockButtonText = () => {
+    if (!isDragonChasingUnlocked) return "Unlock a Secret";
+    if (!areAllStylesUnlocked) return "Unlock Final Styles";
+    return "Everything Unlocked";
   }
 
   const isTyping = startTyping && displayedMessage.length < orbMessage.length;
@@ -114,7 +125,7 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
     <button
       onClick={() => handleThemeSwitch(trope.name)}
       className={cn(
-        "p-3 md:p-4 rounded-lg border-2 text-left transition-all hover:border-accent w-full",
+        "p-3 md:p-4 rounded-lg border-2 text-left transition-all hover:border-accent w-full h-full",
         selectedTrope === trope.name ? "border-accent bg-accent/20 shadow-lg shadow-accent/20" : "border-border"
       )}
       {...props}
@@ -160,52 +171,54 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
         </CardHeader>
         <CardContent className="space-y-6 p-4 md:p-6 pt-0 md:pt-0">
            <div className="grid grid-cols-2 gap-2 md:gap-4">
+            {initialTropes.map(trope => (
+                <TropeButton key={trope.name} trope={trope} />
+            ))}
             <AnimatePresence>
-                <TropeButton key={initialTropes[0].name} trope={initialTropes[0]} />
-                <TropeButton key={initialTropes[1].name} trope={initialTropes[1]} />
-                
-                {isFreeflowUnlocked ? (
-                    <>
-                        <motion.div 
-                            key={initialTropes[2].name}
-                            layout
-                            transition={{ ease: "easeInOut", duration: 0.5 }}
-                        >
-                             <TropeButton trope={initialTropes[2]} />
-                        </motion.div>
-                        <motion.div
-                            key={freeflowTrope.name}
-                            layout
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ ease: "easeInOut", duration: 0.5, delay: 0.2 }}
-                        >
-                            <TropeButton trope={freeflowTrope} />
-                        </motion.div>
-                    </>
-                ) : (
-                    <motion.div key="centered-trope" className="col-span-2 flex justify-center" layout>
-                         <div className="w-1/2">
-                            <TropeButton trope={initialTropes[2]} />
-                         </div>
-                    </motion.div>
-                )}
+            {areAllStylesUnlocked && unlockableTropes.map((trope, index) => (
+                <motion.div
+                    key={trope.name}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                >
+                    <TropeButton trope={trope} />
+                </motion.div>
+            ))}
             </AnimatePresence>
           </div>
 
           <div className="space-y-2 pt-2">
             <h4 className="text-center font-headline text-foreground text-sm md:text-base">Select Mode</h4>
-            <div className="flex justify-center gap-2">
-              {DURATIONS.map((duration) => (
+             <div className="flex justify-center gap-2 flex-wrap">
+              {initialDurations.map((duration) => (
                 <Button
                   key={duration.value}
                   variant={selectedDuration === duration.value ? "default" : "secondary"}
                   onClick={() => handleDurationSelect(duration)}
-                  className="w-24 md:w-32 text-xs md:text-base md:h-11"
+                  className="w-28 md:w-32 text-xs md:text-base md:h-11"
                 >
                   {duration.label}
                 </Button>
               ))}
+               <AnimatePresence>
+               {isDragonChasingUnlocked && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <Button
+                            key={dragonChasingDuration.value}
+                            variant={selectedDuration === dragonChasingDuration.value ? "default" : "secondary"}
+                            onClick={() => handleDurationSelect(dragonChasingDuration)}
+                             className="w-28 md:w-32 text-xs md:text-base md:h-11 border border-accent/50"
+                        >
+                            {dragonChasingDuration.label}
+                        </Button>
+                    </motion.div>
+               )}
+               </AnimatePresence>
             </div>
           </div>
         </CardContent>
@@ -233,9 +246,10 @@ export default function MainMenu({ onStartGame, onStartSimulation, comingFromOnb
             onClick={handleUnlockClick}
             variant="link"
             className="mt-2 text-accent md:text-base"
+            disabled={isDragonChasingUnlocked && areAllStylesUnlocked}
         >
             <Gift className="mr-2 h-4 w-4" />
-            {isFreeflowUnlocked ? 'Freeflow Style Unlocked' : 'Unlock a Secret Style'}
+            {getUnlockButtonText()}
         </Button>
       </div>
     </motion.div>

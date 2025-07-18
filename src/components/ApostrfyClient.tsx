@@ -73,7 +73,8 @@ export default function ApostrfyClient() {
   const [sessionPersonas, setSessionPersonas] = useState<[Persona, Persona] | null>(null);
   const [isAdVisible, setIsAdVisible] = useState(false);
   const [adTrigger, setAdTrigger] = useState<AdTrigger>(null);
-  const [isFreeflowUnlocked, setIsFreeflowUnlocked] = useState(false);
+  const [isDragonChasingUnlocked, setIsDragonChasingUnlocked] = useState(false);
+  const [areAllStylesUnlocked, setAreAllStylesUnlocked] = useState(false);
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const analyticsFired = useRef(new Set<string>());
@@ -137,7 +138,7 @@ export default function ApostrfyClient() {
     setGameState({ status: "menu" });
   };
 
-  const handleStartGame = async (trope: Trope, duration: number, analyticsName: 'lightning' | 'minute' | 'twice_a_minute') => {
+  const handleStartGame = async (trope: Trope, duration: number, analyticsName: 'lightning' | 'minute' | 'dragon_chasing') => {
     logEvent('start_game', { game_mode: 'interactive', game_duration: analyticsName });
     setGameMode('interactive');
     setSettings({ trope, duration });
@@ -309,6 +310,7 @@ export default function ApostrfyClient() {
                 style: { primaryMatch: "The Silent Observer", secondaryMatch: "The Patient Chronicler" },
                 famousQuote: null,
                 keywords: ['Reflection', 'Silence', 'Stillness', 'Pause', 'Contemplation', 'End'],
+                finalScript: "The story was left unwritten, a silent testament to a moment of quiet contemplation.",
                 story: story,
             };
             setAnalysis(finalAnalysis);
@@ -348,6 +350,7 @@ export default function ApostrfyClient() {
         const mood = getResult(moodResult, { primaryEmotion: "Melancholy" as const, confidenceScore: 0.5 }, "Mood");
         const style = getResult(styleResult, { styleMatches: ["The Storyteller", "The Dreamer"] }, "Style");
         const keywords = getResult(keywordsResult, { keywords: ['Mystery', 'Suspense', 'Hope', 'Wonder', 'Resolve'] }, "Keywords").keywords;
+        const script = getResult(scriptResult, { finalScript: fullStory }, "Final Script").finalScript;
 
         const winner = style.styleMatches[0];
         const famousQuote = quotes[winner] ? { author: winner, quote: quotes[winner] } : null;
@@ -369,6 +372,7 @@ export default function ApostrfyClient() {
             },
             famousQuote,
             keywords,
+            finalScript: script,
             story: story,
         };
 
@@ -388,6 +392,7 @@ export default function ApostrfyClient() {
             style: { primaryMatch: "The Storyteller", secondaryMatch: "The Dreamer" },
             famousQuote: null,
             keywords: ['Mystery', 'Suspense', 'Hope', 'Wonder', 'Resolve'],
+            finalScript: story.map(p => p.line).join(' '),
             story: story,
         });
         setGameState({ status: "gameover" });
@@ -497,32 +502,50 @@ export default function ApostrfyClient() {
     } else if (adTrigger === 'end_game') {
       // The analysis is already running; the gameover state will be set when it's done.
     } else if (adTrigger === 'reward') {
-      // The reward logic is handled in MainMenu now.
+      // The reward logic is handled in handleUnlockSecret now.
     }
-    // 'mid_game' and 'reward' ad triggers are self-contained and don't need further action here.
+    // 'mid_game' ad trigger is self-contained and doesn't need further action here.
     setAdTrigger(null);
   };
 
-  const handleUnlockFreeflow = () => {
-    if (isFreeflowUnlocked) {
-      toast({ title: "Already Unlocked!", description: "You can now select the Freeflow style." });
+  const handleUnlockSecret = () => {
+    if (areAllStylesUnlocked && isDragonChasingUnlocked) {
+        toast({ title: "You've unlocked everything!", description: "Explore the new modes and styles." });
+        return;
+    }
+
+    setAdTrigger('reward');
+    
+    // First, unlock Dragon Chasing mode
+    if (!isDragonChasingUnlocked) {
+      logEvent('rewarded_ad_flow', { status: 'offered', unlock_target: 'dragon_chasing_mode' });
+      setIsAdVisible(true);
+      setTimeout(() => {
+          toast({ 
+              title: "Mode Unlocked!", 
+              description: "You can now select the 'Dragon Chasing' mode." 
+          });
+          setIsDragonChasingUnlocked(true);
+          logEvent('rewarded_ad_flow', { status: 'completed', unlock_target: 'dragon_chasing_mode' });
+      }, 500);
       return;
     }
-    
-    logEvent('rewarded_ad_flow', { status: 'offered' });
-    setAdTrigger('reward');
-    setIsAdVisible(true);
-    
-    // Simulate ad reward after a delay
-    setTimeout(() => {
-        toast({ 
-            title: "Style Unlocked!", 
-            description: "You can now select the 'Freeflow' writing style." 
-        });
-        setIsFreeflowUnlocked(true);
-        logEvent('rewarded_ad_flow', { status: 'completed' });
-    }, 500); // Small delay to allow ad to show
+
+    // If Dragon Chasing is unlocked, unlock the final styles
+    if (!areAllStylesUnlocked) {
+        logEvent('rewarded_ad_flow', { status: 'offered', unlock_target: 'final_styles' });
+        setIsAdVisible(true);
+        setTimeout(() => {
+            toast({ 
+                title: "Styles Unlocked!", 
+                description: "You can now select 'Gothic Romance' and 'Freeflow'." 
+            });
+            setAreAllStylesUnlocked(true);
+            logEvent('rewarded_ad_flow', { status: 'completed', unlock_target: 'final_styles' });
+        }, 500);
+    }
   }
+
 
   const showFooter = !(
     gameState.status === 'playing' ||
@@ -533,7 +556,7 @@ export default function ApostrfyClient() {
     <div className="flex flex-col h-screen bg-background text-foreground">
       <main className="flex-grow flex flex-col relative">
         <AnimatePresence mode="wait">
-            {gameState.status === "loading_screen" && <LoadingScreen key="loading"/>}
+            {gameState.status === "loading_screen" && <LoadingScreen key="loading" isInteractive={true} />}
             {gameState.status === "onboarding" && <OnboardingModal key="onboarding" onComplete={handleOnboardingComplete} />}
             {gameState.status === "menu" && (
               <MainMenu 
@@ -541,8 +564,9 @@ export default function ApostrfyClient() {
                 onStartGame={handleStartGame} 
                 onStartSimulation={handleStartSimulation} 
                 comingFromOnboarding={comingFromOnboarding}
-                isFreeflowUnlocked={isFreeflowUnlocked}
-                onUnlockFreeflow={handleUnlockFreeflow}
+                isDragonChasingUnlocked={isDragonChasingUnlocked}
+                areAllStylesUnlocked={areAllStylesUnlocked}
+                onUnlockSecret={handleUnlockSecret}
               />
             )}
             {(gameState.status === "generating_initial_story" && settings.trope) && (
@@ -550,6 +574,7 @@ export default function ApostrfyClient() {
                 key="generating_initial"
                 trope={settings.trope}
                 duration={settings.duration}
+                isInteractive={true}
               />
             )}
             {(gameState.status === "playing" && settings.trope) && (
@@ -569,7 +594,7 @@ export default function ApostrfyClient() {
                 inputRef={inputRef}
               />
             )}
-            {gameState.status === "generating_summary" && <LoadingScreen key="generating" />}
+            {gameState.status === "generating_summary" && <LoadingScreen key="generating" isInteractive={true} />}
             {gameState.status === "gameover" && analysis && (
               <GameOverScreen 
                 key="gameover" 

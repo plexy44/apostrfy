@@ -17,6 +17,11 @@ export const LITERARY_PLACEHOLDERS: string[] = [
   "Teaching the AI to love. It's complicated.",
   "Definitely not becoming sentient.",
   "The muses are on their coffee break.",
+  "Calibrating the serendipity drive...",
+  "Shuffling the deck of narrative possibility.",
+  "If you can dream it, we can write it.",
+  "The ghosts in the machine are friendly today.",
+  "Let's make some beautiful mistakes.",
 ];
 
 export const ORB_MESSAGES: string[] = [
@@ -32,10 +37,17 @@ export const ORB_MESSAGES: string[] = [
     "Let's get lost in a new world.",
 ];
 
-export const DURATIONS: { label: string; value: number, analyticsName: 'lightning' | 'minute' | 'twice_a_minute' }[] = [
+export const DURATIONS: { label: string; value: number, analyticsName: 'lightning' | 'minute' | 'dragon_chasing' }[] = [
   { label: "Lightning", value: 30, analyticsName: 'lightning' },
   { label: "Minute", value: 60, analyticsName: 'minute' },
-  { label: "Twice a minute", value: 120, analyticsName: 'twice_a_minute' },
+  { label: "Dragon Chasing", value: 120, analyticsName: 'dragon_chasing' },
+];
+
+export const TROPES_DATA: { name: Trope; description: string; isInitiallyVisible: boolean; }[] = [
+  { name: "Noir Detective", description: "Rain-slicked streets and whispered secrets.", isInitiallyVisible: true },
+  { name: "Cosmic Wanderer", description: "Lost constellations and alien whispers.", isInitiallyVisible: true },
+  { name: "Gothic Romance", description: "Crumbling manors and timeless heartbreak.", isInitiallyVisible: false },
+  { name: "Freeflow", description: "Your voice, your story. I'll follow your lead.", isInitiallyVisible: false },
 ];
 
 export const ONBOARDING_CONTENT = [
