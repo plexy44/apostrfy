@@ -10,6 +10,8 @@
 import { useState, useEffect, useRef } from "react";
 import dynamic from 'next/dynamic';
 import { AnimatePresence } from "framer-motion";
+import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
+import { app } from "@/lib/firebase"; 
 import type { GameState, StoryPart, Trope, Persona, TropePersonaKey, InspirationalPersonas, GameAnalysis, Speaker } from "@/lib/types";
 import type { GenerateStoryContentInput } from '@/ai/flows/generate-story-content';
 import type { GenerateSimulationContentInput } from '@/ai/flows/generate-simulation-content';
@@ -86,6 +88,23 @@ export default function ApostrfyClient() {
   const inputRef = useRef<HTMLInputElement>(null);
   const turnTimerRef = useRef<number>(Date.now());
   const analyticsFired = useRef(new Set<string>());
+
+  useEffect(() => {
+    const auth = getAuth(app);
+    
+    // This listener checks the user's sign-in state
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // If the user is not signed in, sign them in anonymously
+        signInAnonymously(auth).catch((error) => {
+          console.error("Anonymous sign-in failed:", error);
+        });
+      }
+    });
+  
+    // Clean up the listener when the component unmounts
+    return () => unsubscribe();
+  }, []); // The empty array [] ensures this runs only once when the app loads
 
   useEffect(() => {
     let screenName: string;
