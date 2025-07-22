@@ -1,5 +1,5 @@
-# Firebase Studio
+#apostrfy
 
-This is a NextJS starter in Firebase Studio.
+AYYYY LMAOOOOO
 
 To get started, take a look at src/app/page.tsx.
