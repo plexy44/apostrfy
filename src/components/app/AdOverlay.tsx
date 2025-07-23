@@ -6,7 +6,6 @@
 
 "use client";
 
-import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
@@ -29,18 +28,15 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
     onClose();
   }
 
-  useEffect(() => {
-    if (isVisible) {
-      try {
-        if (typeof window !== 'undefined') {
-          ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-        }
-      } catch (err) {
-        console.error("AdSense error in overlay:", err);
+  const handleAdLoad = () => {
+    try {
+      if (typeof window !== 'undefined') {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
       }
+    } catch (err) {
+      console.error("AdSense error in overlay:", err);
     }
-  }, [isVisible]);
-
+  }
 
   return (
     <AnimatePresence>
@@ -51,6 +47,7 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
+          onAnimationComplete={handleAdLoad}
         >
           <div className="relative w-full max-w-md h-[80vh] bg-secondary rounded-lg flex flex-col items-center justify-center text-center border border-border shadow-2xl">
             
