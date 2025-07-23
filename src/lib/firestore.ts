@@ -28,6 +28,8 @@ const sanitizeForFirestore = (data: any): any => {
         // Firestore cannot store 'undefined' values. We convert them to 'null'.
         if (value !== undefined) {
           sanitizedObject[key] = sanitizeForFirestore(value);
+        } else {
+          sanitizedObject[key] = null;
         }
       }
     }
