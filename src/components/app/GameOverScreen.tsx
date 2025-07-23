@@ -190,14 +190,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
         </Card>
       </div>
 
-       {/* Ad Banner Placeholder */}
-       <div className="mt-4 w-full flex justify-center">
-        <div className="w-[300px] h-[250px] bg-secondary flex items-center justify-center text-muted-foreground rounded-lg">
-          Ad Banner Placeholder
-        </div>
-      </div>
-
-      <div className="flex flex-col sm:flex-row justify-center gap-4 mt-2 w-full max-w-md">
+      <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4 w-full max-w-md">
         <Button onClick={onPlayAgain} size="lg" className="w-full px-4 text-base md:text-lg">
           <RefreshCw />
           Play Again
