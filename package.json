@@ -54,10 +54,7 @@
     "recharts": "^2.15.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.24.2",
-    "firebase-admin": "^11.11.1",
-    "mailgun.js": "^10.2.1",
-    "form-data": "^4.0.0"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/gtag.js": "^0.0.20",
