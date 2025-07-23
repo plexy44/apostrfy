@@ -6,6 +6,7 @@
 
 "use client";
 
+import { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
@@ -17,25 +18,38 @@ interface AdOverlayProps {
 }
 
 export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
+  const adContainerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (isVisible) {
+      // We need to wait for the animation to finish and the element to be in the DOM with a size.
+      // A timeout is a reliable way to defer this until the next render cycle after animation starts.
+      const timer = setTimeout(() => {
+        try {
+          if (adContainerRef.current && adContainerRef.current.clientWidth > 0) {
+            ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+            logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'quit_game_interstitial' });
+          } else {
+             // Optional: retry or log an error if the container still has no size
+             console.warn("Ad container not ready after timeout.");
+          }
+        } catch (err) {
+          console.error("AdSense error in overlay:", err);
+          logEvent('ad_load_failed', { ad_unit_name: 'quit_game_interstitial', error_message: (err as Error).message });
+        }
+      }, 500); // 500ms delay to allow animation and layout to complete.
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible]);
+
   const handleAdClick = () => {
     logEvent('ad_click', { ad_format: 'interstitial', ad_unit_name: 'mid_game_interstitial' });
     // In a real app, this might navigate to the ad's destination URL
   }
 
   const handleClose = () => {
-    // In a real ad SDK, you might get a callback for ad closed.
-    // Here we just call the parent's onClose handler.
     onClose();
-  }
-
-  const handleAdLoad = () => {
-    try {
-      if (typeof window !== 'undefined') {
-        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-      }
-    } catch (err) {
-      console.error("AdSense error in overlay:", err);
-    }
   }
 
   return (
@@ -47,13 +61,13 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          onAnimationComplete={handleAdLoad}
         >
           <div className="relative w-full max-w-md h-[80vh] bg-secondary rounded-lg flex flex-col items-center justify-center text-center border border-border shadow-2xl">
             
             <p className="text-muted-foreground text-sm mb-4">Advertisement</p>
             
             <div 
+              ref={adContainerRef}
               className="w-11/12 h-4/5 bg-background flex items-center justify-center cursor-pointer p-4 text-center"
               onClick={handleAdClick}
             >
