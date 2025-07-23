@@ -42,7 +42,7 @@ function getMailgunClient() {
   return mg;
 }
 
-exports.sendStoryWithMailGun = onDocumentCreated("subscribers/{subscriberId}",
+exports.sendStoryByEmail = onDocumentCreated("subscribers/{subscriberId}",
     async (event) => {
       const mailgunClient = getMailgunClient();
       if (!mailgunClient) {
