@@ -15,7 +15,7 @@ const mg = mailgun.client({
   key: functions.config().mailgun.key,
 });
 
-// This is the function that will be triggered using the NEW v2 syntax
+// This is the function that will be triggered using the NEW, CORRECT syntax
 exports.sendStoryWithMailGun = onDocumentCreated("subscribers/{subscriberId}", async (event) => {
   const snap = event.data;
   if (!snap) {
@@ -26,7 +26,6 @@ exports.sendStoryWithMailGun = onDocumentCreated("subscribers/{subscriberId}", a
   const submissionData = snap.data();
   const userEmail = submissionData.email;
   const storyId = submissionData.storyId;
-  const userName = submissionData.name || "Storyteller";
 
   functions.logger.log(
       `New story request for storyId: ${storyId} to email: ${userEmail}`,
@@ -42,30 +41,27 @@ exports.sendStoryWithMailGun = onDocumentCreated("subscribers/{subscriberId}", a
     }
     const storyData = storyDoc.data();
     const transcript = storyData.transcript;
-    const title = storyData.title || "Your Apostrfy Story";
-
 
     // 2. Format the story into a clean HTML email
-    let storyHtml = `<h1>${title}</h1>`;
-    storyHtml += `<p>Hi ${userName},</p>`;
+    let storyHtml = `<h1>Your Apostrfy Story</h1>`;
     storyHtml += `<p>Thank you for creating with us. Here is the story you wrote:</p><hr>`;
     transcript.forEach((line) => {
-      const speaker = line.personaName ? line.personaName : (line.speaker === "ai" ? "Apostrfy" : "You");
+      const speaker = line.speaker === "ai" ? "Apostrfy" : "You";
       storyHtml += `<p><strong>${speaker}:</strong> ${line.line}</p>`;
     });
     storyHtml += `<hr><p>Play again soon at Apostrfy.</p>`;
 
     // 3. Construct the email message
     const messageData = {
-      from: "Apostrfy <stories@apostrfy.co.uk>",
+      from: `Apostrfy <postmaster@${functions.config().mailgun.domain}>`,
       to: userEmail,
-      subject: `Your Apostrfy Story: ${title}`,
+      subject: "Your Apostrfy Story is Here!",
       html: storyHtml,
     };
 
     // 4. Send the email using the Mailgun client
     const response = await mg.messages.create(
-        "apostrfy.co.uk",
+        functions.config().mailgun.domain,
         messageData,
     );
 
