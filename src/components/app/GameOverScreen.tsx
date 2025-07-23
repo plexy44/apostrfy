@@ -23,6 +23,7 @@ import MoodWheel from "./MoodWheel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { logEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
+import Script from "next/script";
 
 interface GameOverScreenProps {
   analysis: GameAnalysis;
@@ -63,7 +64,6 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
     setIsSubmitting(false);
   };
 
-
   const handleOpenEmailModal = () => {
     logEvent('request_transcript', { email_provided: false });
     setIsModalOpen(true);
@@ -78,12 +78,23 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
     </Card>
   );
 
+  const handleAdLoad = () => {
+    try {
+      if (typeof window !== 'undefined') {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+      }
+    } catch (err) {
+      console.error("AdSense error:", err);
+    }
+  };
+
   return (
     <motion.div 
       className="w-full max-w-4xl mx-auto flex flex-col items-center text-center p-2"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeInOut' }}
+      onAnimationComplete={handleAdLoad}
     >
       <h2 className="font-script text-2xl md:text-5xl text-foreground mb-4 md:mb-8 text-center">
         &ldquo;{analysis.quoteBanner}&rdquo;
@@ -192,14 +203,15 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
       </div>
 
        {/* Ad Banner Placeholder */}
-      <div className="w-full max-w-lg my-4">
-        <div 
-            className="h-24 bg-secondary rounded-lg flex items-center justify-center text-center text-muted-foreground border border-border"
-            data-ai-hint="advertisement"
-            onClick={() => logEvent('ad_click', { ad_format: 'banner', ad_unit_name: 'analysis_screen_banner' })}
-        >
-            <p className="text-sm">Ad Unit 2: Analysis Screen Banner <br />(ca-app-pub-3940256099942544/6300978111)</p>
-        </div>
+       <div className="mt-4 w-full flex justify-center">
+        <ins className="adsbygoogle"
+            style={{ display: 'inline-block', width: '300px', height: '250px' }}
+            data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
+            data-ad-slot={process.env.NEXT_PUBLIC_ADSENSE_BANNER_AD_UNIT_ID}>
+        </ins>
+        <Script id="adsense-banner-script">
+          {`(adsbygoogle = window.adsbygoogle || []).push({});`}
+        </Script>
       </div>
 
       <div className="flex flex-col sm:flex-row justify-center gap-4 mt-2 w-full max-w-md">
