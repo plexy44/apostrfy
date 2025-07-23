@@ -6,6 +6,7 @@
 
 "use client";
 
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
@@ -28,6 +29,19 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
     onClose();
   }
 
+  useEffect(() => {
+    if (isVisible) {
+      try {
+        if (typeof window !== 'undefined') {
+          ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+        }
+      } catch (err) {
+        console.error("AdSense error in overlay:", err);
+      }
+    }
+  }, [isVisible]);
+
+
   return (
     <AnimatePresence>
       {isVisible && (
@@ -44,17 +58,17 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
             
             <div 
               className="w-11/12 h-4/5 bg-background flex items-center justify-center cursor-pointer p-4 text-center"
-              data-ai-hint="advertisement"
               onClick={handleAdClick}
             >
-              <p className="font-bold text-xl text-foreground">
-                Interstitial Ad
-                <br />
-                <span className="text-sm font-normal text-muted-foreground">(Placeholder)</span>
-              </p>
+              <ins className="adsbygoogle"
+                  style={{display:'block'}}
+                  data-ad-client="ca-pub-7132522800049597"
+                  data-ad-slot="9931548453"
+                  data-ad-format="auto"
+                  data-full-width-responsive="true"></ins>
             </div>
             
-            <p className="text-muted-foreground text-xs mt-4 px-4">Test Ad Unit ID: ca-app-pub-3940256099942544/1033173712</p>
+            <p className="text-muted-foreground text-xs mt-4 px-4">Ad Unit: Apostrfy Analysis Banner</p>
 
             <Button
               variant="ghost"
