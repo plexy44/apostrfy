@@ -23,7 +23,6 @@ import MoodWheel from "./MoodWheel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { logEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
-import Script from "next/script";
 
 interface GameOverScreenProps {
   analysis: GameAnalysis;
@@ -209,9 +208,6 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
             data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
             data-ad-slot={process.env.NEXT_PUBLIC_ADSENSE_BANNER_AD_UNIT_ID}>
         </ins>
-        <Script id="adsense-banner-script">
-          {`(adsbygoogle = window.adsbygoogle || []).push({});`}
-        </Script>
       </div>
 
       <div className="flex flex-col sm:flex-row justify-center gap-4 mt-2 w-full max-w-md">
