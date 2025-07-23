@@ -26,7 +26,7 @@ exports.sendStoryWithMailGun = onDocumentCreated("subscribers/{subscriberId}", a
   const submissionData = snap.data();
   const userEmail = submissionData.email;
   const storyId = submissionData.storyId;
-  const userName = submissionData.name || 'Storyteller';
+  const userName = submissionData.name || "Storyteller";
 
   functions.logger.log(
       `New story request for storyId: ${storyId} to email: ${userEmail}`,
