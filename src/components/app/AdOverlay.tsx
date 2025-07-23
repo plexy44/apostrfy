@@ -21,32 +21,38 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
   const adContainerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    if (isVisible) {
-      // We need to wait for the animation to finish and the element to be in the DOM with a size.
-      // A timeout is a reliable way to defer this until the next render cycle after animation starts.
+    if (isVisible && adContainerRef.current) {
+      // Clear any existing ad content to prevent errors on re-show
+      adContainerRef.current.innerHTML = '';
+
+      // Wait for animation to complete before injecting the ad
       const timer = setTimeout(() => {
+        if (!adContainerRef.current) return;
         try {
-          if (adContainerRef.current && adContainerRef.current.clientWidth > 0) {
-            ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+            const ins = document.createElement('ins');
+            ins.className = 'adsbygoogle';
+            ins.style.display = 'block';
+            ins.setAttribute('data-ad-client', 'ca-pub-7132522800049597');
+            ins.setAttribute('data-ad-slot', '9931548453');
+            ins.setAttribute('data-ad-format', 'auto');
+            ins.setAttribute('data-full-width-responsive', 'true');
+            
+            const script = document.createElement('script');
+            script.innerHTML = '(adsbygoogle = window.adsbygoogle || []).push({});';
+            
+            adContainerRef.current?.appendChild(ins);
+            adContainerRef.current?.appendChild(script);
+
             logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'quit_game_interstitial' });
-          } else {
-             // Optional: retry or log an error if the container still has no size
-             console.warn("Ad container not ready after timeout.");
-          }
         } catch (err) {
-          console.error("AdSense error in overlay:", err);
-          logEvent('ad_load_failed', { ad_unit_name: 'quit_game_interstitial', error_message: (err as Error).message });
+            console.error("AdSense error in overlay:", err);
+            logEvent('ad_load_failed', { ad_unit_name: 'quit_game_interstitial', error_message: (err as Error).message });
         }
       }, 500); // 500ms delay to allow animation and layout to complete.
       
       return () => clearTimeout(timer);
     }
   }, [isVisible]);
-
-  const handleAdClick = () => {
-    logEvent('ad_click', { ad_format: 'interstitial', ad_unit_name: 'mid_game_interstitial' });
-    // In a real app, this might navigate to the ad's destination URL
-  }
 
   const handleClose = () => {
     onClose();
@@ -69,14 +75,8 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
             <div 
               ref={adContainerRef}
               className="w-11/12 h-4/5 bg-background flex items-center justify-center cursor-pointer p-4 text-center"
-              onClick={handleAdClick}
             >
-              <ins className="adsbygoogle"
-                  style={{display:'block'}}
-                  data-ad-client="ca-pub-7132522800049597"
-                  data-ad-slot="9931548453"
-                  data-ad-format="auto"
-                  data-full-width-responsive="true"></ins>
+              {/* Ad content will be injected here by the useEffect hook */}
             </div>
             
             <p className="text-muted-foreground text-xs mt-4 px-4">Ad Unit: Apostrfy Analysis Banner</p>
