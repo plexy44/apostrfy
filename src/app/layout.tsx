@@ -10,7 +10,7 @@ import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
   title: 'Scriblox',
-  description: 'connect || co-create',
+  description: 'A collaborative writing experience.',
 };
 
 export const viewport: Viewport = {

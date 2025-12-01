@@ -147,7 +147,6 @@ export default function MainMenu({
     >
       <div className="flex flex-col items-center text-center mb-4 md:mb-6">
         <ScribloxLogo className="w-36 h-auto mb-1 md:w-56 md:mb-2 text-foreground" />
-        <p className="font-headline text-muted-foreground tracking-widest text-sm md:text-lg">connect || co-create</p>
       </div>
 
       <div className="flex flex-col items-center gap-4 mb-4">
