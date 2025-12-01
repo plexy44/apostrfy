@@ -6,7 +6,6 @@
 
 "use client";
 
-import { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
@@ -19,9 +18,9 @@ interface AdOverlayProps {
 
 export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
 
-  const loadAd = () => {
+  const handleAdLoad = () => {
     try {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && (window as any).adsbygoogle) {
         ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
         logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'quit_game_interstitial' });
       }
@@ -30,14 +29,6 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
       logEvent('ad_load_failed', { ad_unit_name: 'quit_game_interstitial', error_message: (err as Error).message });
     }
   }
-
-  useEffect(() => {
-    if (isVisible) {
-      const timer = setTimeout(loadAd, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isVisible]);
-
 
   return (
     <AnimatePresence>
@@ -48,6 +39,7 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
+          onAnimationComplete={handleAdLoad}
         >
           <div className="relative w-full max-w-md h-[80vh] bg-secondary rounded-lg flex flex-col items-center justify-center text-center border border-border shadow-2xl">
             
