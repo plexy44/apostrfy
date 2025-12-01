@@ -68,7 +68,7 @@ const generateFinalScriptFlow = ai.defineFlow(
             } else if (part.isPaste) {
                 speaker = 'USER (Pasted):';
             } else {
-                speaker = part.speaker === 'user' ? 'USER:' : 'APOSTRFY:';
+                speaker = part.speaker === 'user' ? 'USER:' : 'SCRIBLOX:';
             }
             return `${speaker} ${part.line}`;
         }).join('\n');

@@ -238,7 +238,7 @@ export default function GameScreen({
 
                   const speakerLabel = part.personaName
                         ? part.personaName
-                        : isUserSpeaker ? 'You' : 'Apostrfy';
+                        : isUserSpeaker ? 'You' : 'Scriblox';
 
                   return (
                     <div key={index} className={`flex flex-col animate-fade-in-up ${alignment}`}>

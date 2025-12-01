@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DURATIONS, ORB_MESSAGES, TROPES_DATA } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import ApostrfyLogo from "../icons/ApostrfyLogo";
+import ScribloxLogo from "../icons/ScribloxLogo";
 import Orb from "./Orb";
 import { logEvent } from "@/lib/analytics";
 import { Gift } from "lucide-react";
@@ -146,7 +146,7 @@ export default function MainMenu({
       transition={{ duration: 0.4 }}
     >
       <div className="flex flex-col items-center text-center mb-4 md:mb-6">
-        <ApostrfyLogo className="w-36 h-auto mb-1 md:w-56 md:mb-2 text-foreground" />
+        <ScribloxLogo className="w-36 h-auto mb-1 md:w-56 md:mb-2 text-foreground" />
         <p className="font-headline text-muted-foreground tracking-widest text-sm md:text-lg">connect || co-create</p>
       </div>
 

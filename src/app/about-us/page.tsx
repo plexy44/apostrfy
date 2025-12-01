@@ -1,5 +1,5 @@
 /**
- * @fileoverview This page contains information about the Apostrfy application,
+ * @fileoverview This page contains information about the Scriblox application,
  * explaining its purpose and mission.
  *
  * - AboutUsPage - The component that renders the about us page.
@@ -20,14 +20,14 @@ export default function AboutUsPage() {
     <div className="container mx-auto max-w-3xl md:max-w-4xl py-8 md:py-12 px-4">
       <Card className="glassmorphism">
         <CardHeader>
-          <CardTitle className="text-2xl md:text-4xl font-headline text-center">About Apostrfy</CardTitle>
+          <CardTitle className="text-2xl md:text-4xl font-headline text-center">About Scriblox</CardTitle>
         </CardHeader>
         <CardContent className="prose prose-invert max-w-none text-foreground/80 space-y-4 text-base md:text-lg">
           <p>
-            Welcome to Apostrfy, a unique space for creative exploration and collaborative writing. Our mission is to provide a tool that acts as a mirror to your own imagination, a partner in the dance of storytelling.
+            Welcome to Scriblox, a unique space for creative exploration and collaborative writing. Our mission is to provide a tool that acts as a mirror to your own imagination, a partner in the dance of storytelling.
           </p>
           <p>
-            Apostrfy is more than just an app; it's a sanctuary for your thoughts. In a world of constant connection and performance, we offer a place to write not for an audience, but for yourself. It's a game of call and response, where you and your AI companion build worlds, one line at a time. There's no pressure, no judgment—just the pure flow of creation.
+            Scriblox is more than just an app; it's a sanctuary for your thoughts. In a world of constant connection and performance, we offer a place to write not for an audience, but for yourself. It's a game of call and response, where you and your AI companion build worlds, one line at a time. There's no pressure, no judgment—just the pure flow of creation.
           </p>
           <p>
             Our AI is designed to be your creative partner, a reflection of your own style, subtly infused with the spirits of great literary figures. It listens, adapts, and helps you uncover the stories waiting within you.

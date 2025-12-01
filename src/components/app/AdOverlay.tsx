@@ -64,7 +64,7 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
                   data-full-width-responsive="true"></ins>
             </div>
             
-            <p className="text-muted-foreground text-xs mt-4 px-4">Ad Unit: Apostrfy Analysis Banner</p>
+            <p className="text-muted-foreground text-xs mt-4 px-4">Ad Unit: Scriblox Analysis Banner</p>
 
             <Button
               variant="ghost"

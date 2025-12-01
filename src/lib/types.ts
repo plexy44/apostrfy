@@ -1,5 +1,5 @@
 /**
- * @fileoverview This file defines the core TypeScript types used throughout the Apostrfy application.
+ * @fileoverview This file defines the core TypeScript types used throughout the Scriblox application.
  * It centralizes the definitions for game states, story elements, character archetypes (tropes),
  * and the structure of stored data, ensuring consistency and type safety across different components and modules.
  */

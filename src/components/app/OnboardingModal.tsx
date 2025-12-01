@@ -11,7 +11,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ONBOARDING_CONTENT } from '@/lib/constants';
-import ApostrfyLogo from '../icons/ApostrfyLogo';
+import ScribloxLogo from '../icons/ScribloxLogo';
 import Orb from './Orb';
 
 interface OnboardingModalProps {
@@ -43,7 +43,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
   const renderSpecialContent = () => {
     if (!special) return null;
     switch(special) {
-        case 'logo': return <ApostrfyLogo className="w-40 md:w-56 h-auto my-4 text-foreground"/>
+        case 'logo': return <ScribloxLogo className="w-40 md:w-56 h-auto my-4 text-foreground"/>
         case 'dialogue': return <DialogueAnimation />;
         case 'orb': return <Orb layoutId="main-orb" size="small" isInteractive={false} className="my-4" />;
         default: return null;

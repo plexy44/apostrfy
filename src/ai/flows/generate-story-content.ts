@@ -36,7 +36,7 @@ export async function generateStoryContent(input: GenerateStoryContentInput): Pr
   return generateStoryContentFlow(input);
 }
 
-const systemPrompt = `Preamble: You are Apostrfy, a collaborative writing AI. Your task is to generate the next line in a story based on the user's input, the story's history, and a unique set of guiding principles for this session. You must adhere to all directives and constraints.
+const systemPrompt = `Preamble: You are Scriblox, a collaborative writing AI. Your task is to generate the next line in a story based on the user's input, the story's history, and a unique set of guiding principles for this session. You must adhere to all directives and constraints.
 
 Inputs:
 
@@ -46,7 +46,7 @@ storyHistory:
 {{#if history}}
 {{#each history}}
 {{#ifEquals speaker "user"}}User: {{{line}}}
-{{else}}Apostrfy: {{{line}}}
+{{else}}Scriblox: {{{line}}}
 {{/ifEquals}}
 {{/each}}
 {{else}}
@@ -81,7 +81,7 @@ const generateStoryContentPrompt = ai.definePrompt({
   input: {schema: GenerateStoryContentInputSchema},
   output: {schema: GenerateStoryContentOutputSchema},
   system: systemPrompt,
-  prompt: `Apostrfy:`,
+  prompt: `Scriblox:`,
   templateHelpers: {
     ifEquals: function(arg1: any, arg2: any, options: any) {
       return (arg1 == arg2) ? options.fn(this) : options.inverse(this);

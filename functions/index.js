@@ -72,14 +72,14 @@ exports.sendStoryByEmail = onDocumentCreated("subscribers/{subscriberId}",
         const storyData = storyDoc.data();
         const transcript = storyData.transcript;
 
-        let storyHtml = `<h1>Your Apostrfy Story</h1>`;
+        let storyHtml = `<h1>Your Scriblox Story</h1>`;
         storyHtml += "<p>Thank you for creating with us. ";
         storyHtml += "Here is the story you wrote:</p><hr>";
         transcript.forEach((line) => {
-          const speaker = line.speaker === "ai" ? "Apostrfy" : "You";
+          const speaker = line.speaker === "ai" ? "Scriblox" : "You";
           storyHtml += `<p><strong>${speaker}:</strong> ${line.line}</p>`;
         });
-        storyHtml += `<hr><p>Play again soon at Apostrfy.</p>`;
+        storyHtml += `<hr><p>Play again soon at Scriblox.</p>`;
 
         const mailgunDomain = functions.config().mailgun.domain;
         if (!mailgunDomain) {
@@ -91,9 +91,9 @@ exports.sendStoryByEmail = onDocumentCreated("subscribers/{subscriberId}",
         }
 
         const messageData = {
-          from: `Apostrfy <postmaster@${mailgunDomain}>`,
+          from: `Scriblox <postmaster@${mailgunDomain}>`,
           to: userEmail,
-          subject: "Your Apostrfy Story is Here!",
+          subject: "Your Scriblox Story is Here!",
           html: storyHtml,
         };
 

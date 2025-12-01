@@ -151,7 +151,7 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
                       
                       const speakerLabel = part.personaName
                         ? part.personaName
-                        : isUserSpeaker ? 'You' : 'Apostrfy';
+                        : isUserSpeaker ? 'You' : 'Scriblox';
                       
                       const alignment = isUserSpeaker ? 'items-end' : 'items-start';
                       const bubbleStyles = isUserSpeaker

@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from "react";
 
-const VISIT_KEY = "apostrfy_has_visited_v1";
+const VISIT_KEY = "scriblox_has_visited_v1";
 
 export const useIsFirstVisit = () => {
   const [isFirstVisit, setIsFirstVisit] = useState<boolean | undefined>(undefined);

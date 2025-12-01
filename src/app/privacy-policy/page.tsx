@@ -28,7 +28,7 @@ export default function PrivacyPolicyPage() {
         <CardContent className="prose prose-invert max-w-none text-foreground/80 space-y-4 text-base md:text-lg">
           <p className="text-muted-foreground text-sm text-center">Last Updated: {currentDate}</p>
           <p>
-            Welcome to Apostrfy. We are committed to protecting your privacy and providing a transparent experience. This policy outlines how we handle your information.
+            Welcome to Scriblox. We are committed to protecting your privacy and providing a transparent experience. This policy outlines how we handle your information.
           </p>
           <h3 className="font-headline text-lg md:text-2xl text-foreground">1. Information We Collect</h3>
           <p>
@@ -54,7 +54,7 @@ export default function PrivacyPolicyPage() {
 
           <h3 className="font-headline text-lg md:text-2xl text-foreground">3. Third-Party Services & Advertising</h3>
           <p>
-            Apostrfy displays advertisements from third-party networks, such as Google AdSense. These services may use cookies and other technologies to collect information and serve ads they deem relevant. We do not share your user-generated stories or email address with our ad partners. Please be aware that we are not responsible for the privacy practices of these third-party services.
+            Scriblox displays advertisements from third-party networks, such as Google AdSense. These services may use cookies and other technologies to collect information and serve ads they deem relevant. We do not share your user-generated stories or email address with our ad partners. Please be aware that we are not responsible for the privacy practices of these third-party services.
           </p>
 
           <h3 className="font-headline text-lg md:text-2xl text-foreground">4. Data Storage and Security</h3>
