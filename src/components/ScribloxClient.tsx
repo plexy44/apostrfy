@@ -319,7 +319,7 @@ export default function ScribloxClient() {
       }
     };
     
-    const timeoutId = setTimeout(runSimulationTurn, 1500); 
+    const timeoutId = setTimeout(runSimulationTurn, 3000); 
     return () => clearTimeout(timeoutId);
 
   }, [story, gameMode, gameState.status, sessionPersonas, settings.trope, isAiTyping, isAdVisible]);
