@@ -35,6 +35,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsFirstVisit } from "@/hooks/useIsFirstVisit";
 import personasData from "@/lib/personas.json";
 import famousQuotesData from "@/lib/famousQuotes.json";
+import { NARRATIVE_HOOKS } from "@/lib/constants";
 import { logEvent } from "@/lib/analytics";
 import { saveStoryToFirestore, saveSubscriberToFirestore } from "@/lib/firestore";
 import { WebShare } from "lucide-react";
@@ -217,10 +218,13 @@ export default function ScribloxClient() {
     try {
       const { generateStoryContent } = await import('@/ai/flows/generate-story-content');
       const aiStartTime = Date.now();
+      const hooks = NARRATIVE_HOOKS[personaKey];
+      const initialSeed = hooks[Math.floor(Math.random() * hooks.length)];
+
       const input: GenerateStoryContentInput = {
         trope,
         duration: duration / 60, 
-        userInput: "Start the story.",
+        userInput: initialSeed,
         history: [],
         persona1: uniquePersonas[0],
         persona2: uniquePersonas[1],
@@ -257,11 +261,15 @@ export default function ScribloxClient() {
     try {
       const { generateSimulationContent } = await import('@/ai/flows/generate-simulation-content');
       const aiStartTime = Date.now();
+      const hooks = NARRATIVE_HOOKS[personaKey];
+      const initialSeed = hooks[Math.floor(Math.random() * hooks.length)];
+
       const input: GenerateSimulationContentInput = {
         trope,
         history: [],
         personaToEmbody: uniquePersonas[0],
         otherPersona: uniquePersonas[1],
+        initialSeed: initialSeed,
       };
       const result = await generateSimulationContent(input);
       const aiEndTime = Date.now();

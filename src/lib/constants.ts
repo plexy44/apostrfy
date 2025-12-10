@@ -1,6 +1,4 @@
-
-
-import type { Trope } from "./types";
+import type { Trope, TropePersonaKey } from "./types";
 
 export const LITERARY_PLACEHOLDERS: string[] = [
     "The ink is listening...",
@@ -63,22 +61,22 @@ export const DURATIONS: { label: string; value: number, analyticsName: 'lightnin
 export const TROPES_DATA: { name: Trope; description: string; isInitiallyVisible: boolean; }[] = [
   { 
     name: "Noir Detective", 
-    description: "Step into a world where streetlights bleed into wet asphalt and every shadow holds a secret. In this city of smoke and mirrors, a lone detective navigates a labyrinth of femme fatales, double-crosses, and moral ambiguity. Trust is a currency you can't afford, and the truth is always paid for in blood.", 
+    description: "Rain slicked the asphalt, reflecting neon signs like bleeding wounds. In this city, secrets are currency and everyone is bankrupt. A lone detective, haunted by his past, navigates a labyrinth of femme fatales and double-crosses. The truth? It’s a luxury no one here can afford, paid for in lead.", 
     isInitiallyVisible: true 
   },
   { 
     name: "Cosmic Wanderer", 
-    description: "Drift through the silent, velvet expanse of the cosmos, a solitary traveler among dying stars and nascent galaxies. Encounter ancient, unknowable intelligences, decipher cryptic alien signals, and contemplate humanity's fragile place in an infinite, uncaring universe. The journey is long, the destination unknown, and the loneliness is profound.", 
+    description: "Adrift in the velvet nothing, a solitary vessel ghosts between dying stars and nascent galaxies. Inside, a lone traveler deciphers cryptic signals from unknowable intelligences, contemplating humanity's fragile footnote in an infinite, uncaring cosmos. The destination is a question, and the silence is the only answer they have.", 
     isInitiallyVisible: true 
   },
   { 
     name: "Gothic Romance", 
-    description: "Within the crumbling walls of a forgotten manor, a timeless love story unfolds, haunted by ancestral secrets and forbidden desires. Here, intense passion is inseparable from deep melancholy, and the line between devotion and obsession is as thin as a cobweb. Every creak of the floorboards whispers a tragic history.", 
+    description: "Within the crumbling spine of a forgotten manor, a love story unfolds, waltzing with ancestral madness and forbidden desires. Passion here is a fever, inseparable from a deep, chilling melancholy. The line between devotion and obsession is as thin as a cobweb, and every shadow whispers a tragic history.", 
     isInitiallyVisible: false 
   },
   { 
     name: "Freeflow", 
-    description: "There is no map for this territory. This mode is a blank canvas for your stream of consciousness. Let your thoughts run wild, from the mundane to the surreal. I will listen to your rhythm, adapt to your voice, and follow your lead wherever the narrative takes us. Your mind is the genre.", 
+    description: "There is no map. This is a canvas for your stream of consciousness. Let your thoughts run wild, from the mundane to the surreal, the beautiful to the grotesque. I will listen to your rhythm, adapt to your voice, and follow your lead wherever the narrative river flows. Your mind is the genre.", 
     isInitiallyVisible: false 
   },
 ];
@@ -100,3 +98,54 @@ export const ONBOARDING_CONTENT = [
         special: 'orb',
     }
 ];
+
+export const NARRATIVE_HOOKS: Record<TropePersonaKey, string[]> = {
+  noirDetective: [
+    "A single playing card, the Queen of Spades, left on a wet sidewalk.",
+    "The last message on a dead man's phone was just a single, cryptic number.",
+    "A thick fog rolling in from the docks, smelling of salt and secrets.",
+    "The distinct sound of a woman's laughter from an empty, locked room.",
+    "A missing person's case where the only clue is a worn-out poetry book.",
+    "A client who pays in antique gold coins and refuses to give their name.",
+    "An old photograph that shows a murder victim alive and well yesterday.",
+    "The sudden, inexplicable silence of a city that never sleeps.",
+    "A key that fits no lock anyone can find.",
+    "A coded message found tucked inside a matchbook from a closed-down bar."
+  ],
+  cosmicWanderer: [
+    "The ship's AI begins humming a song that hasn't been written yet.",
+    "A distress signal that is older than the universe itself.",
+    "A planet where the flora are made of crystalline, moving glass.",
+    "Discovering a perfect sphere of absolute nothingness in deep space.",
+    "The last star in a forgotten galaxy finally flickers and dies.",
+    "A log entry from a ghost ship details a journey to a non-existent star.",
+    "Waking up from cryo-sleep to find the ship's destination has been erased.",
+    "An alien signal that is a perfect echo of your own thoughts.",
+    "Finding a perfect, Earth-like forest growing on the inside of an asteroid.",
+    "A cosmic entity that communicates not with words, but with shared memories."
+  ],
+  gothicRomance: [
+    "A portrait whose eyes seem to follow you with a sorrowful gaze.",
+    "A locked diary that feels cold to the touch, even in the summer heat.",
+    "The faint scent of dying roses in a room that has been sealed for a century.",
+    "A music box that plays a haunting melody on its own during a thunderstorm.",
+    "A hidden, overgrown garden containing a single, perpetually blooming black flower.",
+    "A letter of confession from an ancestor, detailing a love they took to the grave.",
+    "The discovery of a beautiful, antique dress that seems to fit you perfectly.",
+    "A chilling prophecy found in the margins of an old family bible.",
+    "A ghostly waltz heard echoing through the manor's empty ballroom.",
+    "A strange, recurring dream of a lover you've never met, but whose face you know."
+  ],
+  freeflow: [
+    "The taste of static on the air right before a storm.",
+    "A sudden, overwhelming memory of a place you've never been.",
+    "The realization that your shadow is no longer mimicking your movements.",
+    "The quiet hum of a refrigerator in the middle of the night.",
+a   "A conversation overheard between two birds that sounds suspiciously like an argument.",
+    "The geometry of a spider's web, glistening with morning dew.",
+    "The feeling of déjà vu for a future event.",
+    "A forgotten shopping list found in the pocket of an old coat.",
+    "The precise moment when a street lamp flickers on at dusk.",
+    "The internal monologue of a cat watching a moth."
+  ]
+};
