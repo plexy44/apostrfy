@@ -17,7 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, RefreshCw, Send, Loader2 } from "lucide-react";
+import { Mail, RefreshCw, Send, Loader2, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
 import MoodWheel from "./MoodWheel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,6 +28,7 @@ interface GameOverScreenProps {
   analysis: GameAnalysis;
   onPlayAgain: () => void;
   onEmailSubmit: (name: string, email: string) => Promise<boolean>;
+  onShare: () => void;
 }
 
 
@@ -40,7 +41,7 @@ const FinalScriptRenderer = ({ script }: { script: string }) => {
 };
 
 
-export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }: GameOverScreenProps) {
+export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit, onShare }: GameOverScreenProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -190,14 +191,18 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit }:
         </Card>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4 w-full max-w-md">
-        <Button onClick={onPlayAgain} size="lg" className="w-full px-4 text-base md:text-lg">
+      <div className="flex flex-col sm:flex-row justify-center gap-2 mt-4 w-full max-w-md">
+        <Button onClick={onPlayAgain} size="lg" className="flex-1 px-4 text-base md:text-lg">
           <RefreshCw />
           Play Again
         </Button>
-        <Button onClick={handleOpenEmailModal} variant="outline" size="lg" className="w-full px-4 text-base md:text-lg">
+        <Button onClick={handleOpenEmailModal} variant="outline" size="lg" className="flex-1 px-4 text-base md:text-lg">
           <Mail />
-          Email Story
+          Email
+        </Button>
+        <Button onClick={onShare} variant="outline" size="lg" className="flex-1 px-4 text-base md:text-lg">
+          <Share2 />
+          Share
         </Button>
       </div>
 

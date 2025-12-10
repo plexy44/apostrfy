@@ -33,7 +33,7 @@ export default function AboutUsPage() {
             Our AI is designed to be your creative partner, a reflection of your own style, subtly infused with the spirits of great literary figures. It listens, adapts, and helps you uncover the stories waiting within you.
           </p>
           <p>
-            Whether you have a few seconds or a few minutes, we invite you to connect, co-create, and see what you discover.
+            Whether you have a few seconds or a few minutes, we invite you to co-create and see what you discover.
           </p>
           <div className="text-center pt-4">
              <Link href="/" className="text-accent hover:underline">

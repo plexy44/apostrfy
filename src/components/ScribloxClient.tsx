@@ -9,6 +9,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import dynamic from 'next/dynamic';
+import Script from "next/script";
 import { AnimatePresence } from "framer-motion";
 import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { app } from "@/lib/firebase"; 
@@ -36,6 +37,7 @@ import personasData from "@/lib/personas.json";
 import famousQuotesData from "@/lib/famousQuotes.json";
 import { logEvent } from "@/lib/analytics";
 import { saveStoryToFirestore, saveSubscriberToFirestore } from "@/lib/firestore";
+import { WebShare } from "lucide-react";
 
 // Dynamically import heavy components
 const MainMenu = dynamic(() => import('@/components/app/MainMenu'), { 
@@ -68,6 +70,13 @@ const getPersonaKey = (trope: Trope): TropePersonaKey => {
   return map[trope];
 };
 
+const getGameStateFromPath = (path: string): GameState['status'] => {
+    if (path.startsWith('/game')) return 'playing';
+    if (path.startsWith('/analysis')) return 'gameover';
+    return 'menu';
+}
+
+
 export default function ScribloxClient() {
   const { isFirstVisit, setHasVisited } = useIsFirstVisit();
   const [gameState, setGameState] = useState<GameState>({ status: "loading_screen" });
@@ -88,58 +97,81 @@ export default function ScribloxClient() {
   const inputRef = useRef<HTMLInputElement>(null);
   const turnTimerRef = useRef<number>(Date.now());
   const analyticsFired = useRef(new Set<string>());
+  const [areAdsEnabled, setAreAdsEnabled] = useState(true);
 
+  // URL and Ad management logic
   useEffect(() => {
-    const auth = getAuth(app);
-    
-    // This listener checks the user's sign-in state
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        // If the user is not signed in, sign them in anonymously
-        signInAnonymously(auth).catch((error) => {
-          console.error("Anonymous sign-in failed:", error);
-        });
+    const handleUrlChange = () => {
+      const currentStatus = getGameStateFromPath(window.location.pathname);
+      
+      // Prevent re-triggering state changes if already in a "final" state like gameover
+      if (gameState.status === 'gameover' && currentStatus === 'gameover') return;
+      if (gameState.status === 'playing' && currentStatus === 'playing') return;
+
+      if (currentStatus === 'menu' && gameState.status !== 'menu') {
+        handlePlayAgain(); // Reset state when navigating back to menu
       }
-    });
-  
-    // Clean up the listener when the component unmounts
-    return () => unsubscribe();
-  }, []); // The empty array [] ensures this runs only once when the app loads
+    };
 
-  useEffect(() => {
-    let screenName: string;
+    window.addEventListener('popstate', handleUrlChange);
+
+    let path = '/';
+    let enableAds = true;
+    let screenName: string = 'loading_screen';
+
     switch (gameState.status) {
-      case 'loading_screen':
-        screenName = 'loading_screen';
-        break;
-      case 'onboarding':
-        screenName = 'onboarding';
-        break;
-      case 'menu':
-        screenName = 'main_menu';
-        break;
-      case 'playing':
-      case 'generating_initial_story':
-        screenName = 'game_screen';
-        break;
-      case 'gameover':
-      case 'generating_summary':
-        screenName = 'analysis_screen';
-        break;
-      default:
-        return; // Don't log for intermediate or unknown states
+        case 'menu':
+            path = '/';
+            screenName = 'main_menu';
+            break;
+        case 'playing':
+        case 'generating_initial_story':
+            path = '/game';
+            enableAds = false;
+            screenName = 'game_screen';
+            break;
+        case 'gameover':
+        case 'generating_summary':
+            path = '/analysis';
+            screenName = 'analysis_screen';
+            break;
+        case 'onboarding':
+            screenName = 'onboarding';
+            break;
     }
+
+    if (window.location.pathname !== path) {
+      window.history.pushState({ status: gameState.status }, '', path);
+    }
+    
+    setAreAdsEnabled(enableAds);
     
     if (screenName && !analyticsFired.current.has(screenName)) {
       logEvent('screen_view', { screen_name: screenName as any });
       analyticsFired.current.add(screenName);
     }
+
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+    };
+
   }, [gameState.status]);
 
+
   useEffect(() => {
-    if (isFirstVisit === undefined) {
-      return; 
-    }
+    const auth = getAuth(app);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        signInAnonymously(auth).catch((error) => {
+          console.error("Anonymous sign-in failed:", error);
+        });
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (isFirstVisit === undefined) return;
     const timer = setTimeout(() => {
         if (isFirstVisit) {
             setGameState({ status: 'onboarding', step: 1 });
@@ -532,6 +564,38 @@ export default function ScribloxClient() {
     }
   };
 
+  const handleShare = async () => {
+    if (!analysis) return;
+
+    const shareData = {
+        title: `My Scriblox Story: "${analysis.title}"`,
+        text: `I co-created a story called "${analysis.title}" on Scriblox. Here's the final script:\n\n${analysis.finalScript}`,
+        url: window.location.href, // Share the URL of the analysis page
+    };
+
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+            logEvent('request_transcript', { email_provided: false }); // Using this for share too
+        } else {
+            // Fallback for browsers that don't support Web Share API
+            navigator.clipboard.writeText(shareData.text);
+            toast({
+                title: "Story Copied!",
+                description: "The story has been copied to your clipboard. You can now paste it to share.",
+            });
+        }
+    } catch (error) {
+        console.error('Error sharing:', error);
+        toast({
+            variant: "destructive",
+            title: "Sharing Error",
+            description: "Could not share the story.",
+        });
+    }
+  };
+
+
   const handleAdClosed = () => {
     setIsAdVisible(false);
 
@@ -605,6 +669,24 @@ export default function ScribloxClient() {
   
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
+        {areAdsEnabled && (
+            <>
+                <Script 
+                  async 
+                  src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}`}
+                  crossOrigin="anonymous" 
+                  strategy="afterInteractive"
+                ></Script>
+                <Script id="google-analytics" strategy="afterInteractive">
+                  {`
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', 'G-7JK1BH6Y8R');
+                  `}
+                </Script>
+            </>
+        )}
       <main className="flex-grow flex flex-col relative">
         <AnimatePresence mode="wait">
             {gameState.status === "loading_screen" && <LoadingScreen key="loading" />}
@@ -650,6 +732,7 @@ export default function ScribloxClient() {
                 analysis={analysis} 
                 onPlayAgain={handlePlayAgain}
                 onEmailSubmit={handleEmailSubmit}
+                onShare={handleShare}
               />
             )}
         </AnimatePresence>
