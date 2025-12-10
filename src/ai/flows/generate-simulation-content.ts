@@ -110,9 +110,15 @@ const generateSimulationContentFlow = ai.defineFlow(
         };
       } catch (e: any) {
         lastError = e;
+        const isRateLimitError = e.message?.includes('429');
         const isServiceUnavailable = e.message?.includes('503') || e.status === 503;
 
-        if (isServiceUnavailable) {
+        if (isRateLimitError) {
+          attempt++;
+          if (attempt < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds for rate limit
+          }
+        } else if (isServiceUnavailable) {
           attempt++;
           if (attempt < maxRetries) {
             await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt))); // Exponential backoff
