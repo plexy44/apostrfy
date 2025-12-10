@@ -1,4 +1,5 @@
 
+
 import type { Trope } from "./types";
 
 export const LITERARY_PLACEHOLDERS: string[] = [
@@ -60,15 +61,31 @@ export const DURATIONS: { label: string; value: number, analyticsName: 'lightnin
 ];
 
 export const TROPES_DATA: { name: Trope; description: string; isInitiallyVisible: boolean; }[] = [
-  { name: "Noir Detective", description: "Rain-slicked streets and whispered secrets.", isInitiallyVisible: true },
-  { name: "Cosmic Wanderer", description: "Lost constellations and alien whispers.", isInitiallyVisible: true },
-  { name: "Gothic Romance", description: "Crumbling manors and timeless heartbreak.", isInitiallyVisible: false },
-  { name: "Freeflow", description: "Your voice, your story. I'll follow your lead.", isInitiallyVisible: false },
+  { 
+    name: "Noir Detective", 
+    description: "Step into a world where streetlights bleed into wet asphalt and every shadow holds a secret. In this city of smoke and mirrors, a lone detective navigates a labyrinth of femme fatales, double-crosses, and moral ambiguity. Trust is a currency you can't afford, and the truth is always paid for in blood.", 
+    isInitiallyVisible: true 
+  },
+  { 
+    name: "Cosmic Wanderer", 
+    description: "Drift through the silent, velvet expanse of the cosmos, a solitary traveler among dying stars and nascent galaxies. Encounter ancient, unknowable intelligences, decipher cryptic alien signals, and contemplate humanity's fragile place in an infinite, uncaring universe. The journey is long, the destination unknown, and the loneliness is profound.", 
+    isInitiallyVisible: true 
+  },
+  { 
+    name: "Gothic Romance", 
+    description: "Within the crumbling walls of a forgotten manor, a timeless love story unfolds, haunted by ancestral secrets and forbidden desires. Here, intense passion is inseparable from deep melancholy, and the line between devotion and obsession is as thin as a cobweb. Every creak of the floorboards whispers a tragic history.", 
+    isInitiallyVisible: false 
+  },
+  { 
+    name: "Freeflow", 
+    description: "There is no map for this territory. This mode is a blank canvas for your stream of consciousness. Let your thoughts run wild, from the mundane to the surreal. I will listen to your rhythm, adapt to your voice, and follow your lead wherever the narrative takes us. Your mind is the genre.", 
+    isInitiallyVisible: false 
+  },
 ];
 
 export const ONBOARDING_CONTENT = [
     {
-        title: "",
+        title: "Welcome to Scriblox",
         text: "A space to write, not for an audience, but for yourself. Let's create a story together.",
         special: 'logo',
     },
