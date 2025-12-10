@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { Trope } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { DURATIONS, ORB_MESSAGES, TROPES_DATA } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import ScribloxLogo from "../icons/ScribloxLogo";
@@ -122,18 +123,23 @@ export default function MainMenu({
 
   const isTyping = startTyping && displayedMessage.length < orbMessage.length;
   
-  const TropeButton = ({ trope, ...props }: { trope: { name: Trope, description: string }, [key: string]: any }) => (
-    <button
-      onClick={() => handleThemeSwitch(trope.name)}
-      className={cn(
-        "p-3 md:p-4 rounded-lg border-2 text-left transition-all hover:border-accent w-full h-full",
-        selectedTrope === trope.name ? "border-accent bg-accent/20 shadow-lg shadow-accent/20" : "border-border"
-      )}
-      {...props}
-    >
-      <h3 className="font-headline text-base md:text-lg text-foreground">{trope.name}</h3>
-      <p className="text-xs md:text-sm text-muted-foreground">{trope.description}</p>
-    </button>
+  const TropeAccordionItem = ({ trope, ...props }: { trope: { name: Trope, description: string }, [key: string]: any }) => (
+    <AccordionItem value={trope.name} className="border-b-0">
+        <AccordionTrigger 
+            className={cn(
+                "p-3 md:p-4 rounded-lg border-2 text-left transition-all hover:border-accent w-full h-full hover:no-underline [&[data-state=open]>svg]:text-accent",
+                selectedTrope === trope.name ? "border-accent bg-accent/20 shadow-lg shadow-accent/20" : "border-border"
+            )}
+            onClick={() => handleThemeSwitch(trope.name)}
+        >
+            <h3 className="font-headline text-base md:text-lg text-foreground">
+                <span className={cn(selectedTrope === trope.name && "text-shimmer")}>{trope.name}</span>
+            </h3>
+        </AccordionTrigger>
+        <AccordionContent className="p-4 text-xs md:text-sm text-muted-foreground text-left">
+            {trope.description}
+        </AccordionContent>
+    </AccordionItem>
   );
 
 
@@ -166,13 +172,13 @@ export default function MainMenu({
       
       <Card className="w-full max-w-md md:max-w-xl glassmorphism">
         <CardHeader className="p-4 md:p-6">
-          <CardTitle className="font-headline text-lg md:text-2xl text-center text-foreground">Co-create a story</CardTitle>
-          <CardDescription className="text-center text-xs md:text-sm">First, choose a style for your AI companion.</CardDescription>
+          <CardTitle className="font-headline text-lg md:text-2xl text-center text-foreground">Choose a Style</CardTitle>
+          <CardDescription className="text-center text-xs md:text-sm">Select a genre to begin your story.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 p-4 md:p-6 pt-0 md:pt-0">
-           <div className="grid grid-cols-2 gap-2 md:gap-4">
+          <Accordion type="single" collapsible defaultValue={selectedTrope} className="w-full space-y-2">
             {initialTropes.map(trope => (
-                <TropeButton key={trope.name} trope={trope} />
+                <TropeAccordionItem key={trope.name} trope={trope} />
             ))}
             <AnimatePresence>
             {areAllStylesUnlocked && unlockableTropes.map((trope, index) => (
@@ -182,11 +188,11 @@ export default function MainMenu({
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3, delay: index * 0.1 }}
                 >
-                    <TropeButton trope={trope} />
+                    <TropeAccordionItem trope={trope} />
                 </motion.div>
             ))}
             </AnimatePresence>
-          </div>
+          </Accordion>
 
           <div className="space-y-2 pt-2">
             <h4 className="text-center font-headline text-foreground text-sm md:text-base">Select Mode</h4>

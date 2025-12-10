@@ -103,4 +103,24 @@
   .glassmorphism {
     @apply bg-card/60 backdrop-blur-lg border border-border/20;
   }
+
+  .text-shimmer {
+    background: linear-gradient(110deg,
+      hsl(var(--accent)),
+      hsl(var(--mood-joy)),
+      hsl(var(--mood-serenity)),
+      hsl(var(--accent))
+    );
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 5s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 50%; }
+    50% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
 }
