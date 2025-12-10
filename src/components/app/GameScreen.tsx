@@ -186,11 +186,11 @@ export default function GameScreen({
       transition={{ duration: 0.5, ease: 'easeInOut' }}
     >
         {/* Header */}
-        <header className="flex-shrink-0 p-4 border-b border-border/20 flex items-center gap-4 relative">
+        <header className="flex-shrink-0 p-2 md:p-4 border-b border-border/20 flex items-center gap-2 md:gap-4 relative">
            <Button
             variant="ghost"
             size="icon"
-            className="rounded-full"
+            className="rounded-full h-8 w-8 md:h-10 md:w-10"
             onClick={onQuitRequest}
             aria-label="Quit game"
             disabled={isTimerPaused}
@@ -198,7 +198,7 @@ export default function GameScreen({
              <X className="h-4 w-4" />
           </Button>
           <div className="flex-grow">
-            <h3 className="font-headline text-lg md:text-xl text-foreground">{trope}</h3>
+            <h3 className="font-headline text-base md:text-xl text-foreground">{trope}</h3>
             <TimerBar
                 ref={timerBarRef}
                 durationInSeconds={duration} 
@@ -256,7 +256,7 @@ export default function GameScreen({
           </div>
         </main>
         {/* Footer/Input */}
-        <footer className="flex-shrink-0 p-4 border-t border-border/20">
+        <footer className="flex-shrink-0 p-2 md:p-4 border-t border-border/20">
           <div className="flex flex-col gap-2 max-w-2xl mx-auto">
             <form onSubmit={handleSubmit} className="flex items-center gap-2">
               <Input
@@ -266,13 +266,13 @@ export default function GameScreen({
                 onPaste={handlePaste}
                 placeholder={isAiTyping ? "AI is thinking..." : gameMode === 'simulation' ? "Simulation in progress..." : "Continue the story..."}
                 disabled={isTimerPaused || gameMode === 'simulation'}
-                className="flex-grow h-11 md:h-12 text-sm md:text-base bg-background/50"
+                className="flex-grow h-11 md:h-12 text-base"
               />
               <Button type="submit" size="icon" className="h-11 w-11 md:h-12 md:w-12 flex-shrink-0" disabled={isAiTyping || !userInput.trim() || gameMode === 'simulation'}>
                 {isAiTyping ? <Loader className="animate-spin" /> : <Send />}
               </Button>
             </form>
-            <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused} className="w-full mt-1 md:h-10 md:text-base">
+            <Button onClick={onEndGame} variant="outline" size="sm" disabled={isTimerPaused} className="w-full mt-1 md:h-10 text-sm md:text-base">
                   End Game
             </Button>
           </div>

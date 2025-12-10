@@ -151,11 +151,11 @@ export default function MainMenu({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="flex flex-col items-center text-center mb-4 md:mb-6">
-        <ScribloxLogo className="w-36 h-auto mb-1 md:w-56 md:mb-2 text-foreground" />
+      <div className="flex flex-col items-center text-center mb-2 md:mb-4">
+        <ScribloxLogo className="w-32 h-auto md:w-48 text-foreground" />
       </div>
 
-      <div className="flex flex-col items-center gap-4 mb-4">
+      <div className="flex flex-col items-center gap-3 mb-3">
         <Orb 
           layoutId="main-orb" 
           size="large" 
@@ -175,7 +175,7 @@ export default function MainMenu({
           <CardTitle className="font-headline text-lg md:text-2xl text-center text-foreground">Choose a Style</CardTitle>
           <CardDescription className="text-center text-xs md:text-sm">Select a genre to begin your story.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6 p-4 md:p-6 pt-0 md:pt-0">
+        <CardContent className="space-y-4 p-4 md:p-6 pt-0 md:pt-0">
           <Accordion type="single" collapsible defaultValue={selectedTrope} className="w-full space-y-2">
             {initialTropes.map(trope => (
                 <TropeAccordionItem key={trope.name} trope={trope} />
@@ -201,7 +201,7 @@ export default function MainMenu({
                   key={lightningDuration.value}
                   variant={selectedDuration === lightningDuration.value ? "default" : "secondary"}
                   onClick={() => handleDurationSelect(lightningDuration)}
-                  className="w-28 md:w-32 text-xs md:text-base md:h-11"
+                  className="w-28 text-xs md:text-sm h-10"
                 >
                   {lightningDuration.label}
                 </Button>
@@ -217,7 +217,7 @@ export default function MainMenu({
                             key={dragonChasingDuration.value}
                             variant={selectedDuration === dragonChasingDuration.value ? "default" : "secondary"}
                             onClick={() => handleDurationSelect(dragonChasingDuration)}
-                             className="w-28 md:w-32 text-[11px] md:text-sm md:h-11 border border-accent/50"
+                             className="w-28 text-[11px] md:text-sm h-10 border border-accent/50"
                         >
                             {dragonChasingDuration.label}
                         </Button>
@@ -229,7 +229,7 @@ export default function MainMenu({
                   key={minuteDuration.value}
                   variant={selectedDuration === minuteDuration.value ? "default" : "secondary"}
                   onClick={() => handleDurationSelect(minuteDuration)}
-                  className="w-28 md:w-32 text-xs md:text-base md:h-11"
+                  className="w-28 text-xs md:text-sm h-10"
                 >
                   {minuteDuration.label}
                 </Button>
@@ -243,7 +243,7 @@ export default function MainMenu({
           onClick={handleStart}
           disabled={!selectedTrope}
           size="lg"
-          className="mt-4 w-full font-headline text-base md:text-xl md:h-14"
+          className="mt-4 w-full font-headline text-base md:text-lg h-12"
         >
           Start Writing
         </Button>
@@ -252,14 +252,14 @@ export default function MainMenu({
           disabled={!selectedTrope}
           variant="outline"
           size="lg"
-          className="mt-2 w-full font-headline text-base md:text-xl md:h-14"
+          className="mt-2 w-full font-headline text-base md:text-lg h-12"
         >
           Simulate
         </Button>
         <Button
             onClick={handleUnlockClick}
             variant="link"
-            className="mt-2 text-accent md:text-base"
+            className="mt-2 text-accent text-sm md:text-base"
             disabled={isDragonChasingUnlocked && areAllStylesUnlocked}
         >
             <Gift className="mr-2 h-4 w-4" />

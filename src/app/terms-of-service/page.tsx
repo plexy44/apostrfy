@@ -25,7 +25,7 @@ export default function TermsOfServicePage() {
         <CardHeader>
           <CardTitle className="text-2xl md:text-4xl font-headline text-center">Terms of Service</CardTitle>
         </CardHeader>
-        <CardContent className="prose prose-invert max-w-none text-foreground/80 space-y-4 text-base md:text-lg">
+        <CardContent className="prose prose-invert max-w-none text-foreground/80 space-y-4 text-sm md:text-lg">
             <p className="text-muted-foreground text-sm text-center">Last Updated: {currentDate}</p>
             <p>
                 By using the Scriblox application ("the app"), you agree to be bound by these Terms of Service. Please read them carefully.

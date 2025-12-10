@@ -25,7 +25,7 @@ export default function PrivacyPolicyPage() {
         <CardHeader>
           <CardTitle className="text-2xl md:text-4xl font-headline text-center">Privacy Policy</CardTitle>
         </CardHeader>
-        <CardContent className="prose prose-invert max-w-none text-foreground/80 space-y-4 text-base md:text-lg">
+        <CardContent className="prose prose-invert max-w-none text-foreground/80 space-y-4 text-sm md:text-lg">
           <p className="text-muted-foreground text-sm text-center">Last Updated: {currentDate}</p>
           <p>
             Welcome to Scriblox. We are committed to protecting your privacy and providing a transparent experience. This policy outlines how we handle your information.

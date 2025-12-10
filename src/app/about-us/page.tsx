@@ -22,7 +22,7 @@ export default function AboutUsPage() {
         <CardHeader>
           <CardTitle className="text-2xl md:text-4xl font-headline text-center">About Scriblox</CardTitle>
         </CardHeader>
-        <CardContent className="prose prose-invert max-w-none text-foreground/80 space-y-4 text-base md:text-lg">
+        <CardContent className="prose prose-invert max-w-none text-foreground/80 space-y-4 text-sm md:text-lg">
           <p>
             Welcome to Scriblox. We believe AI can never replace writers, but it can help you write. Our mission is to provide a tool that acts not as an author, but as a mirror to your own imagination and a partner in the dance of storytelling.
           </p>
