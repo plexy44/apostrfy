@@ -24,10 +24,10 @@ export default function AboutUsPage() {
         </CardHeader>
         <CardContent className="prose prose-invert max-w-none text-foreground/80 space-y-4 text-base md:text-lg">
           <p>
-            Welcome to Scriblox. We believe AI shouldn't replace writers, but play with them. Our mission is to provide a tool that acts not as an author, but as a mirror to your own imagination—a partner in the dance of storytelling.
+            Welcome to Scriblox. We believe AI can never replace writers, but it can help you write. Our mission is to provide a tool that acts not as an author, but as a mirror to your own imagination and a partner in the dance of storytelling.
           </p>
           <p>
-            Scriblox is more than just an app; it's a sanctuary for your thoughts. In a world of constant connection and performance, we offer a place to write not for an audience, but for yourself. It's a game of call and response, where you and your AI companion build worlds, one line at a time. There's no pressure, no judgment—just the pure flow of creation.
+            Scriblox is more than just an app; it's a sanctuary for your thoughts. In a world of constant connection and performance, we offer a place to write not for an audience, but for yourself. It's a game of call and response, where you and your AI companion build worlds, one line at a time. There's no pressure and no judgment, just the pure flow of creation.
           </p>
           <p>
             Our AI is designed to be your creative companion, a reflection of your own style that is subtly infused with the spirits of great literary figures. It listens, adapts, and helps you uncover the stories waiting within you.
