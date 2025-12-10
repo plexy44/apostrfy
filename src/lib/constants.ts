@@ -141,7 +141,7 @@ export const NARRATIVE_HOOKS: Record<TropePersonaKey, string[]> = {
     "A sudden, overwhelming memory of a place you've never been.",
     "The realization that your shadow is no longer mimicking your movements.",
     "The quiet hum of a refrigerator in the middle of the night.",
-a   "A conversation overheard between two birds that sounds suspiciously like an argument.",
+    "A conversation overheard between two birds that sounds suspiciously like an argument.",
     "The geometry of a spider's web, glistening with morning dew.",
     "The feeling of déjà vu for a future event.",
     "A forgotten shopping list found in the pocket of an old coat.",
