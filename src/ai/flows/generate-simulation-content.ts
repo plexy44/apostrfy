@@ -85,7 +85,7 @@ const generateSimulationContentPrompt = ai.definePrompt({
   name: 'generateSimulationContentPrompt',
   input: {schema: GenerateSimulationContentInputSchema},
   output: {schema: GenerateSimulationContentOutputSchema},
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-2.5-flash',
   prompt: systemPrompt,
   config: {
     temperature: 0.75,

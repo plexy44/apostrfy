@@ -28,7 +28,7 @@ const prompt = ai.definePrompt({
   name: 'generateStoryTitlePrompt',
   input: {schema: GenerateStoryTitleInputSchema},
   output: {schema: GenerateStoryTitleOutputSchema},
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-2.5-flash',
   prompt: `You are a skilled book editor. Your task is to read the following story and create a short, evocative, and compelling title for it. The title should be under 8 words and should not use quotes in the title.
 
 Story:
