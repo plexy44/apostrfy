@@ -101,13 +101,13 @@ const generateStoryContentPrompt = ai.definePrompt({
   input: {schema: GenerateStoryContentInputSchema},
   output: {schema: GenerateStoryContentOutputSchema},
   prompt: promptTemplate,
+  model: 'gemini-1.5-flash',
   templateHelpers: {
     ifEquals: function(arg1: any, arg2: any, options: any) {
       return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
     }
   },
   config: {
-    model: 'gemini-1.5-flash',
     temperature: 0.75,
   }
 });

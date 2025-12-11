@@ -28,9 +28,7 @@ const prompt = ai.definePrompt({
   name: 'generateQuoteBannerPrompt',
   input: {schema: GenerateQuoteBannerInputSchema},
   output: {schema: GenerateQuoteBannerOutputSchema},
-  config: {
-    model: 'gemini-1.5-flash',
-  },
+  model: 'gemini-1.5-flash',
   prompt: `You are a literary editor. Read the following collaborative story. Your task is to generate a single, insightful, and memorable quote of 10-20 words that captures the story's core theme, a pivotal moment, or its emotional essence. The quote should be artful, poignant, and sound like a line from a novel. Do not explain the quote. Return only the quote itself as a string.
 
 Story:

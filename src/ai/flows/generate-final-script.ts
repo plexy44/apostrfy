@@ -38,9 +38,7 @@ const prompt = ai.definePrompt({
   name: 'generateFinalScriptPrompt',
   input: {schema: z.object({ storyText: z.string() })},
   output: {schema: GenerateFinalScriptOutputSchema},
-  config: {
-    model: 'gemini-1.5-flash',
-  },
+  model: 'gemini-1.5-flash',
   prompt: `You are a proofreader and text formatter. Your task is to take the following raw story transcript, which consists of alternating lines from authors, and perform the following actions:
 
 1.  **Correct Spelling and Grammar**: Fix any spelling mistakes and grammatical errors in the text.
