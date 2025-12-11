@@ -100,7 +100,7 @@ const generateStoryContentPrompt = ai.definePrompt({
   name: 'generateStoryContentPrompt',
   input: {schema: GenerateStoryContentInputSchema},
   output: {schema: GenerateStoryContentOutputSchema},
-  model: 'gemini-pro',
+  model: 'googleai/gemini-1.5-flash',
   prompt: promptTemplate,
   templateHelpers: {
     ifEquals: function(arg1: any, arg2: any, options: any) {

@@ -28,7 +28,7 @@ const prompt = ai.definePrompt({
   name: 'generateStoryKeywordsPrompt',
   input: {schema: GenerateStoryKeywordsInputSchema},
   output: {schema: GenerateStoryKeywordsOutputSchema},
-  model: 'gemini-pro',
+  model: 'googleai/gemini-1.5-flash',
   prompt: `You are a literary analyst AI specializing in sentiment and thematic analysis. Read the following text, which contains a user's creative writing. Your task is to look beyond the literal words and analyze the underlying emotional tone, mood, and core themes.
 
 Based on this deep analysis, generate 5 to 7 single-word, conceptual keywords that encapsulate the overall sentiment of the piece. These keywords should represent abstract feelings or ideas (e.g., 'Hope', 'Isolation', 'Urgency', 'Discovery', 'Conflict') rather than being words directly extracted from the text.
