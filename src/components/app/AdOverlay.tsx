@@ -19,15 +19,17 @@ interface AdOverlayProps {
 export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
 
   const handleAdLoad = () => {
-    try {
-      if (typeof window !== 'undefined' && (window as any).adsbygoogle) {
-        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-        logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'quit_game_interstitial' });
+    setTimeout(() => {
+      try {
+        if (typeof window !== 'undefined' && (window as any).adsbygoogle) {
+          ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+          logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'quit_game_interstitial' });
+        }
+      } catch (err) {
+        console.error("AdSense error in overlay:", err);
+        logEvent('ad_load_failed', { ad_unit_name: 'quit_game_interstitial', error_message: (err as Error).message });
       }
-    } catch (err) {
-      console.error("AdSense error in overlay:", err);
-      logEvent('ad_load_failed', { ad_unit_name: 'quit_game_interstitial', error_message: (err as Error).message });
-    }
+    }, 100); // 100ms delay to ensure container is rendered
   }
 
   return (
