@@ -31,6 +31,9 @@ const prompt = ai.definePrompt({
   name: 'generateStyleMatchPrompt',
   input: {schema: GenerateStyleMatchInputSchema},
   output: {schema: GenerateStyleMatchOutputSchema},
+  config: {
+    model: 'gemini-1.5-flash',
+  },
   prompt: `You are a literary analyst AI. I will provide you with a block of text written by a user and a JSON object of influential figures with their descriptions. Your task is to meticulously compare the user's writing style (considering sentence structure, vocabulary, tone, pacing, and thematic focus) against the styles suggested by the descriptions of every figure in the JSON object. You must identify the two figures whose styles are the closest match to the user's text. Your response must be a JSON object containing a single key, styleMatches, which is an array of two strings: ['[WINNER_NAME]', '[RUNNER-UP_NAME]'].
 
 User Text:

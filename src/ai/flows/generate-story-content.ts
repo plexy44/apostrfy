@@ -107,6 +107,7 @@ const generateStoryContentPrompt = ai.definePrompt({
     }
   },
   config: {
+    model: 'gemini-1.5-flash',
     temperature: 0.75,
   }
 });

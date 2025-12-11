@@ -28,6 +28,9 @@ const prompt = ai.definePrompt({
   name: 'generateStoryTitlePrompt',
   input: {schema: GenerateStoryTitleInputSchema},
   output: {schema: GenerateStoryTitleOutputSchema},
+  config: {
+    model: 'gemini-1.5-flash',
+  },
   prompt: `You are a skilled book editor. Your task is to read the following story and create a short, evocative, and compelling title for it. The title should be under 8 words and should capture the essence of the story's theme, mood, or a key event. Do not use quotes in the title.
 
 Story:
