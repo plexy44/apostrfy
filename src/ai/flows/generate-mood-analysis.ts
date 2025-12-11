@@ -32,7 +32,7 @@ const prompt = ai.definePrompt({
   name: 'generateMoodAnalysisPrompt',
   input: {schema: GenerateMoodAnalysisInputSchema},
   output: {schema: GenerateMoodAnalysisOutputSchema},
-  model: 'gemini-1.5-flash',
+  model: 'gemini-pro',
   prompt: `Analyse the emotional sentiment of the following text. You must identify a primary emotion from the following list: [Joy, Hope, Awe, Serenity, Melancholy, Tension, Fear, Sadness, Morose]. Then, provide a confidence score for this primary emotion as a decimal value between 0.0 and 1.0. Your response must be a JSON object with two keys: primaryEmotion (string) and confidenceScore (float).
 
 User Text:

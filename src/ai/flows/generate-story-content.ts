@@ -100,8 +100,8 @@ const generateStoryContentPrompt = ai.definePrompt({
   name: 'generateStoryContentPrompt',
   input: {schema: GenerateStoryContentInputSchema},
   output: {schema: GenerateStoryContentOutputSchema},
+  model: 'gemini-pro',
   prompt: promptTemplate,
-  model: 'gemini-1.5-flash',
   templateHelpers: {
     ifEquals: function(arg1: any, arg2: any, options: any) {
       return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
