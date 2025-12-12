@@ -39,17 +39,22 @@ const prompt = ai.definePrompt({
   input: {schema: z.object({ storyText: z.string() })},
   output: {schema: GenerateFinalScriptOutputSchema},
   model: 'googleai/gemini-2.5-flash',
-  prompt: `You are a proofreader and text formatter. Your task is to take the following raw story transcript, which consists of alternating lines from authors, and perform the following actions:
+  prompt: `You are a "story finisher" AI. Your task is to take the following raw, back-and-forth story transcript and transform it into a cohesive and compelling piece of micro-fiction.
 
-1.  **Correct Spelling and Grammar**: Fix any spelling mistakes and grammatical errors in the text.
-2.  **Combine into Paragraphs**: Merge the alternating lines into a single, cohesive narrative. Form logical paragraphs where appropriate. Do not add any new content, ideas, or descriptions. Your role is only to format and correct.
-3.  **Preserve Original Intent**: The original voice and style of the authors should be preserved. Do not rephrase sentences unless it's for grammatical correctness.
-4.  **Output**: The final output should be a single block of text with standard paragraph breaks.
+**Your instructions are:**
 
-Do not interpret the story, add scene headings, or change the meaning. Simply combine, correct, and format.
+1.  **Synthesize, Don't Just Combine**: Weave the lines of dialogue and action into a unified narrative. Create smooth transitions between speakers.
+2.  **Embellish and Enhance**: Add descriptive details, sensory information, and internal thoughts where appropriate to enrich the scene. Your goal is to elevate the raw text into a more literary format, like an excerpt from a novel.
+3.  **Correct and Polish**: Fix any spelling mistakes and grammatical errors. Ensure the final text flows naturally.
+4.  **Preserve the Core**: Maintain the original tone, plot, and character voices established in the transcript. The embellishments should support the existing story, not change it.
+5.  **Format as Prose**: The final output should be a single block of text formatted into standard paragraphs. Do not use dialogue tags like "USER:" or "SCRIBLOX:".
 
-Raw Story Transcript:
-{{{storyText}}}`,
+**Raw Story Transcript:**
+\`\`\`
+{{{storyText}}}
+\`\`\`
+
+Turn this raw material into a short, interesting piece of literature.`,
 });
 
 
