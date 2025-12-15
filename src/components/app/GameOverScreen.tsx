@@ -17,7 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, RefreshCw, Send, Loader2, Share2 } from "lucide-react";
+import { Mail, RefreshCw, Send, Loader2, Share2, Award } from "lucide-react";
 import { motion } from "framer-motion";
 import MoodWheel from "./MoodWheel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,6 +29,7 @@ interface GameOverScreenProps {
   onPlayAgain: () => void;
   onEmailSubmit: (name: string, email: string) => Promise<boolean>;
   onShare: () => void;
+  onPublish: () => void;
 }
 
 
@@ -41,7 +42,7 @@ const FinalScriptRenderer = ({ script }: { script: string }) => {
 };
 
 
-export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit, onShare }: GameOverScreenProps) {
+export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit, onShare, onPublish }: GameOverScreenProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -77,6 +78,8 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit, o
       <CardContent className="p-4 md:p-6 pt-0">{children}</CardContent>
     </Card>
   );
+
+  const isPublishable = analysis.storyId !== 'not_saved' && analysis.storyId !== 'error_state';
 
   return (
     <motion.div 
@@ -196,15 +199,23 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit, o
           <RefreshCw />
           Play Again
         </Button>
-        <Button onClick={handleOpenEmailModal} variant="outline" size="lg" className="flex-1 px-4 text-base">
-          <Mail />
-          Email
+         <Button onClick={onPublish} variant="default" size="lg" className="flex-1 px-4 text-base bg-amber-500 hover:bg-amber-600 text-black" disabled={!isPublishable}>
+            <Award />
+            Publish
         </Button>
         <Button onClick={onShare} variant="outline" size="lg" className="flex-1 px-4 text-base">
           <Share2 />
           Share
         </Button>
       </div>
+
+       <div className="mt-2 w-full max-w-md">
+            <Button onClick={handleOpenEmailModal} variant="link" size="sm" className="w-full text-muted-foreground">
+              <Mail className="mr-2 h-4 w-4" />
+              Email story to yourself
+            </Button>
+        </div>
+
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="glassmorphism md:max-w-md w-[90vw] rounded-lg">

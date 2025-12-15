@@ -21,6 +21,7 @@ export default {
         headline: ['Space Grotesk', 'sans-serif'],
         script: ['Dancing Script', 'cursive'],
         code: ['Courier Prime', 'monospace'],
+        serif: ['Georgia', 'serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -124,5 +125,5 @@ export default {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
 } satisfies Config;

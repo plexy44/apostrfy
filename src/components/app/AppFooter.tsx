@@ -8,6 +8,7 @@
 
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import Link from "next/link";
+import { BookOpenCheck } from "lucide-react";
 
 export default function AppFooter() {
   return (
@@ -18,7 +19,13 @@ export default function AppFooter() {
           <Link href="/privacy-policy" className="hover:text-foreground transition-colors">Privacy</Link>
           <Link href="/terms-of-service" className="hover:text-foreground transition-colors">Terms</Link>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-4">
+          <Link href="/hall-of-fame" className="flex items-center gap-2 hover:text-foreground transition-colors">
+            <BookOpenCheck className="h-4 w-4" />
+            Hall of Fame
+          </Link>
+          <ThemeToggle />
+        </div>
       </div>
     </footer>
   );

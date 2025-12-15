@@ -5,9 +5,10 @@
  */
 "use client";
 
-import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc } from "firebase/firestore";
 import { app } from "./firebase"; // Import the initialized app
 import type { StoryPart, GameAnalysis } from "./types";
+import { getAuth } from "firebase/auth";
 
 const db = getFirestore(app);
 
@@ -47,12 +48,27 @@ interface StoryToSave {
 
 export const saveStoryToFirestore = async (storyData: StoryToSave): Promise<string> => {
     try {
-        const sanitizedStoryData = sanitizeForFirestore(storyData);
-        const docRef = await addDoc(collection(db, "stories"), {
-            ...sanitizedStoryData,
+        const auth = getAuth(app);
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error("User is not authenticated.");
+        }
+
+        const sanitizedStoryData = sanitizeForFirestore({
+            ...storyData,
+            creatorId: user.uid, // Add creatorId for ownership check
             createdAt: serverTimestamp(),
         });
+        
+        const docRef = await addDoc(collection(db, "stories"), sanitizedStoryData);
         console.log("Story saved with ID: ", docRef.id);
+        
+        // Now also update the analysis object with the new ID
+        const storyDoc = doc(db, "stories", docRef.id);
+        await setDoc(storyDoc, { 
+            analysis: { ...sanitizedStoryData.analysis, storyId: docRef.id }
+        }, { merge: true });
+
         return docRef.id;
     } catch (e) {
         console.error("Error adding document: ", e);

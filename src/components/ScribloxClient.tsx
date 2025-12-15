@@ -38,6 +38,7 @@ import famousQuotesData from "@/lib/famousQuotes.json";
 import { NARRATIVE_HOOKS } from "@/lib/constants";
 import { logEvent } from "@/lib/analytics";
 import { saveStoryToFirestore, saveSubscriberToFirestore } from "@/lib/firestore";
+import { publishStory as publishStoryAction } from "@/app/actions/publishStory";
 import { WebShare } from "lucide-react";
 
 // Dynamically import heavy components
@@ -74,6 +75,8 @@ const getPersonaKey = (trope: Trope): TropePersonaKey => {
 const getGameStateFromPath = (path: string): GameState['status'] => {
     if (path.startsWith('/game')) return 'playing';
     if (path.startsWith('/analysis')) return 'gameover';
+    if (path.startsWith('/read')) return 'gameover';
+    if (path.startsWith('/hall-of-fame')) return 'menu';
     return 'menu';
 }
 
@@ -99,6 +102,7 @@ export default function ScribloxClient() {
   const turnTimerRef = useRef<number>(Date.now());
   const analyticsFired = useRef(new Set<string>());
   const [areAdsEnabled, setAreAdsEnabled] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
   // URL and Ad management logic
   useEffect(() => {
@@ -141,7 +145,7 @@ export default function ScribloxClient() {
             break;
     }
 
-    if (window.location.pathname !== path) {
+    if (window.location.pathname !== path && !window.location.pathname.startsWith('/read')) {
       window.history.pushState({ status: gameState.status }, '', path);
     }
     
@@ -162,7 +166,9 @@ export default function ScribloxClient() {
   useEffect(() => {
     const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
+      if (user) {
+        setUser(user);
+      } else {
         signInAnonymously(auth).catch((error) => {
           console.error("Anonymous sign-in failed:", error);
         });
@@ -440,8 +446,30 @@ export default function ScribloxClient() {
 
         logEvent('complete_game', { story_length: story.length, final_mood: mood.primaryEmotion });
         
+        let savedStoryId = "not_saved";
+        try {
+            savedStoryId = await saveStoryToFirestore({
+                transcript: story,
+                analysis: {
+                    title,
+                    trope: settings.trope!,
+                    quoteBanner: quote,
+                    mood: mood,
+                    style: style,
+                    famousQuote: famousQuote,
+                    keywords,
+                    finalScript: script,
+                    story: story,
+                },
+                trope: settings.trope!,
+                title: title,
+            });
+        } catch (e) {
+            console.error("Failed to save story on game over:", e);
+        }
+
         const finalAnalysis: GameAnalysis = {
-            storyId: "not_saved", // The story is not saved by default
+            storyId: savedStoryId,
             title,
             trope: settings.trope!,
             quoteBanner: quote,
@@ -525,36 +553,16 @@ export default function ScribloxClient() {
   };
 
   const handleEmailSubmit = async (name: string, email: string) => {
-    if (!analysis) {
-        toast({ variant: "destructive", title: "Error", description: "No analysis data available to email." });
+    if (!analysis || analysis.storyId === 'not_saved' || analysis.storyId === 'error_state') {
+        toast({ variant: "destructive", title: "Error", description: "Story has not been saved yet. Cannot email." });
         return false;
     }
 
     try {
-        const sanitizedStory = analysis.story.map(part => ({
-          speaker: part.speaker,
-          line: part.line,
-          personaName: part.personaName || null,
-          isPaste: part.isPaste || false,
-        }));
-
-        const sanitizedAnalysis = {
-            ...analysis,
-            story: sanitizedStory,
-            famousQuote: analysis.famousQuote || null,
-        };
-
-        const storyId = await saveStoryToFirestore({
-            transcript: sanitizedAnalysis.story,
-            analysis: sanitizedAnalysis, 
-            trope: sanitizedAnalysis.trope,
-            title: sanitizedAnalysis.title,
-        });
-
         await saveSubscriberToFirestore({
             name: name,
             email: email,
-            storyId: storyId,
+            storyId: analysis.storyId,
         });
 
         toast({
@@ -562,15 +570,32 @@ export default function ScribloxClient() {
             description: "Your story is on its way to your inbox.",
         });
 
-        setAnalysis(prev => prev ? { ...prev, storyId } : null);
-
         return true;
     } catch (error) {
-        console.error("Failed to save or send story:", error);
+        console.error("Failed to save subscriber:", error);
         toast({ variant: "destructive", title: "Submission Error", description: "Could not process your request. Please try again." });
         return false;
     }
   };
+
+    const handlePublish = async () => {
+        if (!analysis || analysis.storyId === 'not_saved' || analysis.storyId === 'error_state') {
+            toast({ variant: "destructive", title: "Cannot Publish", description: "The story must be saved before it can be published."});
+            return;
+        }
+
+        try {
+            const result = await publishStoryAction(analysis.storyId);
+            if (result.success && result.url) {
+                toast({ title: "Story Published!", description: "Your story is now in the Hall of Fame." });
+                window.open(result.url, '_blank'); // Open the new story page
+            }
+        } catch (error: any) {
+            console.error("Failed to publish story:", error);
+            toast({ variant: "destructive", title: "Publishing Failed", description: error.message || "An unknown error occurred." });
+        }
+    };
+
 
   const handleShare = async () => {
     if (!analysis) return;
@@ -741,6 +766,7 @@ export default function ScribloxClient() {
                 onPlayAgain={handlePlayAgain}
                 onEmailSubmit={handleEmailSubmit}
                 onShare={handleShare}
+                onPublish={handlePublish}
               />
             )}
         </AnimatePresence>
