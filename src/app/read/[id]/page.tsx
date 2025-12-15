@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { getAdminDb } from '@/lib/firebaseAdmin';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
@@ -9,6 +9,7 @@ import { ArrowLeft } from 'lucide-react';
 
 // --- 1. Dynamic SEO Metadata ---
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const adminDb = getAdminDb();
   const doc = await adminDb.collection('public_stories').doc(params.id).get();
   if (!doc.exists) return { title: 'Story Not Found | Scriblox' };
   
@@ -30,6 +31,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
 
 // --- 2. The Page Layout ---
 export default async function ReadPage({ params }: { params: { id: string } }) {
+  const adminDb = getAdminDb();
   // Fetch data on the server
   const doc = await adminDb.collection('public_stories').doc(params.id).get();
   if (!doc.exists) return notFound();

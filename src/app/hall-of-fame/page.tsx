@@ -1,7 +1,8 @@
-import { adminDb } from '@/lib/firebaseAdmin';
+import { getAdminDb } from '@/lib/firebaseAdmin';
 import Link from 'next/link';
 
 export default async function HallOfFame() {
+  const adminDb = getAdminDb();
   const snapshot = await adminDb.collection('public_stories')
     .orderBy('createdAt', 'desc')
     .limit(20)

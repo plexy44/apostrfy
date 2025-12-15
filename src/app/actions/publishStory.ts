@@ -1,5 +1,5 @@
 'use server'
-import { adminDb } from '@/lib/firebaseAdmin'; 
+import { getAdminDb } from '@/lib/firebaseAdmin'; 
 import { auth } from '@/auth'; 
 
 export async function publishStory(storyId: string) {
@@ -8,6 +8,8 @@ export async function publishStory(storyId: string) {
   if (!session || !session.user) {
     throw new Error("You must be logged in to publish.");
   }
+  
+  const adminDb = getAdminDb();
 
   // 2. Fetch Original Private Story
   const privateRef = adminDb.collection('stories').doc(storyId);
