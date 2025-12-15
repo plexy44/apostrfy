@@ -42,7 +42,34 @@ const generateQuoteBannerFlow = ai.defineFlow(
     outputSchema: GenerateQuoteBannerOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    const maxRetries = 3;
+    let attempt = 0;
+    let lastError: any = null;
+
+    while (attempt < maxRetries) {
+      try {
+        const {output} = await prompt(input);
+        return output!;
+      } catch (e: any) {
+        lastError = e;
+        const isRateLimitError = e.message?.includes('429');
+        const isServiceUnavailable = e.message?.includes('503') || e.status === 503;
+
+        if (isRateLimitError) {
+          attempt++;
+          if (attempt < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 5000));
+          }
+        } else if (isServiceUnavailable) {
+          attempt++;
+          if (attempt < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+          }
+        } else {
+          throw e;
+        }
+      }
+    }
+    throw lastError;
   }
 );
