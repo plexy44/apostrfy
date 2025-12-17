@@ -5,7 +5,7 @@ import { auth } from '@/auth';
 export async function publishStory(storyId: string) {
   // 1. Verify User Session
   const session = await auth();
-  if (!session || !session.user) {
+  if (!session || !session.user || !session.user.id) {
     throw new Error("You must be logged in to publish.");
   }
   
@@ -21,8 +21,6 @@ export async function publishStory(storyId: string) {
   if (!data) throw new Error("Story data is missing.");
 
   // 3. Ownership Check (Critical Security)
-  // This assumes the original creator's ID is saved on the story document.
-  // The 'creatorId' field needs to be added when saving stories in `lib/firestore.ts`.
   if (data.creatorId !== session.user.id) {
     throw new Error("Unauthorized: You do not own this story.");
   }
