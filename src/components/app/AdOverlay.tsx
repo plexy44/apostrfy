@@ -6,6 +6,7 @@
 
 "use client";
 
+import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
@@ -17,20 +18,36 @@ interface AdOverlayProps {
 }
 
 export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
+  const hasPushedAd = useRef(false);
 
-  const handleAdLoad = () => {
-    setTimeout(() => {
-      try {
-        if (typeof window !== 'undefined' && (window as any).adsbygoogle) {
-          ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-          logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'quit_game_interstitial' });
+  useEffect(() => {
+    // Reset the ad push tracker when the overlay is hidden
+    if (!isVisible) {
+      hasPushedAd.current = false;
+      return;
+    }
+
+    // If the ad is visible and we haven't pushed yet, push the ad.
+    if (isVisible && !hasPushedAd.current) {
+      // Use a timeout to ensure the ad container is rendered and has dimensions
+      const adLoadTimer = setTimeout(() => {
+        try {
+          if (typeof window !== 'undefined' && (window as any).adsbygoogle) {
+            console.log('Pushing ad to Google.');
+            ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+            hasPushedAd.current = true; // Mark that we've pushed the ad
+            logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'quit_game_interstitial' });
+          }
+        } catch (err) {
+          console.error("AdSense error in overlay:", err);
+          logEvent('ad_load_failed', { ad_unit_name: 'quit_game_interstitial', error_message: (err as Error).message });
         }
-      } catch (err) {
-        console.error("AdSense error in overlay:", err);
-        logEvent('ad_load_failed', { ad_unit_name: 'quit_game_interstitial', error_message: (err as Error).message });
-      }
-    }, 100); // 100ms delay to ensure container is rendered
-  }
+      }, 150); // Increased delay slightly for more stability
+
+      return () => clearTimeout(adLoadTimer);
+    }
+  }, [isVisible]);
+
 
   return (
     <AnimatePresence>
@@ -41,7 +58,6 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          onAnimationComplete={handleAdLoad}
         >
           <div className="relative w-full max-w-md h-[80vh] bg-secondary rounded-lg flex flex-col items-center justify-center text-center border border-border shadow-2xl">
             
