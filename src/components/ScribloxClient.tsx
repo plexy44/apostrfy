@@ -74,7 +74,7 @@ const getPersonaKey = (trope: Trope): TropePersonaKey => {
 
 const getGameStateFromPath = (path: string): GameState['status'] => {
     if (path.startsWith('/game')) return 'playing';
-    if (path.startsWith('/analysis')) return 'gameover';
+    // The analysis page is now handled client-side without a URL change
     if (path.startsWith('/read')) return 'gameover';
     if (path.startsWith('/hall-of-fame')) return 'menu';
     return 'menu';
@@ -137,7 +137,9 @@ export default function ScribloxClient() {
             break;
         case 'gameover':
         case 'generating_summary':
-            path = '/analysis';
+             // Stay on the root path for gameover to avoid 404s.
+             // The component will render the GameOverScreen based on state.
+            path = '/';
             screenName = 'analysis_screen';
             break;
         case 'onboarding':
