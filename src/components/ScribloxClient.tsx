@@ -449,7 +449,7 @@ export default function ScribloxClient() {
             savedStoryId = await saveStoryToFirestore({
                 title: title,
                 content: script,
-                authorId: user.uid,
+                creatorId: user.uid, // Use creatorId here
                 mood: mood.primaryEmotion,
                 styleMatch: style.styleMatches[0]
             });
@@ -731,12 +731,6 @@ export default function ScribloxClient() {
                 onPlayAgain={handlePlayAgain}
                 onEmailSubmit={handleEmailSubmit}
                 onShare={handleShare}
-                onPublish={() => {
-                  toast({
-                    title: "Feature Disabled",
-                    description: "Publishing to the Hall of Fame is temporarily disabled.",
-                  });
-                }}
               />
             )}
         </AnimatePresence>

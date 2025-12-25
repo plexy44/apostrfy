@@ -29,7 +29,6 @@ interface GameOverScreenProps {
   onPlayAgain: () => void;
   onEmailSubmit: (name: string, email: string) => Promise<boolean>;
   onShare: () => void;
-  onPublish: () => void;
 }
 
 
@@ -42,7 +41,7 @@ const FinalScriptRenderer = ({ script }: { script: string }) => {
 };
 
 
-export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit, onShare, onPublish }: GameOverScreenProps) {
+export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit, onShare }: GameOverScreenProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -78,8 +77,6 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit, o
       <CardContent className="p-4 md:p-6 pt-0">{children}</CardContent>
     </Card>
   );
-
-  const isPublishable = analysis.storyId !== 'not_saved' && analysis.storyId !== 'error_state';
 
   return (
     <motion.div 
@@ -198,10 +195,6 @@ export default function GameOverScreen({ analysis, onPlayAgain, onEmailSubmit, o
         <Button onClick={onPlayAgain} size="lg" className="flex-1 px-4 text-base">
           <RefreshCw />
           Play Again
-        </Button>
-         <Button onClick={onPublish} variant="default" size="lg" className="flex-1 px-4 text-base bg-amber-500 hover:bg-amber-600 text-black" disabled={!isPublishable}>
-            <Award />
-            Publish
         </Button>
         <Button onClick={onShare} variant="outline" size="lg" className="flex-1 px-4 text-base">
           <Share2 />
