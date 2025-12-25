@@ -106,23 +106,24 @@ export default function ScribloxClient() {
     const handleUrlChange = () => {
       const currentStatus = getGameStateFromPath(window.location.pathname);
       
-      if (gameState.status === 'gameover' && currentStatus === 'gameover') return;
-      if (gameState.status === 'playing' && currentStatus === 'playing') return;
-
-      if (currentStatus === 'menu' && gameState.status !== 'menu') {
-        handlePlayAgain();
+      if (gameState.status === 'gameover' && currentStatus === 'menu') {
+         handlePlayAgain();
+      } else if (gameState.status !== 'gameover' && gameState.status !== 'playing' && currentStatus !== 'menu') {
+        window.history.pushState({ status: 'menu' }, '', '/');
       }
     };
 
     window.addEventListener('popstate', handleUrlChange);
 
-    let path = '/';
+    let path = window.location.pathname;
     let enableAds = true;
     let screenName: string = 'loading_screen';
 
     switch (gameState.status) {
         case 'menu':
-            path = '/';
+            if (path !== '/' && !path.startsWith('/hall-of-fame')) {
+                path = '/';
+            }
             screenName = 'main_menu';
             break;
         case 'playing':
@@ -133,7 +134,9 @@ export default function ScribloxClient() {
             break;
         case 'gameover':
         case 'generating_summary':
-            path = '/';
+             if (path !== '/') {
+                path = '/';
+            }
             screenName = 'analysis_screen';
             break;
         case 'onboarding':
@@ -141,7 +144,7 @@ export default function ScribloxClient() {
             break;
     }
 
-    if (window.location.pathname !== path && !window.location.pathname.startsWith('/read')) {
+    if (window.location.pathname !== path) {
       window.history.pushState({ status: gameState.status }, '', path);
     }
     
