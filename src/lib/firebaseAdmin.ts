@@ -1,8 +1,7 @@
 /**
  * @fileoverview This file initializes the Firebase Admin SDK for server-side
  * operations. It ensures that the admin app is initialized only once (singleton pattern)
- * and exports the Firestore database instance for use in server components and API routes.
- * It fetches service account credentials securely from environment variables.
+ * and exports functions to get the Firestore and Auth instances.
  */
 import * as admin from 'firebase-admin';
 
@@ -13,14 +12,22 @@ function getAdminApp() {
     return app;
   }
 
-  // Ensure the service account details are available in the environment
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY
+    ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+    : undefined;
+
+  if (!projectId || !clientEmail || !privateKey) {
+    throw new Error('Missing Firebase Admin SDK environment variables. Please set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY.');
+  }
+
   const serviceAccount: admin.ServiceAccount = {
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+    projectId,
+    clientEmail,
+    privateKey,
   };
 
-  // Initialize the admin app if it hasn't been already
   if (!admin.apps.length) {
     try {
       app = admin.initializeApp({
@@ -29,7 +36,7 @@ function getAdminApp() {
       console.log('Firebase Admin SDK initialized successfully.');
     } catch (error: any) {
       console.error('Firebase Admin SDK initialization error:', error.message);
-      // Re-throw or handle the error appropriately
+      // Re-throw a more specific error to make debugging easier
       throw new Error(`Firebase Admin SDK initialization failed: ${error.message}`);
     }
   } else {
