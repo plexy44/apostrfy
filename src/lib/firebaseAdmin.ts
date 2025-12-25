@@ -23,7 +23,10 @@ function getAdminApp() {
   }
 
   const serviceAccount: admin.ServiceAccount = {
-    projectId,
+    projectId,] Event: ai_turn_generated 
+{generation_time_ms: 8293, persona_1: "Carl Sagan", persona_2: "Jocelyn Bell Burnell"}
+You are trying to animate backgroundColor from "rgba(0, 0, 0, 0)" to "hsl(var(--accent))". rgba(0, 0, 0, 0) is not an animatable value - to enable this animation set rgba(0, 0, 0, 0) to a value animatable to hsl(var(--accent)) via the `style` property.
+
     clientEmail,
     privateKey,
   };

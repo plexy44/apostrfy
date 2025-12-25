@@ -117,6 +117,7 @@ const TimerBar = forwardRef<TimerBarRef, TimerBarProps>(({
       <div className="w-full h-1.5 md:h-2 bg-secondary rounded-full overflow-hidden">
         <motion.div
           className="h-full rounded-full"
+          initial={{ backgroundColor: "hsl(var(--accent))" }}
           animate={{
             width: `${percentage}%`,
             backgroundColor: isHealing
