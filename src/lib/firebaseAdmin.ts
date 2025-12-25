@@ -5,13 +5,25 @@
  */
 import * as admin from 'firebase-admin';
 
-let app: admin.app.App;
+// Define a type for the cached admin app on the global object
+interface GlobalWithFirebase extends NodeJS.Global {
+  firebaseAdminApp?: admin.app.App;
+}
 
-function getAdminApp() {
-  if (app) {
-    return app;
+function getAdminApp(): admin.app.App {
+  // Check if the app is already cached on the global object
+  if ((global as GlobalWithFirebase).firebaseAdminApp) {
+    return (global as GlobalWithFirebase).firebaseAdminApp!;
   }
 
+  // If not cached, check if it's already initialized by Firebase
+  if (admin.apps.length > 0) {
+    const existingApp = admin.app();
+    (global as GlobalWithFirebase).firebaseAdminApp = existingApp;
+    return existingApp;
+  }
+  
+  // If not initialized at all, proceed with initialization
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   const privateKey = process.env.FIREBASE_PRIVATE_KEY
@@ -23,30 +35,24 @@ function getAdminApp() {
   }
 
   const serviceAccount: admin.ServiceAccount = {
-    projectId,] Event: ai_turn_generated 
-{generation_time_ms: 8293, persona_1: "Carl Sagan", persona_2: "Jocelyn Bell Burnell"}
-You are trying to animate backgroundColor from "rgba(0, 0, 0, 0)" to "hsl(var(--accent))". rgba(0, 0, 0, 0) is not an animatable value - to enable this animation set rgba(0, 0, 0, 0) to a value animatable to hsl(var(--accent)) via the `style` property.
-
+    projectId,
     clientEmail,
     privateKey,
   };
 
-  if (!admin.apps.length) {
-    try {
-      app = admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
-      });
-      console.log('Firebase Admin SDK initialized successfully.');
-    } catch (error: any) {
-      console.error('Firebase Admin SDK initialization error:', error.message);
-      // Re-throw a more specific error to make debugging easier
-      throw new Error(`Firebase Admin SDK initialization failed: ${error.message}`);
-    }
-  } else {
-    app = admin.app();
+  try {
+    const newApp = admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    console.log('Firebase Admin SDK initialized successfully.');
+    // Cache the new app instance globally
+    (global as GlobalWithFirebase).firebaseAdminApp = newApp;
+    return newApp;
+  } catch (error: any) {
+    console.error('Firebase Admin SDK initialization error:', error.message);
+    // Re-throw a more specific error to make debugging easier
+    throw new Error(`Firebase Admin SDK initialization failed: ${error.message}`);
   }
-
-  return app;
 }
 
 // Getter for the Firestore instance
