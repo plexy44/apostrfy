@@ -5,73 +5,38 @@
  */
 "use client";
 
-import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc } from "firebase/firestore";
-import { app } from "./firebase"; // Import the initialized app
-import type { StoryPart, GameAnalysis } from "./types";
-import { getAuth } from "firebase/auth";
+import { getFirestore, collection, addDoc, serverTimestamp, Timestamp } from "firebase/firestore";
+import { app } from "./firebase";
+import type { GameAnalysis } from "./types";
 
 const db = getFirestore(app);
 
-// Helper function to sanitize data for Firestore
-const sanitizeForFirestore = (data: any): any => {
-  if (data === undefined) {
-    return null;
-  }
-  if (Array.isArray(data)) {
-    return data.map(item => sanitizeForFirestore(item));
-  }
-  if (typeof data === 'object' && data !== null && !(data instanceof Date) && Object.getPrototypeOf(data) === Object.prototype) {
-    const sanitizedObject: { [key: string]: any } = {};
-    for (const key in data) {
-      // We only want to sanitize own properties, not properties from the prototype chain.
-      if (Object.prototype.hasOwnProperty.call(data, key)) {
-        const value = data[key];
-        // Firestore cannot store 'undefined' values. We convert them to 'null'.
-        if (value !== undefined) {
-          sanitizedObject[key] = sanitizeForFirestore(value);
-        } else {
-          sanitizedObject[key] = null;
-        }
-      }
-    }
-    return sanitizedObject;
-  }
-  return data;
-};
-
 interface StoryToSave {
-    transcript: StoryPart[];
-    analysis: Omit<GameAnalysis, 'storyId'>;
-    trope: string;
     title: string;
+    content: string;
+    authorId: string;
+    mood?: string;
+    styleMatch?: string;
 }
 
 export const saveStoryToFirestore = async (storyData: StoryToSave): Promise<string> => {
     try {
-        const auth = getAuth(app);
-        const user = auth.currentUser;
-        if (!user) {
-            throw new Error("User is not authenticated.");
-        }
+        const now = Timestamp.now();
+        // Expire documents after 24 hours
+        const expireAt = new Timestamp(now.seconds + 24 * 60 * 60, now.nanoseconds);
 
-        const sanitizedStoryData = sanitizeForFirestore({
+        const storyToSave = {
             ...storyData,
-            creatorId: user.uid, // Add creatorId for ownership check
-            createdAt: serverTimestamp(),
-        });
+            createdAt: now,
+            expireAt: expireAt,
+        };
         
-        const docRef = await addDoc(collection(db, "stories"), sanitizedStoryData);
-        console.log("Story saved with ID: ", docRef.id);
+        const docRef = await addDoc(collection(db, "stories"), storyToSave);
+        console.log("Story saved to Hall of Fame with ID: ", docRef.id);
         
-        // Now also update the analysis object with the new ID
-        const storyDoc = doc(db, "stories", docRef.id);
-        await setDoc(storyDoc, { 
-            analysis: { ...sanitizedStoryData.analysis, storyId: docRef.id }
-        }, { merge: true });
-
         return docRef.id;
     } catch (e) {
-        console.error("Error adding document: ", e);
+        console.error("Error adding document to Hall of Fame: ", e);
         throw new Error("Could not save story to Firestore.");
     }
 };
@@ -84,9 +49,8 @@ interface SubscriberData {
 
 export const saveSubscriberToFirestore = async (subscriberData: SubscriberData) => {
     try {
-        const sanitizedSubscriberData = sanitizeForFirestore(subscriberData);
         const docRef = await addDoc(collection(db, "subscribers"), {
-            ...sanitizedSubscriberData,
+            ...subscriberData,
             submissionTimestamp: serverTimestamp()
         });
         console.log("Subscriber saved with ID: ", docRef.id);

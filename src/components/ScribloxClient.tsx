@@ -11,7 +11,7 @@ import { useState, useEffect, useRef } from "react";
 import dynamic from 'next/dynamic';
 import Script from "next/script";
 import { AnimatePresence } from "framer-motion";
-import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signInAnonymously, User } from "firebase/auth";
 import { app } from "@/lib/firebase"; 
 import type { GameState, StoryPart, Trope, Persona, TropePersonaKey, InspirationalPersonas, GameAnalysis, Speaker } from "@/lib/types";
 import type { GenerateStoryContentInput } from '@/ai/flows/generate-story-content';
@@ -38,7 +38,6 @@ import famousQuotesData from "@/lib/famousQuotes.json";
 import { NARRATIVE_HOOKS } from "@/lib/constants";
 import { logEvent } from "@/lib/analytics";
 import { saveStoryToFirestore, saveSubscriberToFirestore } from "@/lib/firestore";
-import { publishStory as publishStoryAction } from "@/app/actions/publishStory";
 import { WebShare } from "lucide-react";
 
 // Dynamically import heavy components
@@ -74,8 +73,6 @@ const getPersonaKey = (trope: Trope): TropePersonaKey => {
 
 const getGameStateFromPath = (path: string): GameState['status'] => {
     if (path.startsWith('/game')) return 'playing';
-    // The analysis page is now handled client-side without a URL change
-    if (path.startsWith('/read')) return 'gameover';
     if (path.startsWith('/hall-of-fame')) return 'menu';
     return 'menu';
 }
@@ -102,19 +99,18 @@ export default function ScribloxClient() {
   const turnTimerRef = useRef<number>(Date.now());
   const analyticsFired = useRef(new Set<string>());
   const [areAdsEnabled, setAreAdsEnabled] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   // URL and Ad management logic
   useEffect(() => {
     const handleUrlChange = () => {
       const currentStatus = getGameStateFromPath(window.location.pathname);
       
-      // Prevent re-triggering state changes if already in a "final" state like gameover
       if (gameState.status === 'gameover' && currentStatus === 'gameover') return;
       if (gameState.status === 'playing' && currentStatus === 'playing') return;
 
       if (currentStatus === 'menu' && gameState.status !== 'menu') {
-        handlePlayAgain(); // Reset state when navigating back to menu
+        handlePlayAgain();
       }
     };
 
@@ -137,8 +133,6 @@ export default function ScribloxClient() {
             break;
         case 'gameover':
         case 'generating_summary':
-             // Stay on the root path for gameover to avoid 404s.
-             // The component will render the GameOverScreen based on state.
             path = '/';
             screenName = 'analysis_screen';
             break;
@@ -369,12 +363,11 @@ export default function ScribloxClient() {
   };
 
   const proceedToAnalysis = async () => {
-    if (gameState.status === 'generating_summary' || gameState.status === 'gameover') return;
+    if (gameState.status === 'generating_summary' || gameState.status === 'gameover' || !user) return;
 
     setGameState({ status: "generating_summary" });
     
     try {
-        // Dynamically import analysis flows only when needed
         const { generateQuoteBanner } = await import('@/ai/flows/generate-quote-banner');
         const { generateMoodAnalysis } = await import('@/ai/flows/generate-mood-analysis');
         const { generateStyleMatch } = await import('@/ai/flows/generate-style-match');
@@ -451,20 +444,11 @@ export default function ScribloxClient() {
         let savedStoryId = "not_saved";
         try {
             savedStoryId = await saveStoryToFirestore({
-                transcript: story,
-                analysis: {
-                    title,
-                    trope: settings.trope!,
-                    quoteBanner: quote,
-                    mood: mood,
-                    style: style,
-                    famousQuote: famousQuote,
-                    keywords,
-                    finalScript: script,
-                    story: story,
-                },
-                trope: settings.trope!,
                 title: title,
+                content: script,
+                authorId: user.uid,
+                mood: mood.primaryEmotion,
+                styleMatch: style.styleMatches[0]
             });
         } catch (e) {
             console.error("Failed to save story on game over:", e);
@@ -520,7 +504,6 @@ export default function ScribloxClient() {
     setAdTrigger('end_game');
     setIsAdVisible(true);
     
-    // Start analysis in the background while ad is showing
     proceedToAnalysis();
   };
 
@@ -580,40 +563,20 @@ export default function ScribloxClient() {
     }
   };
 
-    const handlePublish = async () => {
-        if (!analysis || analysis.storyId === 'not_saved' || analysis.storyId === 'error_state') {
-            toast({ variant: "destructive", title: "Cannot Publish", description: "The story must be saved before it can be published."});
-            return;
-        }
-
-        try {
-            const result = await publishStoryAction(analysis.storyId);
-            if (result.success && result.url) {
-                toast({ title: "Story Published!", description: "Your story is now in the Hall of Fame." });
-                window.open(result.url, '_blank'); // Open the new story page
-            }
-        } catch (error: any) {
-            console.error("Failed to publish story:", error);
-            toast({ variant: "destructive", title: "Publishing Failed", description: error.message || "An unknown error occurred." });
-        }
-    };
-
-
   const handleShare = async () => {
     if (!analysis) return;
 
     const shareData = {
         title: `My Scriblox Story: "${analysis.title}"`,
         text: `I co-created a story called "${analysis.title}" on Scriblox. Here's the final script:\n\n${analysis.finalScript}`,
-        url: window.location.href, // Share the URL of the analysis page
+        url: window.location.href,
     };
 
     try {
         if (navigator.share) {
             await navigator.share(shareData);
-            logEvent('request_transcript', { email_provided: false }); // Using this for share too
+            logEvent('request_transcript', { email_provided: false });
         } else {
-            // Fallback for browsers that don't support Web Share API
             navigator.clipboard.writeText(shareData.text);
             toast({
                 title: "Story Copied!",
@@ -642,7 +605,6 @@ export default function ScribloxClient() {
       handlePlayAgain();
     } else if (adTrigger === 'end_game') {
       adUnitName = 'end_of_game_interstitial';
-      // The analysis is already running; the gameover state will be set when it's done.
     } else if (adTrigger === 'reward') {
       adUnitName = 'reward_unlock_ad';
       adFormat = 'rewarded';
@@ -666,7 +628,6 @@ export default function ScribloxClient() {
 
     setAdTrigger('reward');
     
-    // First, unlock Dragon Chasing mode
     if (!isDragonChasingUnlocked) {
       logEvent('rewarded_ad_flow', { status: 'offered', unlock_target: 'dragon_chasing_mode' });
       setIsAdVisible(true);
@@ -681,7 +642,6 @@ export default function ScribloxClient() {
       return;
     }
 
-    // If Dragon Chasing is unlocked, unlock the final styles
     if (!areAllStylesUnlocked) {
         logEvent('rewarded_ad_flow', { status: 'offered', unlock_target: 'final_styles' });
         setIsAdVisible(true);
@@ -768,7 +728,12 @@ export default function ScribloxClient() {
                 onPlayAgain={handlePlayAgain}
                 onEmailSubmit={handleEmailSubmit}
                 onShare={handleShare}
-                onPublish={handlePublish}
+                onPublish={() => {
+                  toast({
+                    title: "Feature Disabled",
+                    description: "Publishing to the Hall of Fame is temporarily disabled.",
+                  });
+                }}
               />
             )}
         </AnimatePresence>
