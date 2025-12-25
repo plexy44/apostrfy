@@ -1,8 +1,9 @@
 'use server'
-import { getAdminDb } from '@/lib/firebaseAdmin'; 
+import { saveStoryToFirestore } from '@/lib/firestore';
 import { auth } from '@/auth'; 
+import { getAdminDb } from '@/lib/firebaseAdmin';
 
-export async function publishStory(storyId: string) {
+export async function publishStory(storyData: any) {
   // 1. Verify User Session
   const session = await auth();
   if (!session || !session.user || !session.user.id) {
@@ -12,7 +13,7 @@ export async function publishStory(storyId: string) {
   const adminDb = getAdminDb();
 
   // 2. Fetch Original Private Story
-  const privateRef = adminDb.collection('stories').doc(storyId);
+  const privateRef = adminDb.collection('stories').doc(storyData.storyId);
   const snap = await privateRef.get();
   
   if (!snap.exists) throw new Error("Story not found.");
@@ -27,19 +28,19 @@ export async function publishStory(storyId: string) {
 
   // 4. Bad Word Filter (AdSense Requirement)
   const forbidden = ['badword1', 'badword2']; // Expand this list
-  const storyText = data.analysis?.finalScript || '';
+  const storyText = storyData.analysis?.finalScript || '';
   if (forbidden.some(word => storyText.toLowerCase().includes(word))) {
     throw new Error("Story contains flagged content and cannot be published.");
   }
 
   // 5. Write to Public Collection
-  await adminDb.collection('public_stories').doc(storyId).set({
-    title: data.title || "Untitled Story",
+  const publicStoryRef = await adminDb.collection('public_stories').doc(storyData.storyId).set({
+    title: storyData.title || "Untitled Story",
     content: storyText,
-    tagline: data.analysis?.quoteBanner || "A story from Scriblox.",
-    mood: data.analysis?.mood?.primaryEmotion || "Unknown",
-    styleMatch: data.analysis?.style?.primaryMatch || "Unknown",
-    keywords: data.analysis?.keywords || [],
+    tagline: storyData.analysis?.quoteBanner || "A story from Scriblox.",
+    mood: storyData.analysis?.mood?.primaryEmotion || "Unknown",
+    styleMatch: storyData.analysis?.style?.primaryMatch || "Unknown",
+    keywords: storyData.analysis?.keywords || [],
     originalCreatorId: session.user.id,
     authorName: session.user.name || "Scriblox Writer",
     createdAt: new Date(),
@@ -48,5 +49,5 @@ export async function publishStory(storyId: string) {
   });
 
   // 6. Return Success Path
-  return { success: true, url: `/read/${storyId}` };
+  return { success: true, url: `/read/${storyData.storyId}` };
 }
