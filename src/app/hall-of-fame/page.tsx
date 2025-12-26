@@ -1,8 +1,10 @@
 /**
  * @fileoverview Hall of Fame Page
- * SWITCHED STRATEGY: Now uses Client-Side Fetching to bypass Server-Side Admin SDK crashes.
+ * This page displays the most recent stories created by users.
+ * It fetches data directly from Firestore on the client-side to ensure
+ * the list is always up-to-date.
  */
-'use client'; // <--- This runs the page in the browser, bypassing the server crash
+'use client';
 
 import { useState, useEffect } from 'react';
 import { getFirestore, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
@@ -10,7 +12,7 @@ import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
-// 1. Ensure Firebase Client is Initialized (Safe to repeat)
+// Firebase client configuration
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -20,7 +22,7 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize only if not already running
+// Initialize Firebase client-side, only if it hasn't been already.
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
@@ -41,13 +43,13 @@ export default function HallOfFame() {
     async function fetchStories() {
       try {
         const storiesRef = collection(db, 'stories');
-        // Fetch top 100 newest stories
+        // Fetch top 100 newest stories, ordered by creation date
         const q = query(storiesRef, orderBy('createdAt', 'desc'), limit(100));
         const snapshot = await getDocs(q);
 
         const fetchedStories = snapshot.docs.map(doc => {
           const data = doc.data();
-          // Safe date conversion
+          // Safely convert Firestore timestamp to a string
           let dateStr = new Date().toISOString();
           if (data.createdAt && typeof data.createdAt.toDate === 'function') {
             dateStr = data.createdAt.toDate().toISOString();
@@ -78,7 +80,7 @@ export default function HallOfFame() {
     <div className="p-4 md:p-8">
       <div className="text-center mb-8">
         <h1 className="text-3xl md:text-4xl font-bold font-headline mb-2 text-foreground">Hall of Fame</h1>
-        <p className="text-muted-foreground">Stories live here for 24 hours.</p>
+        <p className="text-muted-foreground">The 100 most recent stories live here for 24 hours.</p>
       </div>
 
       {loading ? (
