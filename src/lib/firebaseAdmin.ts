@@ -1,66 +1,70 @@
-/**
- * @fileoverview This file initializes the Firebase Admin SDK for server-side
- * operations. It ensures that the admin app is initialized only once (singleton pattern)
- * and exports functions to get the Firestore and Auth instances.
- */
 import * as admin from 'firebase-admin';
 
-// Define a type for the cached admin app on the global object
-interface GlobalWithFirebase extends NodeJS.Global {
-  firebaseAdminApp?: admin.app.App;
-}
+let app: admin.app.App;
 
-function getAdminApp(): admin.app.App {
-  // Check if the app is already cached on the global object
-  if ((global as GlobalWithFirebase).firebaseAdminApp) {
-    return (global as GlobalWithFirebase).firebaseAdminApp!;
-  }
-
-  // If not cached, check if it's already initialized by Firebase
-  if (admin.apps.length > 0) {
-    const existingApp = admin.app();
-    (global as GlobalWithFirebase).firebaseAdminApp = existingApp;
-    return existingApp;
-  }
+// --- CLEANER FUNCTION ---
+// Strips accidental quotes and fixes newlines from .env variables
+const formatKey = (key: string | undefined) => {
+  if (!key) return undefined;
   
-  // If not initialized at all, proceed with initialization
-  const projectId = process.env.FIREBASE_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY
-    ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-    : undefined;
+  // 1. Remove surrounding double quotes if present (common paste error)
+  let cleanKey = key.replace(/^"|"$/g, '');
 
-  if (!projectId || !clientEmail || !privateKey) {
-    throw new Error('Missing Firebase Admin SDK environment variables. Please set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY.');
-  }
+  // 2. Replace literal "\n" characters with real newlines
+  cleanKey = cleanKey.replace(/\\n/g, '\n');
 
-  const serviceAccount: admin.ServiceAccount = {
-    projectId,
-    clientEmail,
-    privateKey,
-  };
+  // 3. Remove invisible Carriage Returns (\r) which break crypto
+  cleanKey = cleanKey.replace(/\r/g, '');
+  
+  return cleanKey.trim();
+};
 
-  try {
-    const newApp = admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-    console.log('Firebase Admin SDK initialized successfully.');
-    // Cache the new app instance globally
-    (global as GlobalWithFirebase).firebaseAdminApp = newApp;
-    return newApp;
-  } catch (error: any) {
-    console.error('Firebase Admin SDK initialization error:', error.message);
-    // Re-throw a more specific error to make debugging easier
-    throw new Error(`Firebase Admin SDK initialization failed: ${error.message}`);
-  }
+const cleanVar = (value: string | undefined) => {
+  if (!value) return undefined;
+  return value.replace(/^"|"$/g, '').trim();
 }
 
-// Getter for the Firestore instance
+function getAdminApp() {
+  if (app) return app;
+
+  const privateKey = formatKey(process.env.FIREBASE_PRIVATE_KEY);
+  const clientEmail = cleanVar(process.env.FIREBASE_CLIENT_EMAIL);
+  const projectId = cleanVar(process.env.FIREBASE_PROJECT_ID);
+
+  if (!privateKey || !clientEmail || !projectId) {
+     throw new Error('CRITICAL: Missing Firebase Admin environment variables. Check .env.local');
+  }
+
+  // Safety Check: Verify key format before initializing
+  if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
+      throw new Error('CRITICAL: Invalid Private Key format. Missing header.');
+  }
+
+  if (!admin.apps.length) {
+    try {
+      app = admin.initializeApp({
+        credential: admin.credential.cert({
+            projectId,
+            clientEmail,
+            privateKey
+        })
+      });
+      console.log('[Firebase Admin] SDK initialized successfully via Environment Variables.');
+    } catch (error: any) {
+      console.error('[Firebase Admin] Initialization Error:', error);
+      throw error;
+    }
+  } else {
+    app = admin.app();
+  }
+
+  return app;
+}
+
 export function getAdminDb() {
   return getAdminApp().firestore();
 }
 
-// Getter for the Auth instance
 export function getAdminAuth() {
   return getAdminApp().auth();
 }
