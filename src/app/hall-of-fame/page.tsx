@@ -2,7 +2,8 @@
  * @fileoverview Hall of Fame Page
  * This page displays the most recent stories created by users.
  * It fetches data directly from Firestore on the client-side to ensure
- * the list is always up-to-date.
+ * the list is always up-to-date and provides an interactive, expandable
+ * view for each story.
  */
 'use client';
 
@@ -11,6 +12,10 @@ import { getFirestore, collection, query, orderBy, limit, getDocs } from 'fireba
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import MoodWheel from '@/components/app/MoodWheel';
+import type { Emotion } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 // Firebase client configuration
 const firebaseConfig = {
@@ -30,7 +35,7 @@ interface Story {
   id: string;
   title: string;
   content: string;
-  mood?: string;
+  mood?: Emotion;
   styleMatch?: string;
   createdAt: string;
 }
@@ -38,6 +43,7 @@ interface Story {
 export default function HallOfFame() {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedStoryId, setExpandedStoryId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchStories() {
@@ -76,6 +82,10 @@ export default function HallOfFame() {
     fetchStories();
   }, []);
 
+  const handleCardClick = (storyId: string) => {
+    setExpandedStoryId(prevId => (prevId === storyId ? null : storyId));
+  };
+
   return (
     <div className="p-4 md:p-8">
       <div className="text-center mb-8">
@@ -90,18 +100,61 @@ export default function HallOfFame() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {stories.length > 0 ? (
-            stories.map((story) => (
-              <div key={story.id} className="border border-border/20 rounded-lg p-6 glassmorphism h-full flex flex-col hover:border-accent/50 transition-colors">
-                <h2 className="text-xl font-bold font-headline text-accent">{story.title}</h2>
-                <p className="text-sm text-muted-foreground mt-2 flex-grow line-clamp-3">
-                  {story.content}
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {story.mood && <Badge variant="secondary">{story.mood}</Badge>}
-                  {story.styleMatch && <Badge variant="secondary">{story.styleMatch}</Badge>}
-                </div>
-              </div>
-            ))
+            stories.map((story) => {
+              const isExpanded = expandedStoryId === story.id;
+              return (
+                <motion.div
+                  key={story.id}
+                  layout
+                  transition={{ layout: { duration: 0.3, ease: 'easeInOut' } }}
+                  onClick={() => handleCardClick(story.id)}
+                  className={cn(
+                    "border border-border/20 rounded-lg p-6 glassmorphism h-full flex flex-col cursor-pointer transition-colors",
+                    isExpanded ? "border-accent/50 col-span-1 md:col-span-2 lg:col-span-3" : "hover:border-accent/50"
+                  )}
+                >
+                  <motion.h2 layout="position" className="text-xl font-bold font-headline text-accent">{story.title}</motion.h2>
+                  <AnimatePresence>
+                    {isExpanded && (
+                       <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto', transition: { duration: 0.5, delay: 0.1 } }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                         <div className="mt-6 flex flex-col md:flex-row gap-6">
+                            {story.mood && (
+                                <div className="w-full md:w-48 flex-shrink-0">
+                                    <MoodWheel mood={story.mood} score={1} />
+                                </div>
+                            )}
+                           <p className="whitespace-pre-wrap font-code leading-relaxed text-foreground/80 flex-grow text-shimmer">
+                            {story.content}
+                           </p>
+                         </div>
+                       </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <AnimatePresence>
+                  {!isExpanded && (
+                     <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1, transition: { delay: 0.3 } }}
+                        exit={{ opacity: 0 }}
+                        className="text-sm text-muted-foreground mt-2 flex-grow line-clamp-3"
+                    >
+                        {story.content}
+                    </motion.p>
+                  )}
+                  </AnimatePresence>
+                  
+                  <motion.div layout className="mt-4 flex flex-wrap gap-2">
+                    {story.mood && <Badge variant="secondary">{story.mood}</Badge>}
+                    {story.styleMatch && <Badge variant="secondary">{story.styleMatch}</Badge>}
+                  </motion.div>
+                </motion.div>
+              )
+            })
           ) : (
             <p className="text-center text-muted-foreground col-span-full mt-8">
               The Hall of Fame is currently empty. Be the first to create a story!
