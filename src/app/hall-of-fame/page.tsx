@@ -12,7 +12,7 @@ import { getFirestore, collection, query, orderBy, limit, getDocs } from 'fireba
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import MoodWheel from '@/components/app/MoodWheel';
 import type { Emotion, GameMode } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -116,7 +116,10 @@ export default function HallOfFame() {
                 <AccordionTrigger className="p-3 md:p-4 rounded-lg border-2 text-left transition-all w-full h-full hover:no-underline bg-card/60 backdrop-blur-lg border-border/20 hover:border-accent/50 [&[data-state=open]>svg]:text-accent data-[state=open]:border-accent data-[state=open]:bg-accent/10 data-[state=open]:shadow-lg data-[state=open]:shadow-accent/10">
                     <div className="flex flex-col gap-2 w-full pr-4">
                         <div className="flex justify-between items-center">
-                            <h2 className="text-xl font-bold font-headline text-foreground data-[state=open]:text-shimmer">
+                            <h2 className={cn(
+                              "text-xl font-bold font-headline text-foreground",
+                              "[&[data-state=open]]:text-shimmer"
+                            )}>
                               {story.title}
                             </h2>
                             <GameModeIcon mode={story.gameMode} />
