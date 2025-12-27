@@ -8,6 +8,7 @@ export type Trope = 'Noir Detective' | 'Cosmic Wanderer' | 'Gothic Romance' | 'F
 export type TropePersonaKey = 'noirDetective' | 'cosmicWanderer' | 'gothicRomance' | 'freeflow';
 
 export type Speaker = 'user' | 'ai';
+export type GameMode = 'interactive' | 'simulation';
 
 export type StoryPart = {
   speaker: Speaker;

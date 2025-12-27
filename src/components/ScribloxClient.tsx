@@ -13,7 +13,7 @@ import Script from "next/script";
 import { AnimatePresence } from "framer-motion";
 import { getAuth, onAuthStateChanged, signInAnonymously, User } from "firebase/auth";
 import { app } from "@/lib/firebase"; 
-import type { GameState, StoryPart, Trope, Persona, TropePersonaKey, InspirationalPersonas, GameAnalysis, Speaker } from "@/lib/types";
+import type { GameState, StoryPart, Trope, Persona, TropePersonaKey, InspirationalPersonas, GameAnalysis, Speaker, GameMode } from "@/lib/types";
 import type { GenerateStoryContentInput } from '@/ai/flows/generate-story-content';
 import type { GenerateSimulationContentInput } from '@/ai/flows/generate-simulation-content';
 
@@ -38,7 +38,6 @@ import famousQuotesData from "@/lib/famousQuotes.json";
 import { NARRATIVE_HOOKS } from "@/lib/constants";
 import { logEvent } from "@/lib/analytics";
 import { saveStoryToFirestore, saveSubscriberToFirestore } from "@/lib/firestore";
-import { WebShare } from "lucide-react";
 
 // Dynamically import heavy components
 const MainMenu = dynamic(() => import('@/components/app/MainMenu'), { 
@@ -81,7 +80,7 @@ const getGameStateFromPath = (path: string): GameState['status'] => {
 export default function ScribloxClient() {
   const { isFirstVisit, setHasVisited } = useIsFirstVisit();
   const [gameState, setGameState] = useState<GameState>({ status: "loading_screen" });
-  const [gameMode, setGameMode] = useState<'interactive' | 'simulation'>('interactive');
+  const [gameMode, setGameMode] = useState<GameMode>('interactive');
   const [settings, setSettings] = useState<{ trope: Trope | null; duration: number }>({ trope: null, duration: 60 });
   const [story, setStory] = useState<StoryPart[]>([]);
   const [analysis, setAnalysis] = useState<GameAnalysis | null>(null);
@@ -449,9 +448,10 @@ export default function ScribloxClient() {
             savedStoryId = await saveStoryToFirestore({
                 title: title,
                 content: script,
-                creatorId: user.uid, // Use creatorId here
+                creatorId: user.uid,
                 mood: mood.primaryEmotion,
-                styleMatch: style.styleMatches[0]
+                styleMatch: style.styleMatches[0],
+                gameMode: gameMode,
             });
         } catch (e) {
             console.error("Failed to save story on game over:", e);

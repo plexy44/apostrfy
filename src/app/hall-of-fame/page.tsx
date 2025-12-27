@@ -14,9 +14,10 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import MoodWheel from '@/components/app/MoodWheel';
-import type { Emotion } from '@/lib/types';
+import type { Emotion, GameMode } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { logEvent } from '@/lib/analytics';
+import { User, Bot } from 'lucide-react';
 
 // Firebase client configuration
 const firebaseConfig = {
@@ -39,6 +40,7 @@ interface Story {
   mood?: Emotion;
   styleMatch?: string;
   createdAt: string;
+  gameMode?: GameMode;
 }
 
 export default function HallOfFame() {
@@ -68,7 +70,8 @@ export default function HallOfFame() {
               content: data.content || '',
               mood: data.mood,
               styleMatch: data.styleMatch,
-              createdAt: dateStr
+              createdAt: dateStr,
+              gameMode: data.gameMode,
             } as Story;
           })
           .filter(story => story.content && story.content.trim() !== ''); // Filter out empty stories
@@ -87,6 +90,15 @@ export default function HallOfFame() {
   const handleCardClick = (storyId: string) => {
     setExpandedStoryId(prevId => (prevId === storyId ? null : storyId));
   };
+
+  const GameModeIcon = ({ mode }: { mode?: GameMode }) => {
+    if (!mode) return null;
+    const iconProps = { className: "h-4 w-4 text-muted-foreground" };
+    if (mode === 'simulation') {
+        return <Bot {...iconProps} />;
+    }
+    return <User {...iconProps} />;
+  }
 
   return (
     <div className="p-4 md:p-8">
@@ -112,18 +124,33 @@ export default function HallOfFame() {
                   onClick={() => handleCardClick(story.id)}
                   className={cn(
                     "border border-border/20 rounded-lg p-6 glassmorphism h-full flex flex-col cursor-pointer transition-colors hover:border-accent/50",
-                    isExpanded && "border-accent/50"
                   )}
                 >
-                  <motion.h2 
-                    layout="position" 
-                    className={cn(
-                      "text-xl font-bold font-headline text-accent",
-                       isExpanded && "text-shimmer"
+                  <motion.div layout="position" className="flex justify-between items-start">
+                    <h2 
+                      className={cn(
+                        "text-xl font-bold font-headline text-accent",
+                        isExpanded && "text-shimmer"
+                      )}
+                    >
+                      {story.title}
+                    </h2>
+                    <GameModeIcon mode={story.gameMode} />
+                  </motion.div>
+                  
+
+                  <AnimatePresence>
+                    {!isExpanded && (
+                       <motion.p
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1, transition: { delay: 0.2 } }}
+                          exit={{ opacity: 0 }}
+                          className="text-sm text-muted-foreground mt-2 flex-grow line-clamp-3"
+                      >
+                          {story.content}
+                      </motion.p>
                     )}
-                   >
-                    {story.title}
-                  </motion.h2>
+                  </AnimatePresence>
 
                   <AnimatePresence>
                     {isExpanded && (
@@ -133,31 +160,18 @@ export default function HallOfFame() {
                         exit={{ opacity: 0, height: 0, transition: { duration: 0.3 } }}
                         className="overflow-hidden"
                       >
-                         <div className="mt-6 flex flex-col md:flex-row gap-4 justify-between items-start">
-                           <p className="whitespace-pre-wrap font-code leading-relaxed text-foreground/80 flex-grow basis-3/4 order-2 md:order-1">
+                         <div className="mt-6 flex flex-col gap-4">
+                           <p className="whitespace-pre-wrap font-code leading-relaxed text-foreground/80 text-left">
                             {story.content}
                            </p>
                            {story.mood && (
-                                <div className="w-full md:w-32 flex-shrink-0 order-1 md:order-2">
+                                <div className="w-24 h-24 self-end -mt-4">
                                     <MoodWheel mood={story.mood} score={1} />
                                 </div>
                             )}
                          </div>
                        </motion.div>
                     )}
-                  </AnimatePresence>
-
-                  <AnimatePresence>
-                  {!isExpanded && (
-                     <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1, transition: { delay: 0.2 } }}
-                        exit={{ opacity: 0 }}
-                        className="text-sm text-muted-foreground mt-2 flex-grow line-clamp-3"
-                    >
-                        {story.content}
-                    </motion.p>
-                  )}
                   </AnimatePresence>
                   
                   <motion.div layout className="mt-4 flex flex-wrap gap-2">

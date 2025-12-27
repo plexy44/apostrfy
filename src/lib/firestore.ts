@@ -7,16 +7,17 @@
 
 import { getFirestore, collection, addDoc, serverTimestamp, Timestamp } from "firebase/firestore";
 import { app } from "./firebase";
-import type { GameAnalysis } from "./types";
+import type { GameMode } from "./types";
 
 const db = getFirestore(app);
 
 interface StoryToSave {
     title: string;
     content: string;
-    authorId: string;
+    creatorId: string;
     mood?: string;
     styleMatch?: string;
+    gameMode: GameMode;
 }
 
 export const saveStoryToFirestore = async (storyData: StoryToSave): Promise<string> => {
