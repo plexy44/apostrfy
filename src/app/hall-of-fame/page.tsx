@@ -159,7 +159,7 @@ export default function HallOfFame() {
                         </p>
                         {story.mood && (
                              <motion.div 
-                                className="w-32 h-32 sm:w-40 sm:h-40 mx-auto mt-4"
+                                className="w-40 h-40 sm:w-48 sm:h-48 mx-auto mt-4"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.2 }}
