@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import MoodWheel from '@/components/app/MoodWheel';
 import type { Emotion } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { logEvent } from '@/lib/analytics';
 
 // Firebase client configuration
 const firebaseConfig = {
@@ -46,30 +47,31 @@ export default function HallOfFame() {
   const [expandedStoryId, setExpandedStoryId] = useState<string | null>(null);
 
   useEffect(() => {
+    logEvent('screen_view', { screen_name: 'hall_of_fame' });
     async function fetchStories() {
       try {
         const storiesRef = collection(db, 'stories');
-        // Fetch top 100 newest stories, ordered by creation date
         const q = query(storiesRef, orderBy('createdAt', 'desc'), limit(100));
         const snapshot = await getDocs(q);
 
-        const fetchedStories = snapshot.docs.map(doc => {
-          const data = doc.data();
-          // Safely convert Firestore timestamp to a string
-          let dateStr = new Date().toISOString();
-          if (data.createdAt && typeof data.createdAt.toDate === 'function') {
-            dateStr = data.createdAt.toDate().toISOString();
-          }
+        const fetchedStories = snapshot.docs
+          .map(doc => {
+            const data = doc.data();
+            let dateStr = new Date().toISOString();
+            if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+              dateStr = data.createdAt.toDate().toISOString();
+            }
 
-          return {
-            id: doc.id,
-            title: data.title || 'Untitled Story',
-            content: data.content || '',
-            mood: data.mood,
-            styleMatch: data.styleMatch,
-            createdAt: dateStr
-          } as Story;
-        });
+            return {
+              id: doc.id,
+              title: data.title || 'Untitled Story',
+              content: data.content || '',
+              mood: data.mood,
+              styleMatch: data.styleMatch,
+              createdAt: dateStr
+            } as Story;
+          })
+          .filter(story => story.content && story.content.trim() !== ''); // Filter out empty stories
 
         setStories(fetchedStories);
       } catch (error) {
@@ -109,37 +111,47 @@ export default function HallOfFame() {
                   transition={{ layout: { duration: 0.3, ease: 'easeInOut' } }}
                   onClick={() => handleCardClick(story.id)}
                   className={cn(
-                    "border border-border/20 rounded-lg p-6 glassmorphism h-full flex flex-col cursor-pointer transition-colors",
-                    isExpanded ? "border-accent/50 col-span-1 md:col-span-2 lg:col-span-3" : "hover:border-accent/50"
+                    "border border-border/20 rounded-lg p-6 glassmorphism h-full flex flex-col cursor-pointer transition-colors hover:border-accent/50",
+                    isExpanded && "border-accent/50"
                   )}
                 >
-                  <motion.h2 layout="position" className="text-xl font-bold font-headline text-accent">{story.title}</motion.h2>
+                  <motion.h2 
+                    layout="position" 
+                    className={cn(
+                      "text-xl font-bold font-headline text-accent",
+                       isExpanded && "text-shimmer"
+                    )}
+                   >
+                    {story.title}
+                  </motion.h2>
+
                   <AnimatePresence>
                     {isExpanded && (
                        <motion.div
                         initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto', transition: { duration: 0.5, delay: 0.1 } }}
-                        exit={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto', transition: { duration: 0.4, delay: 0.1 } }}
+                        exit={{ opacity: 0, height: 0, transition: { duration: 0.3 } }}
                         className="overflow-hidden"
                       >
-                         <div className="mt-6 flex flex-col md:flex-row gap-6">
-                            {story.mood && (
-                                <div className="w-full md:w-48 flex-shrink-0">
+                         <div className="mt-6 flex flex-col md:flex-row gap-4 justify-between items-start">
+                           <p className="whitespace-pre-wrap font-code leading-relaxed text-foreground/80 flex-grow basis-3/4 order-2 md:order-1">
+                            {story.content}
+                           </p>
+                           {story.mood && (
+                                <div className="w-full md:w-32 flex-shrink-0 order-1 md:order-2">
                                     <MoodWheel mood={story.mood} score={1} />
                                 </div>
                             )}
-                           <p className="whitespace-pre-wrap font-code leading-relaxed text-foreground/80 flex-grow text-shimmer">
-                            {story.content}
-                           </p>
                          </div>
                        </motion.div>
                     )}
                   </AnimatePresence>
+
                   <AnimatePresence>
                   {!isExpanded && (
                      <motion.p
                         initial={{ opacity: 0 }}
-                        animate={{ opacity: 1, transition: { delay: 0.3 } }}
+                        animate={{ opacity: 1, transition: { delay: 0.2 } }}
                         exit={{ opacity: 0 }}
                         className="text-sm text-muted-foreground mt-2 flex-grow line-clamp-3"
                     >
