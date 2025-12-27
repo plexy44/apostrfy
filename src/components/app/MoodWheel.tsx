@@ -10,7 +10,6 @@ import { Pie, PieChart, Cell } from "recharts"
 import type { Emotion } from "@/lib/types";
 import type { TooltipProps } from 'recharts';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
-import { motion } from "framer-motion";
 
 import {
   ChartConfig,
@@ -18,6 +17,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { cn } from "@/lib/utils";
 
 const MOOD_COLORS_HSL: Record<Emotion, string> = {
   Joy: "hsl(var(--mood-joy))",
@@ -72,49 +72,49 @@ export default function MoodWheel({ mood, score }: MoodWheelProps) {
   return (
     <ChartContainer
       config={chartConfig}
-      className="mx-auto aspect-square h-full max-h-[250px]"
+      className={cn(
+        "mx-auto aspect-square h-full max-h-[250px] rounded-full p-2 mood-background",
+      )}
     >
-      <motion.div className="w-full h-full rounded-full mood-shimmer">
-        <PieChart>
-          <ChartTooltip
-            cursor={false}
-            content={<CustomTooltipContent />}
-          />
-          <Pie
-            data={chartData}
-            dataKey="value"
-            nameKey="name"
-            innerRadius={60}
-            strokeWidth={5}
-            startAngle={90}
-            endAngle={450}
-          >
-              {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} />
-              ))}
-          </Pie>
-           <text
-              x="50%"
-              y="50%"
-              textAnchor="middle"
-              dominantBaseline="middle"
-              className="fill-foreground text-xl font-bold font-headline"
-              style={{ fill: MOOD_COLORS_HSL[mood] }}
-          >
-              {mood}
-          </text>
-           <text
-              x="50%"
-              y="50%"
-              dy="1.5em"
-              textAnchor="middle"
-              dominantBaseline="middle"
-              className="fill-muted-foreground text-sm"
-          >
-              {`${Math.round(score * 100)}% Match`}
-          </text>
-        </PieChart>
-      </motion.div>
+      <PieChart>
+        <ChartTooltip
+          cursor={false}
+          content={<CustomTooltipContent />}
+        />
+        <Pie
+          data={chartData}
+          dataKey="value"
+          nameKey="name"
+          innerRadius={60}
+          strokeWidth={5}
+          startAngle={90}
+          endAngle={450}
+        >
+            {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} />
+            ))}
+        </Pie>
+         <text
+            x="50%"
+            y="50%"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            className="fill-foreground text-xl font-bold font-headline"
+            style={{ fill: MOOD_COLORS_HSL[mood] }}
+        >
+            {mood}
+        </text>
+         <text
+            x="50%"
+            y="50%"
+            dy="1.5em"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            className="fill-muted-foreground text-sm"
+        >
+            {`${Math.round(score * 100)}% Match`}
+        </text>
+      </PieChart>
     </ChartContainer>
   )
 }

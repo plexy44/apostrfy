@@ -118,27 +118,14 @@
     animation: shimmer 5s ease-in-out infinite;
   }
   
-  .mood-shimmer {
-    position: relative;
-    overflow: hidden;
-  }
-  .mood-shimmer::after {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: conic-gradient(
-        from 0deg,
-        hsla(0, 0%, 100%, 0.2),
-        hsla(0, 0%, 100%, 0),
-        hsla(0, 0%, 100%, 0.2),
-        hsla(0, 0%, 100%, 0),
-        hsla(0, 0%, 100%, 0.2)
-      );
-      animation: mood-rotate 8s linear infinite;
-      pointer-events: none;
+  .mood-background {
+    background-image: radial-gradient(
+      circle at top left,
+      hsl(var(--accent) / 0.2),
+      hsl(var(--mood-joy) / 0.1) 25%,
+      hsl(var(--mood-serenity) / 0.2) 50%,
+      hsl(var(--primary) / 0.1) 100%
+    );
   }
 
 
@@ -146,10 +133,5 @@
     0% { background-position: 200% 50%; }
     50% { background-position: 0% 50%; }
     100% { background-position: 200% 50%; }
-  }
-
-  @keyframes mood-rotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
   }
 }
