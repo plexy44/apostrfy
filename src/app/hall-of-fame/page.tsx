@@ -18,6 +18,8 @@ import type { Emotion, GameMode } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { logEvent } from '@/lib/analytics';
 import { User, Bot } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 
 // Firebase client configuration
 const firebaseConfig = {
@@ -46,7 +48,6 @@ interface Story {
 export default function HallOfFame() {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedStoryId, setExpandedStoryId] = useState<string | null>(null);
 
   useEffect(() => {
     logEvent('screen_view', { screen_name: 'hall_of_fame' });
@@ -87,10 +88,6 @@ export default function HallOfFame() {
     fetchStories();
   }, []);
 
-  const handleCardClick = (storyId: string) => {
-    setExpandedStoryId(prevId => (prevId === storyId ? null : storyId));
-  };
-
   const GameModeIcon = ({ mode }: { mode?: GameMode }) => {
     if (!mode) return null;
     const iconProps = { className: "h-4 w-4 text-muted-foreground" };
@@ -112,81 +109,51 @@ export default function HallOfFame() {
           <p className="text-muted-foreground animate-pulse">Loading stories...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          {stories.length > 0 ? (
-            stories.map((story) => {
-              const isExpanded = expandedStoryId === story.id;
-              return (
-                <motion.div
-                  key={story.id}
-                  layout
-                  transition={{ layout: { duration: 0.3, ease: 'easeInOut' } }}
-                  onClick={() => handleCardClick(story.id)}
-                  className={cn(
-                    "border border-border/20 rounded-lg p-6 glassmorphism h-full flex flex-col cursor-pointer transition-colors hover:border-accent/50",
-                  )}
-                >
-                  <motion.div layout="position" className="flex justify-between items-start">
-                    <h2 
-                      className={cn(
-                        "text-xl font-bold font-headline text-accent",
-                        isExpanded && "text-shimmer"
-                      )}
-                    >
-                      {story.title}
-                    </h2>
-                    <GameModeIcon mode={story.gameMode} />
-                  </motion.div>
-                  
-
-                  <AnimatePresence>
-                    {!isExpanded && (
-                       <motion.p
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1, transition: { delay: 0.2 } }}
-                          exit={{ opacity: 0 }}
-                          className="text-sm text-muted-foreground mt-2 flex-grow line-clamp-3"
-                      >
-                          {story.content}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
-
-                  <AnimatePresence>
-                    {isExpanded && (
-                       <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto', transition: { duration: 0.4, delay: 0.1 } }}
-                        exit={{ opacity: 0, height: 0, transition: { duration: 0.3 } }}
-                        className="overflow-hidden"
-                      >
-                         <div className="mt-6 flex flex-col gap-4">
-                           <p className="whitespace-pre-wrap font-code leading-relaxed text-foreground/80 text-left">
-                            {story.content}
-                           </p>
-                           {story.mood && (
-                                <div className="w-24 h-24 self-end -mt-4">
+        stories.length > 0 ? (
+          <Accordion type="single" collapsible className="w-full max-w-2xl mx-auto space-y-3">
+            {stories.map((story) => (
+              <AccordionItem value={story.id} key={story.id} className="border border-border/20 rounded-lg glassmorphism transition-colors hover:border-accent/50 has-[[data-state=open]]:border-accent/50">
+                <AccordionTrigger className="p-4 text-left hover:no-underline [&[data-state=open]>svg]:text-accent">
+                    <div className="flex flex-col gap-2 w-full pr-4">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-xl font-bold font-headline text-accent [&[data-state=open]]:text-shimmer">
+                              {story.title}
+                            </h2>
+                            <GameModeIcon mode={story.gameMode} />
+                        </div>
+                         <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                           {story.content}
+                         </p>
+                         <div className="mt-2 flex flex-wrap gap-2">
+                          {story.mood && <Badge variant="secondary">{story.mood}</Badge>}
+                          {story.styleMatch && <Badge variant="secondary">{story.styleMatch}</Badge>}
+                        </div>
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="px-4 pb-4">
+                    <div className="mt-4 flex flex-col gap-4 border-t border-border/20 pt-4">
+                        <div className="flex justify-between items-start">
+                            <p className="whitespace-pre-wrap font-code leading-relaxed text-foreground/80 text-left flex-1">
+                                {story.content}
+                            </p>
+                            {story.mood && (
+                                <div className="w-20 h-20 self-start shrink-0">
                                     <MoodWheel mood={story.mood} score={1} />
                                 </div>
                             )}
-                         </div>
-                       </motion.div>
-                    )}
-                  </AnimatePresence>
-                  
-                  <motion.div layout className="mt-4 flex flex-wrap gap-2">
-                    {story.mood && <Badge variant="secondary">{story.mood}</Badge>}
-                    {story.styleMatch && <Badge variant="secondary">{story.styleMatch}</Badge>}
-                  </motion.div>
-                </motion.div>
-              )
-            })
-          ) : (
-            <p className="text-center text-muted-foreground col-span-full mt-8">
-              The Hall of Fame is currently empty. Be the first to create a story!
-            </p>
-          )}
-        </div>
+                        </div>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        ) : (
+          <p className="text-center text-muted-foreground col-span-full mt-8">
+            The Hall of Fame is currently empty. Be the first to create a story!
+          </p>
+        )
       )}
 
        <div className="text-center mt-12">
