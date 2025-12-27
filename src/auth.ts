@@ -5,7 +5,6 @@
  * the app before fully signing up.
  */
 import NextAuth from 'next-auth';
-import { adminAuth } from '@/lib/firebaseAdmin';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
