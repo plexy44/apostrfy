@@ -7,40 +7,8 @@
 
 import { getFirestore, collection, addDoc, serverTimestamp, Timestamp } from "firebase/firestore";
 import { app } from "./firebase";
-import type { GameMode } from "./types";
 
 const db = getFirestore(app);
-
-interface StoryToSave {
-    title: string;
-    content: string;
-    creatorId: string;
-    mood?: string;
-    styleMatch?: string;
-    gameMode: GameMode;
-}
-
-export const saveStoryToFirestore = async (storyData: StoryToSave): Promise<string> => {
-    try {
-        const now = Timestamp.now();
-        // Expire documents after 24 hours
-        const expireAt = new Timestamp(now.seconds + 24 * 60 * 60, now.nanoseconds);
-
-        const storyToSave = {
-            ...storyData,
-            createdAt: now,
-            expireAt: expireAt,
-        };
-        
-        const docRef = await addDoc(collection(db, "stories"), storyToSave);
-        console.log("Story saved to Hall of Fame with ID: ", docRef.id);
-        
-        return docRef.id;
-    } catch (e) {
-        console.error("Error adding document to Hall of Fame: ", e);
-        throw new Error("Could not save story to Firestore.");
-    }
-};
 
 interface SubscriberData {
     name: string;
