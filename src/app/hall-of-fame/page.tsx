@@ -12,7 +12,7 @@ import { getFirestore, collection, query, orderBy, limit, getDocs } from 'fireba
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import MoodWheel from '@/components/app/MoodWheel';
 import type { Emotion, GameMode } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -48,6 +48,7 @@ interface Story {
 export default function HallOfFame() {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openAccordion, setOpenAccordion] = useState<string | null>(null);
 
   useEffect(() => {
     logEvent('screen_view', { screen_name: 'hall_of_fame' });
@@ -110,7 +111,12 @@ export default function HallOfFame() {
         </div>
       ) : (
         stories.length > 0 ? (
-          <Accordion type="single" collapsible className="w-full max-w-2xl mx-auto space-y-3">
+          <Accordion 
+            type="single" 
+            collapsible 
+            className="w-full max-w-2xl mx-auto space-y-3"
+            onValueChange={(value) => setOpenAccordion(value)}
+          >
             {stories.map((story) => (
               <AccordionItem value={story.id} key={story.id} className="border-0">
                 <AccordionTrigger className="p-3 md:p-4 rounded-lg border-2 text-left transition-all w-full h-full hover:no-underline bg-card/60 backdrop-blur-lg border-border/20 hover:border-accent/50 [&[data-state=open]>svg]:text-accent data-[state=open]:border-accent data-[state=open]:bg-accent/10 data-[state=open]:shadow-lg data-[state=open]:shadow-accent/10">
@@ -118,19 +124,31 @@ export default function HallOfFame() {
                         <div className="flex justify-between items-center">
                             <h2 className={cn(
                               "text-xl font-bold font-headline text-foreground",
-                              "[&[data-state=open]]:text-shimmer"
+                              openAccordion === story.id && "text-shimmer"
                             )}>
                               {story.title}
                             </h2>
                             <GameModeIcon mode={story.gameMode} />
                         </div>
-                         <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                           {story.content}
-                         </p>
-                         <div className="mt-2 flex flex-wrap gap-2">
-                          {story.mood && <Badge variant="secondary">{story.mood}</Badge>}
-                          {story.styleMatch && <Badge variant="secondary">{story.styleMatch}</Badge>}
-                        </div>
+                        <AnimatePresence initial={false}>
+                          {openAccordion !== story.id && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 'auto' }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="overflow-hidden"
+                            >
+                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                {story.content}
+                              </p>
+                              <div className="mt-2 flex flex-wrap gap-2">
+                               {story.mood && <Badge variant="secondary">{story.mood}</Badge>}
+                               {story.styleMatch && <Badge variant="secondary">{story.styleMatch}</Badge>}
+                             </div>
+                           </motion.div>
+                          )}
+                        </AnimatePresence>
                     </div>
                 </AccordionTrigger>
                 <AccordionContent>
@@ -141,7 +159,7 @@ export default function HallOfFame() {
                         </p>
                         {story.mood && (
                              <motion.div 
-                                className="w-40 h-40 mx-auto mt-4"
+                                className="w-32 h-32 sm:w-40 sm:h-40 mx-auto mt-4"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.2 }}
