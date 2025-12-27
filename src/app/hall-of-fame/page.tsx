@@ -112,11 +112,11 @@ export default function HallOfFame() {
         stories.length > 0 ? (
           <Accordion type="single" collapsible className="w-full max-w-2xl mx-auto space-y-3">
             {stories.map((story) => (
-              <AccordionItem value={story.id} key={story.id} className="border border-border/20 rounded-lg glassmorphism transition-colors hover:border-accent/50 has-[[data-state=open]]:border-accent/50">
-                <AccordionTrigger className="p-4 text-left hover:no-underline [&[data-state=open]>svg]:text-accent">
+              <AccordionItem value={story.id} key={story.id} className="border-0">
+                <AccordionTrigger className="p-3 md:p-4 rounded-lg border-2 text-left transition-all w-full h-full hover:no-underline bg-card/60 backdrop-blur-lg border-border/20 hover:border-accent/50 [&[data-state=open]>svg]:text-accent data-[state=open]:border-accent data-[state=open]:bg-accent/10 data-[state=open]:shadow-lg data-[state=open]:shadow-accent/10">
                     <div className="flex flex-col gap-2 w-full pr-4">
                         <div className="flex justify-between items-center">
-                            <h2 className="text-xl font-bold font-headline text-accent [&[data-state=open]]:text-shimmer">
+                            <h2 className="text-xl font-bold font-headline text-foreground data-[state=open]:text-shimmer">
                               {story.title}
                             </h2>
                             <GameModeIcon mode={story.gameMode} />
@@ -131,18 +131,21 @@ export default function HallOfFame() {
                     </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <div className="px-4 pb-4">
-                    <div className="mt-4 flex flex-col gap-4 border-t border-border/20 pt-4">
-                        <div className="flex justify-between items-start">
-                            <p className="whitespace-pre-wrap font-code leading-relaxed text-foreground/80 text-left flex-1">
-                                {story.content}
-                            </p>
-                            {story.mood && (
-                                <div className="w-20 h-20 self-start shrink-0">
-                                    <MoodWheel mood={story.mood} score={1} />
-                                </div>
-                            )}
-                        </div>
+                  <div className="px-1 py-4 md:px-4 md:pb-4">
+                    <div className="mt-4 flex flex-col gap-4 border-t border-border/20 pt-6">
+                        <p className="whitespace-pre-wrap font-code leading-relaxed text-foreground/80 text-left text-sm md:text-base">
+                            {story.content}
+                        </p>
+                        {story.mood && (
+                             <motion.div 
+                                className="w-40 h-40 mx-auto mt-4"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.2 }}
+                            >
+                                <MoodWheel mood={story.mood} score={1} />
+                            </motion.div>
+                        )}
                     </div>
                   </div>
                 </AccordionContent>
