@@ -49,7 +49,8 @@ export default function HallOfFame() {
         const fetchedStories = snapshot.docs
           .map(doc => {
             const data = doc.data();
-            let dateStr = new Date().toISOString();
+            // Robust date handling: Use the story's date or fallback to now.
+            let dateStr = new Date().toISOString(); 
             if (data.createdAt && typeof data.createdAt.toDate === 'function') {
               dateStr = data.createdAt.toDate().toISOString();
             }
