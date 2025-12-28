@@ -9,7 +9,7 @@
 
 import { useState, useEffect } from 'react';
 import { getFirestore, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { getApp, getApps, initializeApp } from 'firebase/app';
+import { app } from '@/lib/firebase'; // Correctly import the shared app instance
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,19 +20,7 @@ import { logEvent } from '@/lib/analytics';
 import { User, Bot } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-
-// Firebase client configuration
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
-
-// Initialize Firebase client-side, only if it hasn't been already.
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Initialize Firestore using the shared app instance
 const db = getFirestore(app);
 
 interface Story {
