@@ -366,7 +366,10 @@ export default function ScribloxClient() {
   };
 
   const proceedToAnalysis = async () => {
-    if (gameState.status === 'generating_summary' || gameState.status === 'gameover' || !user) return;
+    if (gameState.status === 'generating_summary' || gameState.status === 'gameover' || !user) {
+        if (!user) console.error("User not authenticated, cannot save story.");
+        return;
+    }
 
     setGameState({ status: "generating_summary" });
     
