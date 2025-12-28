@@ -31,6 +31,7 @@ interface Story {
   styleMatch?: string;
   createdAt: string;
   gameMode?: GameMode;
+  fullContent: string;
 }
 
 export default function HallOfFame() {
@@ -49,8 +50,39 @@ export default function HallOfFame() {
         const fetchedStories = snapshot.docs
           .map(doc => {
             const data = doc.data();
-            // Robust date handling: Use the story's date or fallback to now.
-            let dateStr = new Date().toISOString(); 
+
+            // === ROBUST MAPPING FIX ===
+
+            // 1. Content: Check 'content', then 'story', then 'transcript'
+            let foundContent = data.content; // This is the final polished script
+            let previewContent = "";
+
+            // If the polished script doesn't exist, create a preview from raw data
+            if (!foundContent) {
+                // Check NEW structure (field = 'transcript')
+                if (Array.isArray(data.transcript) && data.transcript.length > 0) {
+                    foundContent = data.transcript.map((t: any) => `${t.speaker === 'ai' ? 'Scriblox' : 'You'}: ${t.line}`).join('\n');
+                    previewContent = data.transcript[0]?.line || "A story begins...";
+                }
+                // Check OLD structure (field = 'story')
+                else if (Array.isArray(data.story) && data.story.length > 0) {
+                    foundContent = data.story.map((t: any) => `${t.speaker === 'ai' ? 'Scriblox' : 'You'}: ${t.line}`).join('\n');
+                    previewContent = data.story[0]?.line || "A story begins...";
+                }
+            } else {
+              // If we have polished content, the preview is the first sentence.
+              previewContent = foundContent.split('.')[0] + '.';
+            }
+
+            if (!foundContent) foundContent = "No text content found.";
+            if (!previewContent) previewContent = foundContent.substring(0, 100) + '...';
+
+
+            // 2. Mood: Check 'mood', 'primaryEmotion', or 'trope'
+            const foundMood = data.mood || data.primaryEmotion || data.trope || "Unknown";
+
+            // 3. Date Handling
+            let dateStr = new Date().toISOString();
             if (data.createdAt && typeof data.createdAt.toDate === 'function') {
               dateStr = data.createdAt.toDate().toISOString();
             }
@@ -58,14 +90,15 @@ export default function HallOfFame() {
             return {
               id: doc.id,
               title: data.title || 'Untitled Story',
-              content: data.content || '',
-              mood: data.mood,
+              content: previewContent,
+              fullContent: foundContent,
+              mood: foundMood,
               styleMatch: data.styleMatch,
               createdAt: dateStr,
               gameMode: data.gameMode,
             } as Story;
           })
-          .filter(story => story.content && story.content.trim() !== ''); // Filter out empty stories
+          .filter(story => story.fullContent && story.fullContent.trim() !== '' && story.fullContent !== 'No text content found.');
 
         setStories(fetchedStories);
       } catch (error) {
@@ -144,7 +177,7 @@ export default function HallOfFame() {
                   <div className="px-1 py-4 md:px-4 md:pb-4">
                     <div className="mt-4 flex flex-col gap-4 border-t border-border/20 pt-6">
                         <p className="whitespace-pre-wrap font-code leading-relaxed text-foreground/80 text-left text-sm md:text-base">
-                            {story.content}
+                            {story.fullContent}
                         </p>
                         {story.mood && (
                              <motion.div 
