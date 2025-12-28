@@ -37,7 +37,7 @@ import personasData from "@/lib/personas.json";
 import famousQuotesData from "@/lib/famousQuotes.json";
 import { NARRATIVE_HOOKS } from "@/lib/constants";
 import { logEvent } from "@/lib/analytics";
-import { saveStory } from "@/app/actions/saveStory";
+import { saveStory } from "@/app/actions";
 import { saveSubscriberToFirestore } from "@/lib/firestore";
 
 // Dynamically import heavy components
@@ -449,7 +449,9 @@ export default function ScribloxClient() {
         
         let savedStoryId = "not_saved";
         try {
-            const storyToSave = {
+            if (!user) throw new Error("User not authenticated.");
+
+            const storyPayload = {
                 title: title,
                 content: script,
                 creatorId: user.uid,
@@ -457,8 +459,10 @@ export default function ScribloxClient() {
                 styleMatch: style.styleMatches[0],
                 gameMode: gameMode,
             };
-            const result = await saveStory(storyToSave);
-            if (result.id) {
+
+            const result = await saveStory(storyPayload);
+            
+            if (result.success && result.id) {
                 savedStoryId = result.id;
             } else {
                  throw new Error(result.error || "Unknown error saving story");
@@ -468,7 +472,7 @@ export default function ScribloxClient() {
             toast({
                 variant: "destructive",
                 title: "Save Failed",
-                description: "Your story could not be saved to the Hall of Fame.",
+                description: (e as Error).message || "Your story could not be saved to the Hall of Fame.",
             });
         }
 
