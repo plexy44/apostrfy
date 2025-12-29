@@ -12,7 +12,7 @@ import type { GameMode, Trope } from '@/lib/types';
 
 interface StoryData {
   title: string;
-  content: string;
+  content: string; // Corresponds to finalScript
   creatorId: string;
   mood?: string;
   styleMatch?: string;

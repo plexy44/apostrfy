@@ -31,7 +31,6 @@ interface Story {
   styleMatch?: string;
   createdAt: string;
   gameMode?: GameMode;
-  fullContent: string;
   trope?: string;
 }
 
@@ -51,8 +50,10 @@ export default function HallOfFame() {
         const fetchedStories = snapshot.docs
           .map(doc => {
             const data = doc.data();
-            const fullContent = data.content || "No full script available.";
-            const previewContent = fullContent.substring(0, 150) + (fullContent.length > 150 ? '...' : '');
+            // Robust content mapping
+            const foundContent = data.content || "No full script available.";
+            
+            const previewContent = foundContent.substring(0, 150) + (foundContent.length > 150 ? '...' : '');
 
             let dateStr = new Date().toISOString();
             if (data.createdAt && typeof data.createdAt.toDate === 'function') {
@@ -63,7 +64,7 @@ export default function HallOfFame() {
               id: doc.id,
               title: data.title || 'Untitled Story',
               content: previewContent,
-              fullContent: fullContent,
+              fullContent: foundContent,
               mood: data.mood,
               styleMatch: data.styleMatch,
               createdAt: dateStr,
