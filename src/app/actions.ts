@@ -8,7 +8,7 @@
 
 import { getAdminDb } from '@/lib/firebaseAdmin';
 import { Timestamp } from 'firebase-admin/firestore';
-import type { GameMode } from '@/lib/types';
+import type { GameMode, Trope } from '@/lib/types';
 
 interface StoryData {
   title: string;
@@ -17,6 +17,7 @@ interface StoryData {
   mood?: string;
   styleMatch?: string;
   gameMode: GameMode;
+  trope: Trope;
 }
 
 /**

@@ -9,7 +9,7 @@
 
 import { useState, useEffect } from 'react';
 import { getFirestore, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { app } from '@/lib/firebase'; // Correctly import the shared app instance
+import { app } from '@/lib/firebase';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -32,6 +32,7 @@ interface Story {
   createdAt: string;
   gameMode?: GameMode;
   fullContent: string;
+  trope?: string;
 }
 
 export default function HallOfFame() {
@@ -50,38 +51,9 @@ export default function HallOfFame() {
         const fetchedStories = snapshot.docs
           .map(doc => {
             const data = doc.data();
+            const fullContent = data.content || "No full script available.";
+            const previewContent = fullContent.substring(0, 150) + (fullContent.length > 150 ? '...' : '');
 
-            // === ROBUST MAPPING FIX ===
-
-            // 1. Content: Check 'content', then 'story', then 'transcript'
-            let foundContent = data.content; // This is the final polished script
-            let previewContent = "";
-
-            // If the polished script doesn't exist, create a preview from raw data
-            if (!foundContent) {
-                // Check NEW structure (field = 'transcript')
-                if (Array.isArray(data.transcript) && data.transcript.length > 0) {
-                    foundContent = data.transcript.map((t: any) => `${t.speaker === 'ai' ? 'Scriblox' : 'You'}: ${t.line}`).join('\n');
-                    previewContent = data.transcript[0]?.line || "A story begins...";
-                }
-                // Check OLD structure (field = 'story')
-                else if (Array.isArray(data.story) && data.story.length > 0) {
-                    foundContent = data.story.map((t: any) => `${t.speaker === 'ai' ? 'Scriblox' : 'You'}: ${t.line}`).join('\n');
-                    previewContent = data.story[0]?.line || "A story begins...";
-                }
-            } else {
-              // If we have polished content, the preview is the first sentence.
-              previewContent = foundContent.split('.')[0] + '.';
-            }
-
-            if (!foundContent) foundContent = "No text content found.";
-            if (!previewContent) previewContent = foundContent.substring(0, 100) + '...';
-
-
-            // 2. Mood: Check 'mood', 'primaryEmotion', or 'trope'
-            const foundMood = data.mood || data.primaryEmotion || data.trope || "Unknown";
-
-            // 3. Date Handling
             let dateStr = new Date().toISOString();
             if (data.createdAt && typeof data.createdAt.toDate === 'function') {
               dateStr = data.createdAt.toDate().toISOString();
@@ -91,14 +63,15 @@ export default function HallOfFame() {
               id: doc.id,
               title: data.title || 'Untitled Story',
               content: previewContent,
-              fullContent: foundContent,
-              mood: foundMood,
+              fullContent: fullContent,
+              mood: data.mood,
               styleMatch: data.styleMatch,
               createdAt: dateStr,
               gameMode: data.gameMode,
+              trope: data.trope
             } as Story;
           })
-          .filter(story => story.fullContent && story.fullContent.trim() !== '' && story.fullContent !== 'No text content found.');
+          .filter(story => story.fullContent && story.fullContent.trim() !== '' && story.fullContent !== 'No full script available.');
 
         setStories(fetchedStories);
       } catch (error) {
@@ -115,9 +88,9 @@ export default function HallOfFame() {
     if (!mode) return null;
     const iconProps = { className: "h-4 w-4 text-muted-foreground" };
     if (mode === 'simulation') {
-        return <Bot {...iconProps} />;
+        return <Bot {...iconProps} title="AI Simulation" />;
     }
-    return <User {...iconProps} />;
+    return <User {...iconProps} title="User Story" />;
   }
 
   return (
@@ -155,6 +128,7 @@ export default function HallOfFame() {
                         <AnimatePresence initial={false}>
                           {openAccordion !== story.id && (
                             <motion.div
+                              key="preview"
                               initial={{ opacity: 0, height: 'auto' }}
                               animate={{ opacity: 1, height: 'auto' }}
                               exit={{ opacity: 0, height: 0 }}
@@ -165,7 +139,7 @@ export default function HallOfFame() {
                                 {story.content}
                               </p>
                               <div className="mt-2 flex flex-wrap gap-2">
-                               {story.mood && <Badge variant="secondary">{story.mood}</Badge>}
+                               {story.trope && <Badge variant="secondary">{story.trope}</Badge>}
                                {story.styleMatch && <Badge variant="secondary">{story.styleMatch}</Badge>}
                              </div>
                            </motion.div>

@@ -366,8 +366,9 @@ export default function ScribloxClient() {
   };
 
   const proceedToAnalysis = async () => {
-    if (gameState.status === 'generating_summary' || gameState.status === 'gameover' || !user) {
+    if (gameState.status === 'generating_summary' || gameState.status === 'gameover' || !user || !settings.trope) {
         if (!user) console.error("User not authenticated, cannot save story.");
+        if (!settings.trope) console.error("Settings not available, cannot save story.");
         return;
     }
 
@@ -458,6 +459,7 @@ export default function ScribloxClient() {
                 mood: mood.primaryEmotion,
                 styleMatch: style.styleMatches[0],
                 gameMode: gameMode,
+                trope: settings.trope,
             };
 
             const result = await saveStory(storyPayload);
