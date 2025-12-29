@@ -2,9 +2,8 @@
  * @fileoverview Hall of Fame Page
  * Displays stories using robust data mapping.
  * FIXES:
- * 1. Correctly maps 'personaName' to credit the AI Co-Author (e.g. Albert Einstein).
- * 2. Joins full transcript text.
- * 3. Shows rich metadata sidebar.
+ * 1. Improved Persona Mapping to find names like "Albert Einstein" or "Marie Curie"
+ * by checking famousQuote, transcript arrays, and style matches.
  */
 'use client';
 
@@ -57,7 +56,6 @@ export default function HallOfFame() {
             // === 1. CONTENT MAPPING ===
             let foundContent = data.finalScript || data.content;
             
-            // Handle Transcripts (Simulations)
             if (!foundContent) {
                 if (Array.isArray(data.transcript)) {
                     foundContent = data.transcript.map((t: any) => t.line).join('\n\n'); 
@@ -88,21 +86,45 @@ export default function HallOfFame() {
                  else if (data.style.primaryMatch) styleMatch = data.style.primaryMatch;
             }
 
-            // === 4. PERSONA MAPPING (FIXED) ===
-            // Goal: Find the AI's name (e.g., "Albert Einstein")
-            let authorName = data.personaName; 
+            // === 4. PERSONA MAPPING (UPDATED) ===
+            // We look for the specific name in this priority order:
+            // 1. Top-level personaName
+            // 2. famousQuote author (Common in Interactive mode)
+            // 3. Transcript/Story arrays (Common in Simulation mode)
+            // 4. Style Match (Often the style IS the persona name)
+            
+            let authorName = data.personaName;
 
-            // If not at top level, look inside the transcript/story for the AI speaker
-            if (!authorName && Array.isArray(data.transcript)) {
-                 const aiTurn = data.transcript.find((t: any) => t.personaName && t.personaName !== 'User');
-                 if (aiTurn) authorName = aiTurn.personaName;
-            }
-            if (!authorName && Array.isArray(data.story)) {
-                 const aiTurn = data.story.find((s: any) => s.personaName && s.personaName !== 'User');
-                 if (aiTurn) authorName = aiTurn.personaName;
+            // Check Famous Quote Author (e.g. "Albert Camus")
+            if (!authorName && data.famousQuote?.author) {
+                authorName = data.famousQuote.author;
             }
 
-            // Fallback
+            // Check Arrays for a specific persona name (ignoring "User" or "AI")
+            if (!authorName) {
+                const arraysToCheck = [data.transcript, data.story];
+                for (const arr of arraysToCheck) {
+                    if (Array.isArray(arr)) {
+                        // Find any item where personaName exists and is NOT 'User' or 'AI'
+                        const foundItem = arr.find((item: any) => 
+                            item.personaName && 
+                            !['user', 'ai', 'User', 'AI'].includes(item.personaName)
+                        );
+                        if (foundItem) {
+                            authorName = foundItem.personaName;
+                            break; 
+                        }
+                    }
+                }
+            }
+
+            // Fallback to Style Match if it looks like a name (and isn't just the Trope)
+            // e.g. If Trope is "Cosmic Wanderer" but Style is "Buckminster Fuller", use the Style.
+            if (!authorName && styleMatch && styleMatch !== data.trope) {
+                authorName = styleMatch;
+            }
+
+            // Final Fallback
             if (!authorName) authorName = "AI Co-Author";
 
             // === 5. DATE MAPPING ===
