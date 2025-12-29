@@ -1,7 +1,9 @@
 /**
  * @fileoverview Hall of Fame Page
- * Displays stories using robust data mapping to handle different schema versions
- * (finalScript vs content, mood objects vs strings).
+ * Displays stories using robust data mapping.
+ * FIXES:
+ * 1. Joins all lines of 'transcript'/'story' arrays so full text is displayed.
+ * 2. Adds rich metadata (Persona, Style, Date) to the expanded view.
  */
 'use client';
 
@@ -15,7 +17,7 @@ import MoodWheel from '@/components/app/MoodWheel';
 import type { Emotion, GameMode } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { logEvent } from '@/lib/analytics';
-import { User, Bot } from 'lucide-react';
+import { User, Bot, Calendar, Feather, UserCircle } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 // Initialize Firestore
@@ -24,13 +26,14 @@ const db = getFirestore(app);
 interface Story {
   id: string;
   title: string;
-  content: string; // The short preview
-  fullContent: string; // The full text
+  content: string;     // The short preview
+  fullContent: string; // The ACTUAL full text
   mood?: Emotion;
   styleMatch?: string;
   createdAt: string;
   gameMode?: GameMode;
   trope?: string;
+  authorName?: string; // The Persona Name
 }
 
 export default function HallOfFame() {
@@ -50,23 +53,31 @@ export default function HallOfFame() {
           .map(doc => {
             const data = doc.data();
             
-            // === 1. ROBUST CONTENT MAPPING (The Critical Fix) ===
-            // We check 'finalScript' first (from your screenshots), then 'content', then 'transcript'
+            // === 1. ROBUST CONTENT MAPPING ===
             let foundContent = data.finalScript || data.content;
             
-            // Fallback for nested transcript (AI simulation data)
-            if (!foundContent && Array.isArray(data.transcript) && data.transcript[0]?.line) {
-               foundContent = `"${data.transcript[0].line}..."`;
+            // FIX: If using transcript (Simulation), JOIN ALL LINES instead of taking just the first one.
+            if (!foundContent) {
+                if (Array.isArray(data.transcript)) {
+                    // Filter out non-story lines if necessary, or just map lines
+                    foundContent = data.transcript
+                        .map((t: any) => t.line)
+                        .join('\n\n'); 
+                } else if (Array.isArray(data.story)) {
+                    foundContent = data.story
+                        .map((s: any) => s.line)
+                        .join('\n\n');
+                }
             }
+            
             if (!foundContent) foundContent = "No full script available.";
             
-            // Create a preview for the collapsed state
+            // Create a preview for the collapsed state (First 150 chars)
             const previewContent = foundContent.length > 150 
                 ? foundContent.substring(0, 150) + '...' 
                 : foundContent;
 
             // === 2. MOOD MAPPING ===
-            // Handle both String ("Fear") and Object ({ primaryEmotion: "Fear" })
             let mood: Emotion | undefined = undefined;
             if (data.mood) {
                 if (typeof data.mood === 'string') {
@@ -77,14 +88,21 @@ export default function HallOfFame() {
             }
 
             // === 3. STYLE MAPPING ===
-            // Handle String vs Object
             let styleMatch = data.styleMatch;
             if (!styleMatch && data.style) {
                  if (typeof data.style === 'string') styleMatch = data.style;
                  else if (data.style.primaryMatch) styleMatch = data.style.primaryMatch;
             }
 
-            // === 4. DATE MAPPING ===
+            // === 4. PERSONA MAPPING (New) ===
+            let authorName = data.personaName || "Unknown";
+            // If missing, try to find it in the story array
+            if ((!authorName || authorName === "Unknown") && Array.isArray(data.story)) {
+                 const userTurn = data.story.find((s: any) => s.speaker === 'user');
+                 if (userTurn && userTurn.personaName) authorName = userTurn.personaName;
+            }
+
+            // === 5. DATE MAPPING ===
             let dateStr = new Date().toISOString();
             if (data.createdAt) {
                 if (typeof data.createdAt.toDate === 'function') {
@@ -98,15 +116,15 @@ export default function HallOfFame() {
               id: doc.id,
               title: data.title || 'Untitled Story',
               content: previewContent,
-              fullContent: foundContent,
+              fullContent: foundContent, // Now contains the FULL joined text
               mood: mood,
               styleMatch: styleMatch,
               createdAt: dateStr,
-              gameMode: data.gameMode || (data.transcript ? 'simulation' : 'interactive'), // Infer mode if missing
-              trope: data.trope || data.tropeName // Handle variations
+              gameMode: data.gameMode || (data.transcript ? 'simulation' : 'interactive'),
+              trope: data.trope || data.tropeName,
+              authorName: authorName
             } as Story;
           })
-          // Only filter out stories that truly have NO content
           .filter(story => story.fullContent && story.fullContent !== "No full script available.");
 
         setStories(fetchedStories);
@@ -183,22 +201,62 @@ export default function HallOfFame() {
                         </AnimatePresence>
                     </div>
                 </AccordionTrigger>
+                
+                {/* === EXPANDED CONTENT === */}
                 <AccordionContent>
                   <div className="px-1 py-4 md:px-4 md:pb-4">
-                    <div className="mt-4 flex flex-col gap-4 border-t border-border/20 pt-6">
-                        <p className="whitespace-pre-wrap font-code leading-relaxed text-foreground/80 text-left text-sm md:text-base">
-                            {story.fullContent}
-                        </p>
-                        {story.mood && (
-                             <motion.div 
-                                className="w-40 h-40 sm:w-48 sm:h-48 mx-auto mt-4"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.2 }}
-                            >
-                                <MoodWheel mood={story.mood} score={1} />
-                            </motion.div>
-                        )}
+                    <div className="mt-4 border-t border-border/20 pt-6 flex flex-col md:flex-row gap-6">
+                        
+                        {/* 1. Full Script */}
+                        <div className="flex-1">
+                            <p className="whitespace-pre-wrap font-code leading-relaxed text-foreground/90 text-left text-sm md:text-base">
+                                {story.fullContent}
+                            </p>
+                        </div>
+
+                        {/* 2. Metadata Sidebar (Mood, Persona, Date) */}
+                        <div className="w-full md:w-48 flex-shrink-0 flex flex-col gap-6 p-4 rounded-lg bg-black/20 border border-white/5 h-fit">
+                            
+                            {/* Mood Ring */}
+                            {story.mood && (
+                                <div className="flex flex-col items-center">
+                                    <span className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Mood</span>
+                                    <div className="w-24 h-24">
+                                        <MoodWheel mood={story.mood} score={1} />
+                                    </div>
+                                    <span className="mt-2 text-sm font-bold text-accent">{story.mood}</span>
+                                </div>
+                            )}
+
+                            {/* Details List */}
+                            <div className="space-y-3 text-sm">
+                                <div className="flex flex-col gap-1">
+                                    <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wide">
+                                        <UserCircle className="w-3 h-3" /> Persona
+                                    </div>
+                                    <span className="font-medium text-foreground">{story.authorName}</span>
+                                </div>
+
+                                {story.styleMatch && (
+                                    <div className="flex flex-col gap-1">
+                                        <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wide">
+                                            <Feather className="w-3 h-3" /> Style
+                                        </div>
+                                        <span className="font-medium text-foreground">{story.styleMatch}</span>
+                                    </div>
+                                )}
+
+                                <div className="flex flex-col gap-1">
+                                    <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wide">
+                                        <Calendar className="w-3 h-3" /> Date
+                                    </div>
+                                    <span className="text-muted-foreground">
+                                        {new Date(story.createdAt).toLocaleDateString()}
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
                   </div>
                 </AccordionContent>
