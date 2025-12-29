@@ -1,9 +1,7 @@
 /**
  * @fileoverview Hall of Fame Page
- * This page displays the most recent stories created by users.
- * It fetches data directly from Firestore on the client-side to ensure
- * the list is always up-to-date and provides an interactive, expandable
- * view for each story.
+ * Displays stories using robust data mapping to handle different schema versions
+ * (finalScript vs content, mood objects vs strings).
  */
 'use client';
 
@@ -20,13 +18,14 @@ import { logEvent } from '@/lib/analytics';
 import { User, Bot } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-// Initialize Firestore using the shared app instance
+// Initialize Firestore
 const db = getFirestore(app);
 
 interface Story {
   id: string;
   title: string;
-  content: string;
+  content: string; // The short preview
+  fullContent: string; // The full text
   mood?: Emotion;
   styleMatch?: string;
   createdAt: string;
@@ -50,14 +49,49 @@ export default function HallOfFame() {
         const fetchedStories = snapshot.docs
           .map(doc => {
             const data = doc.data();
-            // Robust content mapping
-            const foundContent = data.content || "No full script available.";
             
-            const previewContent = foundContent.substring(0, 150) + (foundContent.length > 150 ? '...' : '');
+            // === 1. ROBUST CONTENT MAPPING (The Critical Fix) ===
+            // We check 'finalScript' first (from your screenshots), then 'content', then 'transcript'
+            let foundContent = data.finalScript || data.content;
+            
+            // Fallback for nested transcript (AI simulation data)
+            if (!foundContent && Array.isArray(data.transcript) && data.transcript[0]?.line) {
+               foundContent = `"${data.transcript[0].line}..."`;
+            }
+            if (!foundContent) foundContent = "No full script available.";
+            
+            // Create a preview for the collapsed state
+            const previewContent = foundContent.length > 150 
+                ? foundContent.substring(0, 150) + '...' 
+                : foundContent;
 
+            // === 2. MOOD MAPPING ===
+            // Handle both String ("Fear") and Object ({ primaryEmotion: "Fear" })
+            let mood: Emotion | undefined = undefined;
+            if (data.mood) {
+                if (typeof data.mood === 'string') {
+                    mood = data.mood as Emotion;
+                } else if (data.mood.primaryEmotion) {
+                    mood = data.mood.primaryEmotion as Emotion;
+                }
+            }
+
+            // === 3. STYLE MAPPING ===
+            // Handle String vs Object
+            let styleMatch = data.styleMatch;
+            if (!styleMatch && data.style) {
+                 if (typeof data.style === 'string') styleMatch = data.style;
+                 else if (data.style.primaryMatch) styleMatch = data.style.primaryMatch;
+            }
+
+            // === 4. DATE MAPPING ===
             let dateStr = new Date().toISOString();
-            if (data.createdAt && typeof data.createdAt.toDate === 'function') {
-              dateStr = data.createdAt.toDate().toISOString();
+            if (data.createdAt) {
+                if (typeof data.createdAt.toDate === 'function') {
+                  dateStr = data.createdAt.toDate().toISOString();
+                } else {
+                  dateStr = data.createdAt;
+                }
             }
 
             return {
@@ -65,14 +99,15 @@ export default function HallOfFame() {
               title: data.title || 'Untitled Story',
               content: previewContent,
               fullContent: foundContent,
-              mood: data.mood,
-              styleMatch: data.styleMatch,
+              mood: mood,
+              styleMatch: styleMatch,
               createdAt: dateStr,
-              gameMode: data.gameMode,
-              trope: data.trope
+              gameMode: data.gameMode || (data.transcript ? 'simulation' : 'interactive'), // Infer mode if missing
+              trope: data.trope || data.tropeName // Handle variations
             } as Story;
           })
-          .filter(story => story.fullContent && story.fullContent.trim() !== '' && story.fullContent !== 'No full script available.');
+          // Only filter out stories that truly have NO content
+          .filter(story => story.fullContent && story.fullContent !== "No full script available.");
 
         setStories(fetchedStories);
       } catch (error) {
