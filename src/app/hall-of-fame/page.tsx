@@ -2,8 +2,9 @@
  * @fileoverview Hall of Fame Page
  * Displays stories using robust data mapping.
  * FIXES:
- * 1. Joins all lines of 'transcript'/'story' arrays so full text is displayed.
- * 2. Adds rich metadata (Persona, Style, Date) to the expanded view.
+ * 1. Correctly maps 'personaName' to credit the AI Co-Author (e.g. Albert Einstein).
+ * 2. Joins full transcript text.
+ * 3. Shows rich metadata sidebar.
  */
 'use client';
 
@@ -33,7 +34,7 @@ interface Story {
   createdAt: string;
   gameMode?: GameMode;
   trope?: string;
-  authorName?: string; // The Persona Name
+  authorName?: string; // The AI Persona Name
 }
 
 export default function HallOfFame() {
@@ -53,26 +54,19 @@ export default function HallOfFame() {
           .map(doc => {
             const data = doc.data();
             
-            // === 1. ROBUST CONTENT MAPPING ===
+            // === 1. CONTENT MAPPING ===
             let foundContent = data.finalScript || data.content;
             
-            // FIX: If using transcript (Simulation), JOIN ALL LINES instead of taking just the first one.
+            // Handle Transcripts (Simulations)
             if (!foundContent) {
                 if (Array.isArray(data.transcript)) {
-                    // Filter out non-story lines if necessary, or just map lines
-                    foundContent = data.transcript
-                        .map((t: any) => t.line)
-                        .join('\n\n'); 
+                    foundContent = data.transcript.map((t: any) => t.line).join('\n\n'); 
                 } else if (Array.isArray(data.story)) {
-                    foundContent = data.story
-                        .map((s: any) => s.line)
-                        .join('\n\n');
+                    foundContent = data.story.map((s: any) => s.line).join('\n\n');
                 }
             }
-            
             if (!foundContent) foundContent = "No full script available.";
             
-            // Create a preview for the collapsed state (First 150 chars)
             const previewContent = foundContent.length > 150 
                 ? foundContent.substring(0, 150) + '...' 
                 : foundContent;
@@ -94,13 +88,22 @@ export default function HallOfFame() {
                  else if (data.style.primaryMatch) styleMatch = data.style.primaryMatch;
             }
 
-            // === 4. PERSONA MAPPING (New) ===
-            let authorName = data.personaName || "Unknown";
-            // If missing, try to find it in the story array
-            if ((!authorName || authorName === "Unknown") && Array.isArray(data.story)) {
-                 const userTurn = data.story.find((s: any) => s.speaker === 'user');
-                 if (userTurn && userTurn.personaName) authorName = userTurn.personaName;
+            // === 4. PERSONA MAPPING (FIXED) ===
+            // Goal: Find the AI's name (e.g., "Albert Einstein")
+            let authorName = data.personaName; 
+
+            // If not at top level, look inside the transcript/story for the AI speaker
+            if (!authorName && Array.isArray(data.transcript)) {
+                 const aiTurn = data.transcript.find((t: any) => t.personaName && t.personaName !== 'User');
+                 if (aiTurn) authorName = aiTurn.personaName;
             }
+            if (!authorName && Array.isArray(data.story)) {
+                 const aiTurn = data.story.find((s: any) => s.personaName && s.personaName !== 'User');
+                 if (aiTurn) authorName = aiTurn.personaName;
+            }
+
+            // Fallback
+            if (!authorName) authorName = "AI Co-Author";
 
             // === 5. DATE MAPPING ===
             let dateStr = new Date().toISOString();
@@ -116,7 +119,7 @@ export default function HallOfFame() {
               id: doc.id,
               title: data.title || 'Untitled Story',
               content: previewContent,
-              fullContent: foundContent, // Now contains the FULL joined text
+              fullContent: foundContent,
               mood: mood,
               styleMatch: styleMatch,
               createdAt: dateStr,
@@ -202,7 +205,6 @@ export default function HallOfFame() {
                     </div>
                 </AccordionTrigger>
                 
-                {/* === EXPANDED CONTENT === */}
                 <AccordionContent>
                   <div className="px-1 py-4 md:px-4 md:pb-4">
                     <div className="mt-4 border-t border-border/20 pt-6 flex flex-col md:flex-row gap-6">
@@ -214,10 +216,9 @@ export default function HallOfFame() {
                             </p>
                         </div>
 
-                        {/* 2. Metadata Sidebar (Mood, Persona, Date) */}
+                        {/* 2. Metadata Sidebar */}
                         <div className="w-full md:w-48 flex-shrink-0 flex flex-col gap-6 p-4 rounded-lg bg-black/20 border border-white/5 h-fit">
                             
-                            {/* Mood Ring */}
                             {story.mood && (
                                 <div className="flex flex-col items-center">
                                     <span className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Mood</span>
@@ -228,11 +229,10 @@ export default function HallOfFame() {
                                 </div>
                             )}
 
-                            {/* Details List */}
                             <div className="space-y-3 text-sm">
                                 <div className="flex flex-col gap-1">
                                     <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wide">
-                                        <UserCircle className="w-3 h-3" /> Persona
+                                        <UserCircle className="w-3 h-3" /> Co-Author
                                     </div>
                                     <span className="font-medium text-foreground">{story.authorName}</span>
                                 </div>
