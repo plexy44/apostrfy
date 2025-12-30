@@ -18,33 +18,31 @@ interface AdOverlayProps {
 }
 
 export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
-  const hasPushedAd = useRef(false);
+  const adPushedRef = useRef(false);
 
   useEffect(() => {
-    // Reset the ad push tracker when the overlay is hidden
-    if (!isVisible) {
-      hasPushedAd.current = false;
-      return;
-    }
+    // When the overlay becomes visible, and we haven't pushed an ad yet for this instance
+    if (isVisible && !adPushedRef.current) {
+      adPushedRef.current = true; // Immediately mark as attempting to push
 
-    // If the ad is visible and we haven't pushed yet, push the ad.
-    if (isVisible && !hasPushedAd.current) {
-      // Use a timeout to ensure the ad container is rendered and has dimensions
+      // Use a slightly longer timeout to ensure the ad container is rendered and has dimensions
       const adLoadTimer = setTimeout(() => {
         try {
           if (typeof window !== 'undefined' && (window as any).adsbygoogle) {
             console.log('Pushing ad to Google.');
             ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-            hasPushedAd.current = true; // Mark that we've pushed the ad
-            logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'quit_game_interstitial' });
+            logEvent('ad_impression', { ad_platform: 'google_admob', ad_source: 'admob', ad_format: 'interstitial', ad_unit_name: 'interstitial_ad' });
           }
         } catch (err) {
           console.error("AdSense error in overlay:", err);
-          logEvent('ad_load_failed', { ad_unit_name: 'quit_game_interstitial', error_message: (err as Error).message });
+          logEvent('ad_load_failed', { ad_unit_name: 'interstitial_ad', error_message: (err as Error).message });
         }
-      }, 150); // Increased delay slightly for more stability
+      }, 200); // Increased delay for more stability
 
       return () => clearTimeout(adLoadTimer);
+    } else if (!isVisible) {
+      // Reset the ref when the overlay is hidden, so it can be shown again
+      adPushedRef.current = false;
     }
   }, [isVisible]);
 
@@ -74,7 +72,7 @@ export default function AdOverlay({ isVisible, onClose }: AdOverlayProps) {
                   data-full-width-responsive="true"></ins>
             </div>
             
-            <p className="text-muted-foreground text-xs mt-4 px-4">Ad Unit: Scriblox Analysis Banner</p>
+            <p className="text-muted-foreground text-xs mt-4 px-4">Ad Unit: Scriblox Interstitial</p>
 
             <Button
               variant="ghost"
