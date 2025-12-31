@@ -12,48 +12,64 @@ import type { GameMode, Trope } from '@/lib/types';
 
 interface StoryData {
   title: string;
-  content: string; // Corresponds to finalScript
+  content: string; // Client sends 'content'
   creatorId: string;
   mood?: string;
   styleMatch?: string;
   gameMode: GameMode;
-  trope: Trope;
+  trope: Trope | string | null; // Allow nulls
 }
 
-/**
- * Saves a completed story to the public 'stories' collection in Firestore.
- * This action uses the Firebase Admin SDK, which bypasses all security rules,
- * allowing it to write to a collection that is read-only for clients. It also
- * enforces a 24-hour expiration time on the server.
- * @param storyData - The story data sent from the client.
- * @returns An object indicating success and the new document ID, or an error.
- */
 export async function saveStory(storyData: StoryData) {
+  // 1. Validate User
   if (!storyData.creatorId) {
+    console.error("Server Action: Missing creatorId");
     return { success: false, error: 'A user ID is required to save a story.' };
   }
 
-  console.log("Server Action: Attempting to save story for user:", storyData.creatorId);
+  console.log("Server Action: Saving story for user:", storyData.creatorId);
 
   try {
     const adminDb = getAdminDb();
     const now = Timestamp.now();
-    // Expire documents after 24 hours
     const expireAt = new Timestamp(now.seconds + 24 * 60 * 60, now.nanoseconds);
 
-    const storyToSave = {
-      ...storyData,
+    // 2. SANITIZE DATA (Critical Fix)
+    // Firestore throws error on 'undefined', so we fallback to null or defaults.
+    const cleanStory = {
+      title: storyData.title || "Untitled Story",
+      
+      // MAP 'content' -> 'finalScript' (Matches your DB screenshots)
+      finalScript: storyData.content || "", 
+      
+      // Safe Fallbacks
+      mood: storyData.mood || "Neutral",
+      styleMatch: storyData.styleMatch || "Freeform", 
+      gameMode: storyData.gameMode || "interactive",
+      trope: storyData.trope || "General",
+      
+      creatorId: storyData.creatorId,
       createdAt: now,
       expireAt: expireAt,
+      
+      // Add these for debugging/future use
+      isSimulated: storyData.gameMode === 'simulation'
     };
     
-    const docRef = await adminDb.collection('stories').add(storyToSave);
+    // 3. Save to Firestore
+    const docRef = await adminDb.collection('stories').add(cleanStory);
     
-    console.log("Server Action: Success! Saved story with ID:", docRef.id);
+    console.log("Server Action: Success! Saved ID:", docRef.id);
     return { success: true, id: docRef.id };
 
-  } catch (error) {
-    console.error("Error in saveStory Server Action:", error);
-    return { success: false, error: 'The story could not be saved to the Hall of Fame.' };
+  } catch (error: any) {
+    // Log the REAL error to your terminal so you can see it
+    console.error("CRITICAL SAVE ERROR:", error);
+    
+    // Return a generic error to the client
+    return { 
+        success: false, 
+        error: `Server Error: ${error.message || 'Unknown save failure'}` 
+    };
   }
 }
